@@ -1,8 +1,8 @@
 /**
  * Módulo de Autenticação e UI de Sessão (auth.js):
  * Gerencia o modal de login (<dialog> nativo), botão de mostrar/ocultar senha,
- * contagem regressiva de bloqueio por tentativas (Item C5), cabeçalho logado/deslogado (Item D1)
- * e callbacks de transição após login/logout (Item D4).
+ * contagem regressiva de bloqueio por tentativas compartilhada em localStorage (Item 1.1 / C5),
+ * cabeçalho logado/deslogado (Item D1) e callbacks de transição após login/logout (Item D4 / 1.2).
  */
 
 import {
@@ -19,12 +19,6 @@ let callbacks = {
   onLogoutSuccess: null
 };
 
-/**
- * Inicializa os eventos de autenticação (botões de Entrar/Sair, modal de login e toggle de senha).
- * @param {Object} handlers
- * @param {function(Object): void} handlers.onLoginSuccess
- * @param {function(): void} handlers.onLogoutSuccess
- */
 export function initAuth(handlers = {}) {
   callbacks = { ...callbacks, ...handlers };
 
@@ -97,9 +91,6 @@ export function initAuth(handlers = {}) {
   atualizarUIEstadoAutenticacao();
 }
 
-/**
- * Abre o modal de login resetando estados visuais e verificando se há bloqueio ativo.
- */
 export function abrirModalLogin() {
   const modalLogin = document.getElementById('modalLogin');
   const inputLoginUsuario = document.getElementById('inputLoginUsuario');
@@ -133,9 +124,6 @@ export function abrirModalLogin() {
   }
 }
 
-/**
- * Fecha o modal de login e interrompe qualquer timer de contagem regressiva.
- */
 export function fecharModalLogin() {
   const modalLogin = document.getElementById('modalLogin');
   pararContagemRegressiva();
@@ -144,9 +132,6 @@ export function fecharModalLogin() {
   }
 }
 
-/**
- * Limpa mensagens de erro inline do modal de login.
- */
 function limparErrosModalLogin() {
   const inputLoginUsuario = document.getElementById('inputLoginUsuario');
   const inputLoginSenha = document.getElementById('inputLoginSenha');
@@ -163,10 +148,6 @@ function limparErrosModalLogin() {
   }
 }
 
-/**
- * Exibe erro geral no modal de login (ex: "Usuário ou senha inválidos." ou contagem regressiva).
- * @param {string} mensagem
- */
 function exibirErroGeralLogin(mensagem) {
   const erroLoginGeral = document.getElementById('erroLoginGeral');
   if (!erroLoginGeral) return;
@@ -174,9 +155,6 @@ function exibirErroGeralLogin(mensagem) {
   erroLoginGeral.classList.remove('hidden');
 }
 
-/**
- * Para o intervalo de contagem regressiva de bloqueio.
- */
 function pararContagemRegressiva() {
   if (intervaloContagemBloqueio !== null) {
     clearInterval(intervaloContagemBloqueio);
@@ -185,9 +163,9 @@ function pararContagemRegressiva() {
 }
 
 /**
- * Verifica se o login está temporariamente bloqueado (Item C5) e inicia a contagem regressiva de 60s.
+ * Verifica se o login está bloqueado no localStorage (Item 1.1) e inicia a contagem regressiva de 60s.
  */
-function verificarEIniciarContagemBloqueio() {
+export function verificarEIniciarContagemBloqueio() {
   const inputLoginUsuario = document.getElementById('inputLoginUsuario');
   const inputLoginSenha = document.getElementById('inputLoginSenha');
   const btnSubmeterLogin = document.getElementById('btnSubmeterLogin');
@@ -206,7 +184,6 @@ function verificarEIniciarContagemBloqueio() {
       return true;
     }
 
-    // Bloqueio expirou
     pararContagemRegressiva();
     if (inputLoginUsuario) inputLoginUsuario.disabled = false;
     if (inputLoginSenha) inputLoginSenha.disabled = false;
@@ -215,7 +192,9 @@ function verificarEIniciarContagemBloqueio() {
       erroLoginGeral.textContent = '';
       erroLoginGeral.classList.add('hidden');
     }
-    if (inputLoginUsuario) inputLoginUsuario.focus();
+    if (inputLoginUsuario && document.getElementById('modalLogin')?.open) {
+      inputLoginUsuario.focus();
+    }
     return false;
   }
 
@@ -226,10 +205,6 @@ function verificarEIniciarContagemBloqueio() {
   }
 }
 
-/**
- * Trata a submissão do formulário de login (Item A4, C4, C5, D4).
- * @param {SubmitEvent} e
- */
 async function handleSubmitLogin(e) {
   e.preventDefault();
 
@@ -277,15 +252,11 @@ async function handleSubmitLogin(e) {
     } else {
       if (inputLoginUsuario) inputLoginUsuario.classList.add('is-invalid');
       if (inputLoginSenha) inputLoginSenha.classList.add('is-invalid');
-      // Mensagem genérica exigida pelo Item C5
       exibirErroGeralLogin('Usuário ou senha inválidos.');
     }
   }
 }
 
-/**
- * Encerra a sessão do usuário, atualiza cabeçalho e dispara callback para limpar form e ir ao Ranking (Item D4).
- */
 function handleLogout() {
   logout();
   atualizarUIEstadoAutenticacao();
@@ -296,10 +267,6 @@ function handleLogout() {
   }
 }
 
-/**
- * Sincroniza todos os elementos visuais que dependem do estado logado/deslogado (Itens D1, D3, D4).
- * @returns {{ id: string, usuario: string, nome: string, consultorId: string } | null}
- */
 export function atualizarUIEstadoAutenticacao() {
   const usuarioLogado = getSessaoAtiva();
   const estaLogado = Boolean(usuarioLogado);
@@ -325,13 +292,10 @@ export function atualizarUIEstadoAutenticacao() {
     saudacaoUsuario.textContent = estaLogado ? `Olá, ${usuarioLogado.nome}` : '';
   }
 
-  // Item D1: Aba "Nova venda" só aparece no menu quando logado
   if (tabNovaVenda) {
     tabNovaVenda.classList.toggle('hidden', !estaLogado);
   }
 
-  // Item D3: Na seção #nova-venda, visitante vê card "Faça login para cadastrar vendas"
-  // e não vê o formulário de venda
   if (cardLoginNecessario) {
     cardLoginNecessario.classList.toggle('hidden', estaLogado);
   }
@@ -349,7 +313,6 @@ export function atualizarUIEstadoAutenticacao() {
     labelConsultorLogadoForm.textContent = estaLogado ? usuarioLogado.nome : '-';
   }
 
-  // Item D4: Botão "Restaurar dados de demonstração" no rodapé aparece somente logado
   if (btnRestaurarDemo) {
     btnRestaurarDemo.classList.toggle('hidden', !estaLogado);
   }

@@ -4,17 +4,12 @@
  * - Controles segmentados de período/dimensão com aria-pressed
  * - Gerenciamento de abas acessíveis (role="tablist" / "tab" / "tabpanel") e sincronização de hash na URL
  * - Helpers de erro inline em campos de formulário
+ * - Sincronização de seções recolhíveis (<details>/<summary>) entre desktop e celular (Item 1.3)
  */
 
 export const ABAS_VALIDAS = ['ranking', 'painel', 'nova-venda'];
 export const ABA_PADRAO = 'ranking';
 
-/**
- * Exibe uma notificação temporária (toast) construída com DOM seguro (sem innerHTML).
- * @param {string} mensagem Texto da mensagem a ser exibida
- * @param {'success' | 'error' | 'info'} [tipo='success'] Tipo visual do toast
- * @param {number} [duracaoMs=3500] Tempo em milissegundos antes de ocultar
- */
 export function showToast(mensagem, tipo = 'success', duracaoMs = 3500) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
@@ -42,12 +37,6 @@ export function showToast(mensagem, tipo = 'success', duracaoMs = 3500) {
   }, duracaoMs);
 }
 
-/**
- * Exibe mensagem de erro inline abaixo de um campo e marca aria-invalid="true".
- * @param {HTMLElement|null} inputEl
- * @param {HTMLElement|null} erroEl
- * @param {string} mensagem
- */
 export function exibirErroCampo(inputEl, erroEl, mensagem) {
   if (inputEl) {
     inputEl.classList.add('is-invalid');
@@ -58,11 +47,6 @@ export function exibirErroCampo(inputEl, erroEl, mensagem) {
   }
 }
 
-/**
- * Limpa o estado de erro inline de um campo de formulário.
- * @param {HTMLElement|null} inputEl
- * @param {HTMLElement|null} erroEl
- */
 export function limparErroCampo(inputEl, erroEl) {
   if (inputEl) {
     inputEl.classList.remove('is-invalid');
@@ -73,12 +57,6 @@ export function limparErroCampo(inputEl, erroEl) {
   }
 }
 
-/**
- * Atualiza visualmente e com aria-pressed um grupo de botões segmentados (ex: Dia / Semana / Mês).
- * @param {NodeListOf<HTMLElement>|Array<HTMLElement>} botoes Lista de botões
- * @param {string} valorAtivo Valor ativo correspondente ao dataset
- * @param {string} [dataKey='period'] Nome da propriedade no dataset (ex: 'period' ou 'dimensao')
- */
 export function atualizarBotoesSegmentados(botoes, valorAtivo, dataKey = 'period') {
   if (!botoes) return;
   Array.from(botoes).forEach((btn) => {
@@ -88,12 +66,6 @@ export function atualizarBotoesSegmentados(botoes, valorAtivo, dataKey = 'period
   });
 }
 
-/**
- * Associa ouvintes de clique a um controle segmentado, gerenciando aria-pressed automaticamente.
- * @param {NodeListOf<HTMLElement>|Array<HTMLElement>} botoes
- * @param {function(string): void} onSelect Callback chamado com o novo valor selecionado
- * @param {string} [dataKey='period']
- */
 export function configurarControleSegmentado(botoes, onSelect, dataKey = 'period') {
   if (!botoes) return;
   Array.from(botoes).forEach((btn) => {
@@ -108,12 +80,6 @@ export function configurarControleSegmentado(botoes, onSelect, dataKey = 'period
   });
 }
 
-/**
- * Extrai o identificador da aba a partir do location.hash atual.
- * Valores desconhecidos retornam sempre ABA_PADRAO ('ranking').
- * @param {string} [hashStr=window.location.hash]
- * @returns {'ranking' | 'painel' | 'nova-venda'}
- */
 export function obterAbaDaURL(hashStr = window.location.hash) {
   if (!hashStr || typeof hashStr !== 'string') return ABA_PADRAO;
   const limpo = hashStr.replace(/^#/, '').trim().toLowerCase();
@@ -123,14 +89,6 @@ export function obterAbaDaURL(hashStr = window.location.hash) {
   return ABA_PADRAO;
 }
 
-/**
- * Atualiza o estado das abas (role="tab" / role="tabpanel" e aria-selected) e reflete na URL.
- * @param {string} abaDestino 'ranking' | 'painel' | 'nova-venda'
- * @param {Object} [opcoes={}]
- * @param {boolean} [opcoes.atualizarHash=true] Se deve atualizar o hash na URL
- * @param {boolean} [opcoes.focarAba=false] Se deve mover o foco para o botão da aba ativa
- * @returns {'ranking' | 'painel' | 'nova-venda'} Aba efetivamente ativada
- */
 export function ativarAbaUI(abaDestino, opcoes = {}) {
   const { atualizarHash = true, focarAba = false } = opcoes;
   const abaFinal = ABAS_VALIDAS.includes(abaDestino) ? abaDestino : ABA_PADRAO;
@@ -164,10 +122,6 @@ export function ativarAbaUI(abaDestino, opcoes = {}) {
   return abaFinal;
 }
 
-/**
- * Configura eventos de clique e navegação por teclado (Setas, Home, End) nas abas do cabeçalho.
- * @param {function(string): void} onTabSelect Callback disparado quando uma aba é selecionada
- */
 export function inicializarNavegacaoAbas(onTabSelect) {
   const botoesAba = Array.from(document.querySelectorAll('[role="tab"][data-tab]'));
 
@@ -203,5 +157,19 @@ export function inicializarNavegacaoAbas(onTabSelect) {
         }
       }
     });
+  });
+}
+
+/**
+ * Define o estado inicial de elementos <details> recolhíveis da aba Ranking Geral (Item 1.3):
+ * Abertos por padrão no desktop (> 600px) e fechados por padrão no celular (<= 600px).
+ * @param {string} [seletor='.collapsible-section']
+ */
+export function sincronizarSecoesRecolhiveis(seletor = '.collapsible-section') {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+  const isCelular = window.innerWidth <= 600;
+  const secoes = document.querySelectorAll(seletor);
+  secoes.forEach((detailsEl) => {
+    detailsEl.open = !isCelular;
   });
 }

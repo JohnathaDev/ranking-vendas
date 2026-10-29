@@ -1,8 +1,8 @@
 /**
- * Orquestrador principal da aplicação MotoRanking (Etapa 2 — app.js).
- * Coordena inicialização de dados/migração, autenticação (auth.js),
- * aba Ranking Geral (ranking.js), aba Painel do Consultor, aba Nova Venda,
- * modal de confirmação de exclusão, restauração de demonstração e sincronização entre abas (window storage).
+ * Orquestrador principal da aplicação MotoRanking (app.js):
+ * Coordena inicialização de dados/migração, autenticação compartilhada (auth.js),
+ * aba Ranking Geral com BI (ranking.js), aba Painel do Consultor com gráfico individual (Item 2.4),
+ * aba Nova Venda, seções recolhíveis em mobile (Item 1.3) e sincronização entre abas (Itens 1.1 e 1.2).
  */
 
 import { getModelos, getAnosPorModelo } from './catalog.js';
@@ -37,43 +37,44 @@ import {
   exibirErroCampo,
   limparErroCampo,
   configurarControleSegmentado,
-  atualizarBotoesSegmentados,
   obterAbaDaURL,
   ativarAbaUI,
-  inicializarNavegacaoAbas
+  inicializarNavegacaoAbas,
+  sincronizarSecoesRecolhiveis
 } from './ui.js';
 import {
   initAuth,
-  atualizarUIEstadoAutenticacao
+  atualizarUIEstadoAutenticacao,
+  fecharModalLogin,
+  verificarEIniciarContagemBloqueio
 } from './auth.js';
 import {
   initRanking,
   renderRankingGeral,
   sincronizarRankingComURL
 } from './ranking.js';
+import {
+  renderGraficoConsultorPainel,
+  exportarGraficoPNG
+} from './charts.js';
 
-// ==========================================
-// ESTADO GLOBAL DA INTERFACE
-// ==========================================
 const appState = {
-  abaAtiva: 'ranking', // 'ranking' | 'painel' | 'nova-venda'
+  abaAtiva: 'ranking',
   consultorAtivoId: null,
-  periodoPainel: 'mes', // 'dia' | 'semana' | 'mes'
-  sortModeloOrdem: 'desc', // 'asc' | 'desc'
-  sortAnoOrdem: 'desc', // 'asc' | 'desc'
-  vendaParaExcluir: null
+  periodoPainel: 'mes',
+  tipoGraficoPainel: 'colunas', // 'colunas' | 'pizza' | 'rosca' | 'linha' (Item 2.4)
+  dimensaoGraficoPainel: 'modelo', // 'modelo' | 'anoModelo' (Item 2.4)
+  sortModeloOrdem: 'desc',
+  sortAnoOrdem: 'desc',
+  vendaParaExcluir: null,
+  eraCelular600: typeof window !== 'undefined' ? window.innerWidth <= 600 : false
 };
 
-// ==========================================
-// ELEMENTOS DO DOM
-// ==========================================
 const DOM = {
-  // Painel do Consultor — Seletor "Ver consultor"
   selectConsultor: document.getElementById('selectConsultor'),
   labelNomeConsultor: document.getElementById('labelNomeConsultor'),
   badgeModoPainel: document.getElementById('badgeModoPainel'),
 
-  // Formulário de Cadastro de Venda (Aba Nova Venda)
   formCadastroVenda: document.getElementById('formCadastroVenda'),
   inputDataVenda: document.getElementById('inputDataVenda'),
   inputPlaca: document.getElementById('inputPlaca'),
@@ -81,17 +82,14 @@ const DOM = {
   selectModelo: document.getElementById('selectModelo'),
   selectAnoModelo: document.getElementById('selectAnoModelo'),
 
-  // Mensagens de Erro Inline do Formulário de Venda
   erroDataVenda: document.getElementById('erroDataVenda'),
   erroPlaca: document.getElementById('erroPlaca'),
   erroContrato: document.getElementById('erroContrato'),
   erroModelo: document.getElementById('erroModelo'),
   erroAnoModelo: document.getElementById('erroAnoModelo'),
 
-  // Painel do Consultor — Filtros de Período
   botoesPeriodoPainel: document.querySelectorAll('.btn-painel-period'),
 
-  // Painel do Consultor — KPIs
   kpiTotalVendas: document.getElementById('kpiTotalVendas'),
   kpiPeriodoTexto: document.getElementById('kpiPeriodoTexto'),
   kpiModeloMaisVendido: document.getElementById('kpiModeloMaisVendido'),
@@ -99,7 +97,19 @@ const DOM = {
   kpiAnoMaisVendido: document.getElementById('kpiAnoMaisVendido'),
   kpiAnoDetalhe: document.getElementById('kpiAnoDetalhe'),
 
-  // Painel do Consultor — Tabelas de Agrupamento
+  // Controles do Gráfico do Consultor (Item 2.4)
+  selectPainelGraficoDimensao: document.getElementById('selectPainelGraficoDimensao'),
+  selectPainelGraficoTipo: document.getElementById('selectPainelGraficoTipo'),
+  helperPainelGraficoDimensao: document.getElementById('helperPainelGraficoDimensao'),
+  btnBaixarPNGPainel: document.getElementById('btnBaixarPNGPainel'),
+  canvasGraficoPainel: document.getElementById('canvasGraficoPainel'),
+  containerCanvasPainel: document.getElementById('containerCanvasPainel'),
+  emptyStateGraficoPainel: document.getElementById('emptyStateGraficoPainel'),
+  erroCDNGraficoPainel: document.getElementById('erroCDNGraficoPainel'),
+  detailsTabelaDadosPainel: document.getElementById('detailsTabelaDadosPainel'),
+  theadTabelaDadosPainel: document.getElementById('theadTabelaDadosPainel'),
+  tbodyTabelaDadosPainel: document.getElementById('tbodyTabelaDadosPainel'),
+
   tbodyVendasPorModelo: document.getElementById('tbodyVendasPorModelo'),
   tbodyVendasPorAno: document.getElementById('tbodyVendasPorAno'),
   thSortModelo: document.getElementById('thSortModelo'),
@@ -109,14 +119,12 @@ const DOM = {
   sortIconModelo: document.getElementById('sortIconModelo'),
   sortIconAno: document.getElementById('sortIconAno'),
 
-  // Painel do Consultor — Lista de Vendas
   tabelaListaVendas: document.getElementById('tabelaListaVendas'),
   thColunaAcoesPainel: document.getElementById('thColunaAcoesPainel'),
   tbodyListaVendas: document.getElementById('tbodyListaVendas'),
   emptyStateVendas: document.getElementById('emptyStateVendas'),
   emptyStateTextoPainel: document.getElementById('emptyStateTextoPainel'),
 
-  // Modal de Confirmação de Exclusão
   modalConfirmarExclusao: document.getElementById('modalConfirmarExclusao'),
   formConfirmarExclusao: document.getElementById('formConfirmarExclusao'),
   excluirPlacaModal: document.getElementById('excluirPlacaModal'),
@@ -124,43 +132,31 @@ const DOM = {
   btnCancelarExclusao: document.getElementById('btnCancelarExclusao'),
   btnConfirmarExclusaoFinal: document.getElementById('btnConfirmarExclusaoFinal'),
 
-  // Rodapé & Modal de Restaurar Dados de Demonstração (Item D4)
   btnRestaurarDemo: document.getElementById('btnRestaurarDemo'),
   modalConfirmarReset: document.getElementById('modalConfirmarReset'),
   formConfirmarReset: document.getElementById('formConfirmarReset'),
   btnCancelarReset: document.getElementById('btnCancelarReset')
 };
 
-// ==========================================
-// INICIALIZAÇÃO DA APLICAÇÃO
-// ==========================================
 function initApp() {
-  // 1. Inicializa o seed ou executa migração segura para schema v2 (Itens A1, C1, C2)
   inicializarSeedSeNecessario();
-
-  // 2. Configura limites e valor inicial do input de data da venda (Itens A2 e A3)
   inicializarCampoDataVenda();
-
-  // 3. Popula modelos do catálogo no formulário de venda
   popularSelectModelosVenda();
 
-  // 4. Inicializa autenticação e callbacks de login/logout (Partes C e D)
+  // Item 1.3: Seções Matriz, Vendas gerais e BI abertas no desktop e fechadas no celular
+  sincronizarSecoesRecolhiveis('.collapsible-section');
+
   initAuth({
     onLoginSuccess: (usuarioLogado) => {
-      // Item D4: Painel mostra por padrão as vendas do próprio consultor
       appState.consultorAtivoId = usuarioLogado.consultorId;
       setConsultorAtivoId(usuarioLogado.consultorId);
       carregarListaConsultores(usuarioLogado.consultorId);
 
-      // Atualiza telas
       renderRankingGeral();
       atualizarPainelConsultor();
-
-      // Item D4: Após login, ir para a aba "Nova venda"
       selecionarAba('nova-venda', { atualizarHash: true });
     },
     onLogoutSuccess: () => {
-      // Item D4: Após logout, limpar o formulário e voltar para "Ranking geral"
       resetarFormularioVenda();
       atualizarUIEstadoAutenticacao();
       renderRankingGeral();
@@ -169,29 +165,18 @@ function initApp() {
     }
   });
 
-  // 5. Carrega lista de consultores no select "Ver consultor" do Painel
   const sessaoInicial = getSessaoAtiva();
   carregarListaConsultores(sessaoInicial ? sessaoInicial.consultorId : null);
 
-  // 6. Inicializa módulo de Ranking Geral (Parte E)
   initRanking();
-
-  // 7. Registra ouvintes gerais (formulário, painel, modais, abas, storage event)
   setupEventListeners();
 
-  // 8. Define a aba inicial a partir do hash da URL (padrão #ranking — Item D1)
   const abaInicial = obterAbaDaURL(window.location.hash);
   selecionarAba(abaInicial, { atualizarHash: Boolean(window.location.hash) });
 
-  // 9. Renderiza o Painel do Consultor
   atualizarPainelConsultor();
 }
 
-/**
- * Seleciona e ativa uma aba, sincronizando estado e URL (Itens D1, D3, D4).
- * @param {string} abaId 'ranking' | 'painel' | 'nova-venda'
- * @param {Object} [opcoes={}]
- */
 function selecionarAba(abaId, opcoes = {}) {
   atualizarUIEstadoAutenticacao();
   appState.abaAtiva = ativarAbaUI(abaId, opcoes);
@@ -205,15 +190,6 @@ function selecionarAba(abaId, opcoes = {}) {
   }
 }
 
-// ==========================================
-// DATA DA VENDA (ITENS A2 E A3)
-// ==========================================
-
-/**
- * Recalcula min="2023-01-01" e max=hoje no input de data da venda (Itens A2 e A3).
- * Executado no foco do campo e antes de validar no submit.
- * @returns {string} Data de hoje em formato YYYY-MM-DD
- */
 function recalcularLimitesDataVenda() {
   const hoje = obterDataHojeISO();
   if (DOM.inputDataVenda) {
@@ -223,9 +199,6 @@ function recalcularLimitesDataVenda() {
   return hoje;
 }
 
-/**
- * Inicializa o campo de data com a data de hoje e define min e max.
- */
 function inicializarCampoDataVenda() {
   const hoje = recalcularLimitesDataVenda();
   if (DOM.inputDataVenda) {
@@ -233,13 +206,6 @@ function inicializarCampoDataVenda() {
   }
 }
 
-// ==========================================
-// FORMULÁRIO DE NOVA VENDA
-// ==========================================
-
-/**
- * Popula o select de modelos com o catálogo oficial sem usar innerHTML.
- */
 function popularSelectModelosVenda() {
   if (!DOM.selectModelo) return;
   DOM.selectModelo.replaceChildren();
@@ -257,9 +223,6 @@ function popularSelectModelosVenda() {
   });
 }
 
-/**
- * Reseta oselect dependente de Ano Modelo para o estado desabilitado inicial.
- */
 function resetarSelectAnoModeloVenda() {
   if (!DOM.selectAnoModelo) return;
   DOM.selectAnoModelo.replaceChildren();
@@ -272,9 +235,6 @@ function resetarSelectAnoModeloVenda() {
   DOM.selectAnoModelo.value = '';
 }
 
-/**
- * Limpa completamente o formulário de venda e seus erros inline (Item D4).
- */
 function resetarFormularioVenda() {
   if (DOM.formCadastroVenda) {
     DOM.formCadastroVenda.reset();
@@ -284,9 +244,6 @@ function resetarFormularioVenda() {
   resetarSelectAnoModeloVenda();
 }
 
-/**
- * Atualiza o select de Ano Modelo quando o Modelo é alterado no formulário.
- */
 function handleTrocaModeloVenda() {
   const modelo = DOM.selectModelo.value;
   limparErroCampo(DOM.selectModelo, DOM.erroModelo);
@@ -315,10 +272,6 @@ function handleTrocaModeloVenda() {
   DOM.selectAnoModelo.disabled = false;
 }
 
-/**
- * Valida e salva uma nova venda vinculada ao consultor logado (Itens A2, A3, B1, B2, C6).
- * @param {SubmitEvent} e
- */
 function handleSalvarVenda(e) {
   e.preventDefault();
 
@@ -329,7 +282,6 @@ function handleSalvarVenda(e) {
     return;
   }
 
-  // Item A3: Recalcula o max (hoje) antes de validar no submit
   recalcularLimitesDataVenda();
   limparTodosErrosFormulario();
 
@@ -341,7 +293,6 @@ function handleSalvarVenda(e) {
 
   let hasError = false;
 
-  // 1. Validação de Data da Venda (Item A2: min 2023-01-01 e max hoje)
   if (!dataVendaStr) {
     exibirErroCampo(DOM.inputDataVenda, DOM.erroDataVenda, 'A data da venda é obrigatória.');
     hasError = true;
@@ -361,7 +312,6 @@ function handleSalvarVenda(e) {
     hasError = true;
   }
 
-  // 2. Validação de Placa (Item B1: placas repetidas são permitidas!)
   if (!placaRaw) {
     exibirErroCampo(DOM.inputPlaca, DOM.erroPlaca, 'A placa do veículo é obrigatória.');
     hasError = true;
@@ -374,7 +324,6 @@ function handleSalvarVenda(e) {
     hasError = true;
   }
 
-  // 3. Validação de Contrato (Item B2: único no sistema, case-insensitive e ignorando espaços nas pontas)
   if (!contratoRaw) {
     exibirErroCampo(DOM.inputContrato, DOM.erroContrato, 'O número do contrato é obrigatório.');
     hasError = true;
@@ -394,13 +343,11 @@ function handleSalvarVenda(e) {
     hasError = true;
   }
 
-  // 4. Validação de Modelo
   if (!modelo) {
     exibirErroCampo(DOM.selectModelo, DOM.erroModelo, 'Selecione o modelo da motocicleta.');
     hasError = true;
   }
 
-  // 5. Validação de Ano Modelo
   if (!anoModelo) {
     exibirErroCampo(DOM.selectAnoModelo, DOM.erroAnoModelo, 'Selecione o ano modelo.');
     hasError = true;
@@ -411,7 +358,6 @@ function handleSalvarVenda(e) {
   try {
     const dataIsoFinal = combinarDataComHoraAtual(dataVendaStr);
 
-    // Item C6: storage.js grava sempre consultorId = consultor do usuário logado
     const novaVenda = addVenda({
       consultorId: usuarioLogado.consultorId,
       placa: placaRaw,
@@ -424,7 +370,6 @@ function handleSalvarVenda(e) {
     resetarFormularioVenda();
     showToast(`Venda do contrato ${novaVenda.numeroContrato} registrada com sucesso!`);
 
-    // Garante que o Painel mostre o consultor logado e atualiza tanto Ranking quanto Painel
     appState.consultorAtivoId = usuarioLogado.consultorId;
     setConsultorAtivoId(usuarioLogado.consultorId);
     if (DOM.selectConsultor) {
@@ -446,14 +391,6 @@ function limparTodosErrosFormulario() {
   limparErroCampo(DOM.selectAnoModelo, DOM.erroAnoModelo);
 }
 
-// ==========================================
-// SELETOR "VER CONSULTOR" E PAINEL DO CONSULTOR (ITENS D2, D3, D4)
-// ==========================================
-
-/**
- * Carrega todos os consultores no select "Ver consultor" da aba Painel do Consultor (sem "+ Novo consultor" — Item D2).
- * @param {string|null} [preferenciaConsultorId=null]
- */
 function carregarListaConsultores(preferenciaConsultorId = null) {
   const consultores = getConsultores();
   const sessao = getSessaoAtiva();
@@ -477,7 +414,6 @@ function carregarListaConsultores(preferenciaConsultorId = null) {
     DOM.selectConsultor.appendChild(opt);
   });
 
-  // Se nenhum estava selecionado, seleciona o primeiro consultor disponível
   if (!idEscolhido && consultores.length > 0) {
     idEscolhido = consultores[0].id;
     DOM.selectConsultor.value = idEscolhido;
@@ -487,14 +423,10 @@ function carregarListaConsultores(preferenciaConsultorId = null) {
   setConsultorAtivoId(idEscolhido);
 }
 
-/**
- * Atualiza toda a aba "Painel do consultor".
- */
 function atualizarPainelConsultor() {
   const consultores = getConsultores();
   const sessao = getSessaoAtiva();
 
-  // Atualiza rótulo "(Você)" no select caso o status de login tenha mudado
   if (DOM.selectConsultor) {
     const idAtual = appState.consultorAtivoId || DOM.selectConsultor.value;
     carregarListaConsultores(idAtual);
@@ -532,7 +464,7 @@ function atualizarPainelConsultor() {
     }
   }
 
-  renderDadosPainelConsultor(ehProprioUsuario);
+  renderDadosPainelConsultor(ehProprioUsuario, consultorSelecionado.nome);
 }
 
 function limparPainelConsultor() {
@@ -554,11 +486,7 @@ function getVendasDoPeriodoPainel() {
   return filtrarPorPeriodo(todasVendasConsultor, appState.periodoPainel);
 }
 
-/**
- * Renderiza KPIs, tabelas de agrupamento e lista de vendas do consultor selecionado.
- * @param {boolean} [ehProprioUsuario]
- */
-function renderDadosPainelConsultor(ehProprioUsuario) {
+function renderDadosPainelConsultor(ehProprioUsuario, nomeConsultor = 'Consultor') {
   if (!appState.consultorAtivoId) return;
 
   const sessao = getSessaoAtiva();
@@ -577,9 +505,44 @@ function renderDadosPainelConsultor(ehProprioUsuario) {
   DOM.kpiPeriodoTexto.textContent = rotulosPeriodo[appState.periodoPainel] || 'No período';
 
   renderKPIsPainel(vendasPeriodo);
+  renderGraficoDoConsultorNoPainel(vendasPeriodo, nomeConsultor);
   renderTabelaModelosPainel(vendasPeriodo);
   renderTabelaAnosPainel(vendasPeriodo);
   renderListaVendasPainel(vendasPeriodo, podeExcluir);
+}
+
+/**
+ * Atualiza controles e renderiza o Card "Gráfico do consultor" na aba Painel (Item 2.4).
+ */
+function renderGraficoDoConsultorNoPainel(
+  vendasPeriodo = getVendasDoPeriodoPainel(),
+  nomeConsultor = 'Consultor'
+) {
+  if (DOM.selectPainelGraficoDimensao && DOM.helperPainelGraficoDimensao) {
+    const ehLinha = appState.tipoGraficoPainel === 'linha';
+    DOM.selectPainelGraficoDimensao.disabled = ehLinha;
+    DOM.helperPainelGraficoDimensao.textContent = ehLinha
+      ? 'Na evolução em linha, o gráfico mostra o total de vendas ao longo do período.'
+      : 'Agrupamento das vendas do consultor.';
+  }
+
+  renderGraficoConsultorPainel({
+    vendas: vendasPeriodo,
+    tipo: appState.tipoGraficoPainel,
+    dimensao: appState.dimensaoGraficoPainel,
+    periodo: appState.periodoPainel,
+    nomeConsultor,
+    elementos: {
+      canvas: DOM.canvasGraficoPainel,
+      containerCanvas: DOM.containerCanvasPainel,
+      boxVazio: DOM.emptyStateGraficoPainel,
+      boxErroCDN: DOM.erroCDNGraficoPainel,
+      detailsTabela: DOM.detailsTabelaDadosPainel,
+      theadTabela: DOM.theadTabelaDadosPainel,
+      tbodyTabela: DOM.tbodyTabelaDadosPainel,
+      btnDownload: DOM.btnBaixarPNGPainel
+    }
+  });
 }
 
 function renderKPIsPainel(vendasPeriodo) {
@@ -704,16 +667,9 @@ function renderTabelaAnosPainel(vendasPeriodo = getVendasDoPeriodoPainel()) {
   });
 }
 
-/**
- * Renderiza a lista detalhada de vendas do consultor no período.
- * O botão Excluir aparece APENAS nas vendas do próprio usuário logado (Itens D3 e D4).
- * @param {Array<Object>} vendasPeriodo
- * @param {boolean} podeExcluir
- */
 function renderListaVendasPainel(vendasPeriodo, podeExcluir) {
   DOM.tbodyListaVendas.replaceChildren();
 
-  // Oculta o cabeçalho "Ações" se não estiver visualizando as próprias vendas logado
   if (DOM.thColunaAcoesPainel) {
     DOM.thColunaAcoesPainel.classList.toggle('hidden', !podeExcluir);
   }
@@ -741,12 +697,10 @@ function renderListaVendasPainel(vendasPeriodo, podeExcluir) {
   vendasOrdenadas.forEach((venda) => {
     const tr = document.createElement('tr');
 
-    // 1. Data/Hora
     const tdData = document.createElement('td');
     tdData.setAttribute('data-label', 'Data/Hora');
     tdData.textContent = formatarDataHora(venda.dataVenda);
 
-    // 2. Placa
     const tdPlaca = document.createElement('td');
     tdPlaca.setAttribute('data-label', 'Placa');
     const spanPlaca = document.createElement('span');
@@ -754,7 +708,6 @@ function renderListaVendasPainel(vendasPeriodo, podeExcluir) {
     spanPlaca.textContent = formatarPlaca(venda.placa);
     tdPlaca.appendChild(spanPlaca);
 
-    // 3. Contrato
     const tdContrato = document.createElement('td');
     tdContrato.setAttribute('data-label', 'Contrato');
     const spanContrato = document.createElement('span');
@@ -762,14 +715,12 @@ function renderListaVendasPainel(vendasPeriodo, podeExcluir) {
     spanContrato.textContent = venda.numeroContrato;
     tdContrato.appendChild(spanContrato);
 
-    // 4. Modelo
     const tdModelo = document.createElement('td');
     tdModelo.setAttribute('data-label', 'Modelo');
     const strongModelo = document.createElement('strong');
     strongModelo.textContent = venda.modelo;
     tdModelo.appendChild(strongModelo);
 
-    // 5. Ano
     const tdAno = document.createElement('td');
     tdAno.setAttribute('data-label', 'Ano');
     tdAno.textContent = String(venda.anoModelo);
@@ -780,7 +731,6 @@ function renderListaVendasPainel(vendasPeriodo, podeExcluir) {
     tr.appendChild(tdModelo);
     tr.appendChild(tdAno);
 
-    // 6. Ações: botão Excluir APENAS se logado e a venda pertencer ao próprio usuário (Itens D3 e D4)
     if (podeExcluir && sessao && venda.consultorId === sessao.consultorId) {
       const tdAcoes = document.createElement('td');
       tdAcoes.className = 'text-right';
@@ -808,9 +758,6 @@ function renderListaVendasPainel(vendasPeriodo, podeExcluir) {
   });
 }
 
-// ==========================================
-// EXCLUSÃO DE VENDA COM MODAL NATIVO
-// ==========================================
 function abrirModalExclusao(venda) {
   appState.vendaParaExcluir = venda;
   DOM.excluirPlacaModal.textContent = formatarPlaca(venda.placa);
@@ -848,9 +795,6 @@ function handleConfirmarExclusao(e) {
   }
 }
 
-// ==========================================
-// RESTAURAR DADOS DE DEMONSTRAÇÃO (ITEM D4)
-// ==========================================
 function abrirModalResetDemo() {
   if (!getSessaoAtiva()) {
     showToast('Faça login para restaurar os dados de demonstração.', 'error');
@@ -887,16 +831,11 @@ function handleConfirmarResetDemo(e) {
   }
 }
 
-// ==========================================
-// CONFIGURAÇÃO DE EVENTOS GERAIS
-// ==========================================
 function setupEventListeners() {
-  // Navegação por abas (role="tablist")
   inicializarNavegacaoAbas((abaEscolhida, opcoes) => {
     selecionarAba(abaEscolhida, opcoes);
   });
 
-  // Mudança manual do hash na URL (ex: digitar #nova-venda na barra de endereços — Item D3)
   window.addEventListener('hashchange', () => {
     const abaHash = obterAbaDaURL(window.location.hash);
     selecionarAba(abaHash, { atualizarHash: false });
@@ -908,7 +847,17 @@ function setupEventListeners() {
     sincronizarRankingComURL();
   });
 
-  // Seletor "Ver consultor" no Painel do Consultor
+  // Atualiza <details> e gráficos ao cruzar o breakpoint 600px (Item 1.3 e 2.5)
+  window.addEventListener('resize', () => {
+    const agoraCelular = window.innerWidth <= 600;
+    if (agoraCelular !== appState.eraCelular600) {
+      appState.eraCelular600 = agoraCelular;
+      sincronizarSecoesRecolhiveis('.collapsible-section');
+      renderRankingGeral();
+      atualizarPainelConsultor();
+    }
+  });
+
   if (DOM.selectConsultor) {
     DOM.selectConsultor.addEventListener('change', (e) => {
       appState.consultorAtivoId = e.target.value || null;
@@ -917,7 +866,6 @@ function setupEventListeners() {
     });
   }
 
-  // Controle segmentado de período do Painel do Consultor
   configurarControleSegmentado(
     DOM.botoesPeriodoPainel,
     (novoPeriodo) => {
@@ -927,7 +875,33 @@ function setupEventListeners() {
     'period'
   );
 
-  // Ordenação das tabelas de agrupamento do Painel
+  // Controles do Card "Gráfico do consultor" no Painel (Item 2.4)
+  if (DOM.selectPainelGraficoDimensao) {
+    DOM.selectPainelGraficoDimensao.addEventListener('change', (e) => {
+      appState.dimensaoGraficoPainel = e.target.value === 'anoModelo' ? 'anoModelo' : 'modelo';
+      atualizarPainelConsultor();
+    });
+  }
+
+  if (DOM.selectPainelGraficoTipo) {
+    DOM.selectPainelGraficoTipo.addEventListener('change', (e) => {
+      const val = e.target.value;
+      appState.tipoGraficoPainel = ['colunas', 'pizza', 'rosca', 'linha'].includes(val)
+        ? val
+        : 'colunas';
+      atualizarPainelConsultor();
+    });
+  }
+
+  if (DOM.btnBaixarPNGPainel) {
+    DOM.btnBaixarPNGPainel.addEventListener('click', () => {
+      const ok = exportarGraficoPNG('painel-consultor', appState.tipoGraficoPainel);
+      if (!ok) {
+        showToast('Gráfico indisponível para exportação no momento.', 'error');
+      }
+    });
+  }
+
   if (DOM.btnSortModeloQtd) {
     DOM.btnSortModeloQtd.addEventListener('click', () => {
       appState.sortModeloOrdem = appState.sortModeloOrdem === 'desc' ? 'asc' : 'desc';
@@ -952,12 +926,10 @@ function setupEventListeners() {
     });
   }
 
-  // Formulário de Nova Venda
   if (DOM.selectModelo) {
     DOM.selectModelo.addEventListener('change', handleTrocaModeloVenda);
   }
 
-  // Item A3: Recalcular max (hoje) no foco do campo de data
   if (DOM.inputDataVenda) {
     DOM.inputDataVenda.addEventListener('focus', recalcularLimitesDataVenda);
     DOM.inputDataVenda.addEventListener('change', () => {
@@ -988,7 +960,6 @@ function setupEventListeners() {
     DOM.formCadastroVenda.addEventListener('submit', handleSalvarVenda);
   }
 
-  // Modal de Confirmação de Exclusão
   if (DOM.btnCancelarExclusao) {
     DOM.btnCancelarExclusao.addEventListener('click', fecharModalExclusao);
   }
@@ -1002,7 +973,6 @@ function setupEventListeners() {
     DOM.btnConfirmarExclusaoFinal.addEventListener('click', handleConfirmarExclusao);
   }
 
-  // Modal de Restaurar Dados de Demonstração (Item D4)
   if (DOM.btnRestaurarDemo) {
     DOM.btnRestaurarDemo.addEventListener('click', abrirModalResetDemo);
   }
@@ -1016,8 +986,37 @@ function setupEventListeners() {
     DOM.formConfirmarReset.addEventListener('submit', handleConfirmarResetDemo);
   }
 
-  // Item F: Ouvir o evento `storage` do window para atualizar ranking/painel quando outra aba alterar as vendas
+  // Sincronização entre abas (Itens 1.1, 1.2, 2.3 e F)
   window.addEventListener('storage', (event) => {
+    // Item 1.1: Bloqueio de tentativas de login sincronizado entre abas
+    if (event.key === STORAGE_KEYS.TENTATIVAS_LOGIN) {
+      verificarEIniciarContagemBloqueio();
+      return;
+    }
+
+    // Item 1.2: Sessão compartilhada entre abas (login/logout em uma aba reflete nas outras)
+    if (event.key === STORAGE_KEYS.SESSAO) {
+      const sessaoAtual = getSessaoAtiva();
+      atualizarUIEstadoAutenticacao();
+
+      if (sessaoAtual) {
+        fecharModalLogin();
+        appState.consultorAtivoId = sessaoAtual.consultorId;
+        carregarListaConsultores(sessaoAtual.consultorId);
+      } else {
+        resetarFormularioVenda();
+        carregarListaConsultores(appState.consultorAtivoId);
+        // Se estava em #nova-venda e a sessão acabou, voltar para #ranking
+        if (appState.abaAtiva === 'nova-venda' || window.location.hash === '#nova-venda') {
+          selecionarAba('ranking', { atualizarHash: true });
+        }
+      }
+
+      renderRankingGeral();
+      atualizarPainelConsultor();
+      return;
+    }
+
     if (
       !event.key ||
       event.key === STORAGE_KEYS.VENDAS ||

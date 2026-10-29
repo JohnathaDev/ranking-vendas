@@ -2,11 +2,12 @@
  * ============================================================================
  * AVISO DE SEGURANÇA ARQUITETURAL (Item C7):
  * Este módulo implementa autenticação, hash de senha (SHA-256 via Web Crypto API),
- * controle de sessão (sessionStorage) e regras de permissão EXCLUSIVAMENTE para
+ * controle de sessão (localStorage compartilhado entre abas — Item 1.2), bloqueio
+ * de tentativas (localStorage — Item 1.1) e regras de permissão EXCLUSIVAMENTE para
  * fins demonstrativos e didáticos em ambiente front-end puro (sem servidor).
  *
  * Por executar 100% no navegador do cliente, qualquer validação ou dado em
- * localStorage/sessionStorage pode ser inspecionado ou contornado via DevTools.
+ * localStorage pode ser inspecionado ou contornado via DevTools.
  * Em um ambiente de produção real, a autenticação, o armazenamento de credenciais
  * (com bcrypt/Argon2), o controle de rate-limiting e a autorização de escrita/exclusão
  * DEVEM obrigatoriamente ser processados e validados no BACKEND (servidor/API).
@@ -41,7 +42,6 @@ export const STORAGE_KEYS = {
 
 /**
  * Credenciais públicas do usuário de demonstração (Item C1).
- * A senha nunca é salva em texto puro no storage; apenas o seu hash SHA-256 hexadecimal.
  * Hash SHA-256 de "123456": 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
  */
 const DEMO_USER_CONFIG = {
@@ -50,14 +50,10 @@ const DEMO_USER_CONFIG = {
   senhaHashPadrao: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'
 };
 
-const SESSAO_DURACAO_MS = 8 * 60 * 60 * 1000; // 8 horas (Item C3)
-const MAX_TENTATIVAS_LOGIN = 5; // Item C5
-const BLOQUEIO_LOGIN_MS = 60 * 1000; // 60 segundos (Item C5)
+const SESSAO_DURACAO_MS = 8 * 60 * 60 * 1000; // 8 horas (Item C3 / 1.2)
+const MAX_TENTATIVAS_LOGIN = 5; // Item C5 / 1.1
+const BLOQUEIO_LOGIN_MS = 60 * 1000; // 60 segundos (Item C5 / 1.1)
 
-/**
- * Utilitário seguro para gerar UUIDv4 ou fallback.
- * @returns {string}
- */
 function gerarUUID() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
@@ -69,12 +65,6 @@ function gerarUUID() {
   });
 }
 
-/**
- * Lê e faz parse seguro de dados do localStorage.
- * @param {string} key Chave do localStorage
- * @param {*} fallback Valor padrão caso não exista
- * @returns {*}
- */
 function getItem(key, fallback = null) {
   try {
     const data = localStorage.getItem(key);
@@ -85,12 +75,6 @@ function getItem(key, fallback = null) {
   }
 }
 
-/**
- * Grava dados serializados no localStorage.
- * @param {string} key Chave do localStorage
- * @param {*} value Dados a serem gravados
- * @returns {boolean}
- */
 function setItem(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
@@ -102,38 +86,9 @@ function setItem(key, value) {
 }
 
 /**
- * Lê dados do sessionStorage com segurança.
- * @param {string} key
- * @param {*} fallback
- * @returns {*}
- */
-function getSessionItem(key, fallback = null) {
-  try {
-    const data = sessionStorage.getItem(key);
-    return data ? JSON.parse(data) : fallback;
-  } catch (error) {
-    console.error(`Erro ao ler chave ${key} do sessionStorage:`, error);
-    return fallback;
-  }
-}
-
-/**
- * Grava dados no sessionStorage com segurança.
- * @param {string} key
- * @param {*} value
- */
-function setSessionItem(key, value) {
-  try {
-    sessionStorage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-    console.error(`Erro ao gravar chave ${key} no sessionStorage:`, error);
-  }
-}
-
-/**
  * Calcula o hash SHA-256 em hexadecimal utilizando crypto.subtle.digest (Item C4).
- * @param {string} texto Texto de entrada (case-sensitive)
- * @returns {Promise<string>} Hash SHA-256 em formato hexadecimal minúsculo
+ * @param {string} texto
+ * @returns {Promise<string>}
  */
 export async function gerarHashSHA256(texto) {
   const str = String(texto ?? '');
@@ -144,16 +99,9 @@ export async function gerarHashSHA256(texto) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   }
-
-  // Fallback SHA-256 puro caso o navegador bloqueie crypto.subtle em contexto HTTP não-localhost
   return sha256Fallback(str);
 }
 
-/**
- * Implementação SHA-256 padrão FIPS 180-4 como fallback apenas quando crypto.subtle não está disponível.
- * @param {string} ascii
- * @returns {string}
- */
 function sha256Fallback(ascii) {
   function rightRotate(value, amount) {
     return (value >>> amount) | (value << (32 - amount));
@@ -234,33 +182,21 @@ function sha256Fallback(ascii) {
 // OPERAÇÕES DE CONSULTORES
 // ==========================================
 
-/**
- * Retorna todos os consultores cadastrados.
- * @returns {Array<{ id: string, nome: string }>}
- */
 export function getConsultores() {
   return getItem(STORAGE_KEYS.CONSULTORES, []);
 }
 
-/**
- * Adiciona um novo consultor com validação de tamanho e unicidade (mantida para seed/migração — Item D2).
- * @param {string} nome Nome do consultor
- * @returns {{ id: string, nome: string }} Consultor recém-criado
- */
 export function addConsultor(nome) {
   if (!nome || typeof nome !== 'string') {
     throw new Error('O nome do consultor é obrigatório.');
   }
-
   const nomeLimpo = nome.trim();
-
   if (!validarNomeConsultor(nomeLimpo)) {
     throw new Error('O nome do consultor deve conter entre 3 e 60 caracteres.');
   }
 
   const consultores = getConsultores();
   const nomeNormalizado = normalizarNomeConsultor(nomeLimpo);
-
   const jaExiste = consultores.some(
     (c) => c && normalizarNomeConsultor(c.nome) === nomeNormalizado
   );
@@ -276,14 +212,9 @@ export function addConsultor(nome) {
 
   consultores.push(novoConsultor);
   setItem(STORAGE_KEYS.CONSULTORES, consultores);
-
   return novoConsultor;
 }
 
-/**
- * Retorna o ID do consultor selecionado para visualização no painel.
- * @returns {string|null}
- */
 export function getConsultorAtivoId() {
   try {
     return localStorage.getItem(STORAGE_KEYS.CONSULTOR_ATIVO) || null;
@@ -292,10 +223,6 @@ export function getConsultorAtivoId() {
   }
 }
 
-/**
- * Salva o ID do consultor selecionado para visualização no painel.
- * @param {string|null} id
- */
 export function setConsultorAtivoId(id) {
   try {
     if (id) {
@@ -309,31 +236,26 @@ export function setConsultorAtivoId(id) {
 }
 
 // ==========================================
-// OPERAÇÕES DE USUÁRIOS E SESSÃO (PARTE C)
+// OPERAÇÕES DE USUÁRIOS E SESSÃO (ITENS 1.1, 1.2, PARTE C)
 // ==========================================
 
-/**
- * Retorna todos os usuários cadastrados no storage.
- * Modelo Usuario: { id, usuario, nome, senhaHash, consultorId } (Item C3)
- * @returns {Array<{ id: string, usuario: string, nome: string, senhaHash: string, consultorId: string }>}
- */
 export function getUsuarios() {
   return getItem(STORAGE_KEYS.USUARIOS, []);
 }
 
 /**
- * Retorna o estado atual de bloqueio de tentativas de login (Item C5).
+ * Retorna o estado atual de bloqueio de tentativas de login no localStorage (Item 1.1).
  * @returns {{ bloqueado: boolean, segundosRestantes: number, falhas: number }}
  */
 export function getEstadoBloqueioLogin() {
-  const dados = getSessionItem(STORAGE_KEYS.TENTATIVAS_LOGIN, {
+  const dados = getItem(STORAGE_KEYS.TENTATIVAS_LOGIN, {
     falhas: 0,
     bloqueadoAte: null
   });
 
   const agora = Date.now();
 
-  if (dados.bloqueadoAte && agora < dados.bloqueadoAte) {
+  if (dados && dados.bloqueadoAte && agora < dados.bloqueadoAte) {
     const segundosRestantes = Math.max(1, Math.ceil((dados.bloqueadoAte - agora) / 1000));
     return {
       bloqueado: true,
@@ -342,8 +264,7 @@ export function getEstadoBloqueioLogin() {
     };
   }
 
-  // Se o tempo de bloqueio já expirou, limpa o bloqueio e zera a contagem
-  if (dados.bloqueadoAte && agora >= dados.bloqueadoAte) {
+  if (dados && dados.bloqueadoAte && agora >= dados.bloqueadoAte) {
     limparTentativasLogin();
     return { bloqueado: false, segundosRestantes: 0, falhas: 0 };
   }
@@ -351,12 +272,12 @@ export function getEstadoBloqueioLogin() {
   return {
     bloqueado: false,
     segundosRestantes: 0,
-    falhas: Number(dados.falhas) || 0
+    falhas: Number(dados?.falhas) || 0
   };
 }
 
 /**
- * Registra uma falha de login e ativa o bloqueio de 60s ao atingir 5 erros seguidos (Item C5).
+ * Registra uma falha de login no localStorage e ativa o bloqueio de 60s ao atingir 5 erros (Item 1.1).
  * @returns {{ bloqueado: boolean, segundosRestantes: number, falhas: number }}
  */
 function registrarFalhaLogin() {
@@ -368,7 +289,7 @@ function registrarFalhaLogin() {
   const novasFalhas = estadoAtual.falhas + 1;
   if (novasFalhas >= MAX_TENTATIVAS_LOGIN) {
     const bloqueadoAte = Date.now() + BLOQUEIO_LOGIN_MS;
-    setSessionItem(STORAGE_KEYS.TENTATIVAS_LOGIN, {
+    setItem(STORAGE_KEYS.TENTATIVAS_LOGIN, {
       falhas: novasFalhas,
       bloqueadoAte
     });
@@ -379,7 +300,7 @@ function registrarFalhaLogin() {
     };
   }
 
-  setSessionItem(STORAGE_KEYS.TENTATIVAS_LOGIN, {
+  setItem(STORAGE_KEYS.TENTATIVAS_LOGIN, {
     falhas: novasFalhas,
     bloqueadoAte: null
   });
@@ -392,23 +313,23 @@ function registrarFalhaLogin() {
 }
 
 /**
- * Reseta o contador de tentativas de login.
+ * Reseta o contador de tentativas de login no localStorage (Item 1.1).
  */
 export function limparTentativasLogin() {
   try {
-    sessionStorage.removeItem(STORAGE_KEYS.TENTATIVAS_LOGIN);
+    localStorage.removeItem(STORAGE_KEYS.TENTATIVAS_LOGIN);
   } catch (error) {
     console.error('Erro ao limpar tentativas de login:', error);
   }
 }
 
 /**
- * Retorna o usuário autenticado na sessão ativa ou null (Item C3).
+ * Retorna o usuário autenticado na sessão ativa (localStorage — Item 1.2) ou null.
  * Descarta automaticamente sessões expiradas (8h) ou vinculadas a usuários/consultores inexistentes.
  * @returns {{ id: string, usuario: string, nome: string, consultorId: string } | null}
  */
 export function getSessaoAtiva() {
-  const sessao = getSessionItem(STORAGE_KEYS.SESSAO, null);
+  const sessao = getItem(STORAGE_KEYS.SESSAO, null);
   if (!sessao || typeof sessao !== 'object' || !sessao.usuarioId || !sessao.expiraEm) {
     return null;
   }
@@ -447,10 +368,9 @@ export function getSessaoAtiva() {
 }
 
 /**
- * Autentica um usuário verificando hash SHA-256 e limite de tentativas (Itens C3, C4 e C5).
- * Usuário é comparado sem diferenciar maiúsculas/minúsculas; senha diferencia.
- * @param {string} usuarioInput Nome de usuário
- * @param {string} senhaInput Senha em texto puro (case-sensitive)
+ * Autentica um usuário verificando hash SHA-256 e limite de tentativas (Itens 1.1, 1.2, C3, C4 e C5).
+ * @param {string} usuarioInput
+ * @param {string} senhaInput
  * @returns {Promise<{ id: string, usuario: string, nome: string, consultorId: string }>}
  */
 export async function login(usuarioInput, senhaInput) {
@@ -499,7 +419,7 @@ export async function login(usuarioInput, senhaInput) {
     expiraEm: Date.now() + SESSAO_DURACAO_MS
   };
 
-  setSessionItem(STORAGE_KEYS.SESSAO, sessao);
+  setItem(STORAGE_KEYS.SESSAO, sessao);
   setConsultorAtivoId(usuarioValido.consultorId);
 
   return {
@@ -511,11 +431,11 @@ export async function login(usuarioInput, senhaInput) {
 }
 
 /**
- * Encerra a sessão ativa no sessionStorage (Item C3).
+ * Encerra a sessão ativa no localStorage (Item 1.2).
  */
 export function logout() {
   try {
-    sessionStorage.removeItem(STORAGE_KEYS.SESSAO);
+    localStorage.removeItem(STORAGE_KEYS.SESSAO);
   } catch (error) {
     console.error('Erro ao encerrar sessão:', error);
   }
@@ -525,32 +445,16 @@ export function logout() {
 // OPERAÇÕES DE VENDAS (COM PERMISSÕES C6)
 // ==========================================
 
-/**
- * Retorna todas as vendas cadastradas.
- * @returns {Array<Object>}
- */
 export function getVendas() {
   return getItem(STORAGE_KEYS.VENDAS, []);
 }
 
-/**
- * Retorna apenas as vendas de um consultor específico.
- * @param {string} consultorId ID do consultor
- * @returns {Array<Object>}
- */
 export function getVendasPorConsultor(consultorId) {
   if (!consultorId) return [];
   const todas = getVendas();
   return todas.filter((venda) => venda && venda.consultorId === consultorId);
 }
 
-/**
- * Verifica se já existe uma venda com determinada placa.
- * Mantida exportada por compatibilidade, mas NÃO é usada como bloqueio (Item B1).
- * @param {string} placaRaw
- * @param {string} [ignoreVendaId=null]
- * @returns {boolean}
- */
 export function isPlacaExistente(placaRaw, ignoreVendaId = null) {
   if (!placaRaw) return false;
   const placa = normalizarPlaca(placaRaw);
@@ -560,13 +464,6 @@ export function isPlacaExistente(placaRaw, ignoreVendaId = null) {
   );
 }
 
-/**
- * Verifica se já existe uma venda com determinado número de contrato.
- * Comparação sem diferenciar maiúsculas/minúsculas e ignorando espaços nas pontas (Item B2).
- * @param {string} contrato
- * @param {string} [ignoreVendaId=null]
- * @returns {boolean}
- */
 export function isContratoExistente(contrato, ignoreVendaId = null) {
   if (!contrato || typeof contrato !== 'string') return false;
   const contratoNormalizado = normalizarContrato(contrato);
@@ -582,15 +479,7 @@ export function isContratoExistente(contrato, ignoreVendaId = null) {
   );
 }
 
-/**
- * Adiciona uma nova venda aplicando regras de permissão da sessão ativa (Item C6),
- * permitindo placas repetidas (Item B1), garantindo contrato único (Item B2)
- * e validando data mínima 2023-01-01 e máxima hoje (Item A2).
- * @param {Object} dadosVenda Dados da venda
- * @returns {Object} Venda gravada
- */
 export function addVenda(dadosVenda) {
-  // 1. Regra de permissão (Item C6): exige sessão ativa e força consultorId do usuário logado
   const usuarioLogado = getSessaoAtiva();
   if (!usuarioLogado) {
     throw new Error('Acesso negado: faça login para registrar uma venda.');
@@ -600,7 +489,6 @@ export function addVenda(dadosVenda) {
     throw new Error('Dados da venda inválidos.');
   }
 
-  // Ignora qualquer consultorId externo e usa sempre o consultor do usuário autenticado (Item C6)
   const consultorId = usuarioLogado.consultorId;
   const { placa, numeroContrato, modelo, anoModelo, dataVenda } = dadosVenda;
 
@@ -610,13 +498,11 @@ export function addVenda(dadosVenda) {
     throw new Error('O consultor vinculado ao usuário logado não existe no sistema.');
   }
 
-  // 2. Validação da placa (Item B1: formato obrigatório, mas placas repetidas são permitidas)
   if (!placa || typeof placa !== 'string' || !validarPlaca(placa)) {
     throw new Error('Placa inválida. Utilize o formato Mercosul (ABC1D23) ou antigo (ABC1234/ABC-1234).');
   }
   const placaNormalizada = normalizarPlaca(placa);
 
-  // 3. Validação de formato e unicidade do contrato (Item B2)
   if (!numeroContrato || typeof numeroContrato !== 'string' || !validarContrato(numeroContrato)) {
     throw new Error('Número de contrato inválido. Permitido apenas letras e números, sem espaços.');
   }
@@ -625,7 +511,6 @@ export function addVenda(dadosVenda) {
     throw new Error(`O número de contrato "${contratoLimpo}" já está cadastrado no sistema.`);
   }
 
-  // 4. Validação de modelo e ano modelo contra o catálogo
   if (!modelo || typeof modelo !== 'string') {
     throw new Error('O modelo da moto é obrigatório.');
   }
@@ -642,7 +527,6 @@ export function addVenda(dadosVenda) {
     );
   }
 
-  // 5. Validação de data da venda (Item A2: entre 2023-01-01 e hoje)
   const dataFinal = dataVenda || new Date().toISOString();
   const dataObj = new Date(dataFinal);
   if (isNaN(dataObj.getTime())) {
@@ -675,11 +559,6 @@ export function addVenda(dadosVenda) {
   return novaVenda;
 }
 
-/**
- * Exclui uma venda pelo ID, validando sessão ativa e propriedade da venda (Item C6).
- * @param {string} id ID da venda
- * @returns {boolean} True se a venda foi removida com sucesso
- */
 export function deleteVenda(id) {
   const usuarioLogado = getSessaoAtiva();
   if (!usuarioLogado) {
@@ -711,11 +590,6 @@ export function deleteVenda(id) {
 // SEED E MIGRAÇÃO DE SCHEMA (ITENS A1, C1, C2, D4)
 // ==========================================
 
-/**
- * Gera placa Mercosul fictícia.
- * @param {Set<string>} placasUsadas
- * @returns {string} Placa no formato ABC1D23
- */
 function gerarPlacaFicticia(placasUsadas) {
   const letras = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
   const digitos = '0123456789';
@@ -738,12 +612,6 @@ function gerarPlacaFicticia(placasUsadas) {
   return placa;
 }
 
-/**
- * Calcula os marcos temporais seguros para geração de vendas no seed (Item A1).
- * Se rodar exatamente à meia-noite (00:00:00.000), usa agora - 1 segundo.
- * @param {Date} [dataRef=new Date()]
- * @returns {{ agora: Date, inicioHoje: Date, inicioSemana: Date }}
- */
 export function obterLimitesTemporaisSeed(dataRef = new Date()) {
   let agora = new Date(dataRef.getTime());
   const meiaNoiteAtual = new Date(
@@ -756,7 +624,6 @@ export function obterLimitesTemporaisSeed(dataRef = new Date()) {
     0
   );
 
-  // Item A1: Se o seed rodar exatamente à meia-noite, usar agora - 1 segundo
   if (agora.getTime() === meiaNoiteAtual.getTime()) {
     agora = new Date(agora.getTime() - 1000);
   }
@@ -771,7 +638,7 @@ export function obterLimitesTemporaisSeed(dataRef = new Date()) {
     0
   );
 
-  const diaSemana = agora.getDay(); // 0 = Domingo, 1 = Segunda...
+  const diaSemana = agora.getDay();
   const diffSegunda = diaSemana === 0 ? -6 : 1 - diaSemana;
   const inicioSemana = new Date(
     agora.getFullYear(),
@@ -786,13 +653,6 @@ export function obterLimitesTemporaisSeed(dataRef = new Date()) {
   return { agora, inicioHoje, inicioSemana };
 }
 
-/**
- * Sorteia um instante (Date) estritamente dentro do intervalo [inicio, fim] (Item A1).
- * Nunca retorna horário antes de `inicio` nem depois de `fim`.
- * @param {Date} inicio
- * @param {Date} fim
- * @returns {Date}
- */
 export function sortearDataNoIntervalo(inicio, fim) {
   const minMs = inicio.getTime();
   const maxMs = Math.max(minMs, fim.getTime());
@@ -801,12 +661,6 @@ export function sortearDataNoIntervalo(inicio, fim) {
   return new Date(Math.min(sorteadoMs, maxMs));
 }
 
-/**
- * Descobre o maior número sequencial de contrato existente (ex: CT1040 -> 1040)
- * para evitar colisões em migrações ou seeds.
- * @param {Array<Object>} vendas
- * @returns {number}
- */
 function obterMaiorSequenciaContrato(vendas) {
   let maxSeq = 1000;
   if (!Array.isArray(vendas)) return maxSeq;
@@ -825,18 +679,6 @@ function obterMaiorSequenciaContrato(vendas) {
   return maxSeq;
 }
 
-/**
- * Gera um conjunto de vendas fictícias para uma lista de consultores seguindo a regra A1:
- * - Pelo menos 1 venda "de hoje" sorteada entre 00:00 de hoje e agora
- * - Pelo menos 2 vendas "da semana" (1 hoje + pelo menos 1 entre segunda-feira 00:00 e agora)
- * - Demais vendas distribuídas nos últimos 45 dias.
- * @param {Array<{ id: string, nome: string }>} consultores
- * @param {number} totalVendasPorConsultor
- * @param {number} contratoSeqInicial
- * @param {Set<string>} contratosUsados
- * @param {Date} [dataRef=new Date()]
- * @returns {Array<Object>}
- */
 function gerarVendasParaConsultores(
   consultores,
   totalVendasPorConsultor,
@@ -875,19 +717,15 @@ function gerarVendasParaConsultores(
   }
 
   consultores.forEach((consultor) => {
-    // 1. Venda de HOJE: sorteada estritamente entre 00:00 de hoje e agora (Item A1)
     const dataHoje = sortearDataNoIntervalo(inicioHoje, agora);
     vendasGeradas.push(montarVenda(consultor.id, dataHoje));
 
-    // 2. Segunda venda da SEMANA: sorteada estritamente entre segunda-feira 00:00 e agora (Item A1)
     const dataSemana = sortearDataNoIntervalo(inicioSemana, agora);
     vendasGeradas.push(montarVenda(consultor.id, dataSemana));
 
-    // 3. Terceira venda também na semana atual para enriquecer os dados semanais
     const dataSemanaExtra = sortearDataNoIntervalo(inicioSemana, agora);
     vendasGeradas.push(montarVenda(consultor.id, dataSemanaExtra));
 
-    // 4. Vendas restantes distribuídas nos últimos 45 dias (entre 44 dias atrás e agora)
     const restantes = Math.max(0, totalVendasPorConsultor - 3);
     const limitePassado = new Date(
       inicioHoje.getFullYear(),
@@ -908,11 +746,6 @@ function gerarVendasParaConsultores(
   return vendasGeradas;
 }
 
-/**
- * Executa o seed completo do sistema (5 consultores incluindo João Vitor, ~40 vendas + 8 de João Vitor,
- * usuário JoaoVitor com senha hash SHA-256 e schema = 2).
- * @param {Date} [dataRef=new Date()]
- */
 function executarSeedCompleto(dataRef = new Date()) {
   const consultoresIniciais = [
     { id: gerarUUID(), nome: DEMO_USER_CONFIG.nome },
@@ -925,7 +758,6 @@ function executarSeedCompleto(dataRef = new Date()) {
   const consultorJoao = consultoresIniciais[0];
   setItem(STORAGE_KEYS.CONSULTORES, consultoresIniciais);
 
-  // Cria usuário de demonstração vinculado ao consultor João Vitor (Item C1)
   const usuariosIniciais = [
     {
       id: gerarUUID(),
@@ -937,7 +769,6 @@ function executarSeedCompleto(dataRef = new Date()) {
   ];
   setItem(STORAGE_KEYS.USUARIOS, usuariosIniciais);
 
-  // Gera ~8 vendas para cada um dos 5 consultores (total 40 vendas, sendo 8 de João Vitor)
   const contratosUsados = new Set();
   const vendasSeed = gerarVendasParaConsultores(
     consultoresIniciais,
@@ -947,7 +778,6 @@ function executarSeedCompleto(dataRef = new Date()) {
     dataRef
   );
 
-  // Ordena por data decrescente
   vendasSeed.sort((a, b) => new Date(b.dataVenda) - new Date(a.dataVenda));
   setItem(STORAGE_KEYS.VENDAS, vendasSeed);
   setItem(STORAGE_KEYS.SCHEMA, SCHEMA_VERSION);
@@ -955,11 +785,6 @@ function executarSeedCompleto(dataRef = new Date()) {
   setConsultorAtivoId(consultorJoao.id);
 }
 
-/**
- * Migra dados da Etapa 1 (sem schema v2 ou sem usuário JoaoVitor) para o schema v2
- * SEM apagar consultores ou vendas existentes (Item C2).
- * @param {Date} [dataRef=new Date()]
- */
 function migrarParaSchemaV2(dataRef = new Date()) {
   const consultores = getConsultores();
   const vendas = getVendas();
@@ -981,7 +806,6 @@ function migrarParaSchemaV2(dataRef = new Date()) {
     consultorCriadoAgora = true;
   }
 
-  // Garante que o usuário JoaoVitor exista e aponte para o consultor João Vitor
   const loginNorm = DEMO_USER_CONFIG.usuario.toLowerCase();
   const idxUsuario = usuarios.findIndex(
     (u) => u && typeof u.usuario === 'string' && u.usuario.trim().toLowerCase() === loginNorm
@@ -1001,8 +825,6 @@ function migrarParaSchemaV2(dataRef = new Date()) {
     setItem(STORAGE_KEYS.USUARIOS, usuarios);
   }
 
-  // Se o consultor João Vitor acabou de ser criado na migração e não possui vendas,
-  // adiciona as ~8 vendas demonstrativas dele preservando 100% das vendas existentes
   const vendasJoao = vendas.filter((v) => v && v.consultorId === consultorJoao.id);
   if (consultorCriadoAgora && vendasJoao.length === 0) {
     const contratosUsados = new Set(
@@ -1031,25 +853,17 @@ function migrarParaSchemaV2(dataRef = new Date()) {
   setItem(STORAGE_KEYS.SCHEMA, SCHEMA_VERSION);
 }
 
-/**
- * Inicializa o seed se o localStorage estiver vazio OU executa a migração não-destrutiva
- * caso já existam dados de versões anteriores (Itens A1, C1 e C2).
- * @param {Date} [dataRef=new Date()]
- */
 export function inicializarSeedSeNecessario(dataRef = new Date()) {
   const consultoresExistentes = getConsultores();
   const vendasExistentes = getVendas();
   const schemaAtual = getItem(STORAGE_KEYS.SCHEMA, null);
   const usuariosExistentes = getUsuarios();
 
-  // Caso 1: Armazenamento vazio -> roda seed completo da Etapa 2
   if (consultoresExistentes.length === 0 && vendasExistentes.length === 0) {
     executarSeedCompleto(dataRef);
     return;
   }
 
-  // Caso 2: Já existem dados no storage -> nunca roda o seed completo de novo!
-  // Verifica se precisa migrar para o schema 2 ou recriar o vínculo do usuário JoaoVitor
   const temJoaoUsuario = usuariosExistentes.some(
     (u) =>
       u &&
@@ -1065,12 +879,6 @@ export function inicializarSeedSeNecessario(dataRef = new Date()) {
   }
 }
 
-/**
- * Restaura os dados de demonstração apagando os registros atuais e recriando
- * o seed inicial + usuário JoaoVitor (Item D4).
- * Requer sessão ativa; após recriar, renova a sessão para o novo ID do usuário JoaoVitor.
- * @param {Date} [dataRef=new Date()]
- */
 export function resetarDadosDemonstracao(dataRef = new Date()) {
   const sessaoAntes = getSessaoAtiva();
   if (!sessaoAntes) {
@@ -1085,14 +893,13 @@ export function resetarDadosDemonstracao(dataRef = new Date()) {
 
   executarSeedCompleto(dataRef);
 
-  // Mantém o usuário JoaoVitor logado atualizando o usuarioId da sessão para o novo registro
   const usuariosNovos = getUsuarios();
   const novoJoao = usuariosNovos.find(
     (u) => u.usuario.toLowerCase() === DEMO_USER_CONFIG.usuario.toLowerCase()
   );
 
   if (novoJoao) {
-    setSessionItem(STORAGE_KEYS.SESSAO, {
+    setItem(STORAGE_KEYS.SESSAO, {
       usuarioId: novoJoao.id,
       expiraEm: Date.now() + SESSAO_DURACAO_MS
     });

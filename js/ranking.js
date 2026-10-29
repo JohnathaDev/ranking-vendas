@@ -1,8 +1,8 @@
 /**
- * Módulo da Aba "Ranking geral" (ranking.js — Parte E):
- * Gerencia filtros combinados sincronizados com a URL (?periodo=...&modelo=...&ano=...#ranking),
- * KPIs gerais do recorte, tabela de Ranking de Competição (1, 1, 3) com medalhas acessíveis e etiqueta "Você",
- * Matriz cruzada Consultor x (Modelo | Ano Modelo) e listagem geral paginada (20 por vez).
+ * Módulo da Aba "Ranking geral" (ranking.js — Parte E + Ajustes 1.3 e BI 2.3):
+ * Gerencia filtros combinados e parâmetros de BI na URL (?periodo=...&modelo=...&ano=...&grafico=...&dim=...#ranking),
+ * KPIs do recorte, seção "BI · Análise visual", tabela de Ranking de Competição (1, 1, 3),
+ * Matriz cruzada com coluna Consultor fixa e listagem de Vendas Gerais paginada (10 no celular / 20 no desktop).
  */
 
 import { getModelos, getAnosPorModelo, getTodosAnos } from './catalog.js';
@@ -21,27 +21,49 @@ import {
 } from './utils.js';
 import {
   atualizarBotoesSegmentados,
-  configurarControleSegmentado
+  configurarControleSegmentado,
+  showToast
 } from './ui.js';
+import {
+  renderGraficoRankingBI,
+  exportarGraficoPNG
+} from './charts.js';
 
-const ITENS_POR_PAGINA_GERAL = 20;
 const PERIODOS_VALIDOS = ['dia', 'semana', 'mes'];
+export const TIPOS_GRAFICO_BI = [
+  'colunas',
+  'barras',
+  'pizza',
+  'rosca',
+  'empilhadas',
+  'linha',
+  'dispersao'
+];
+export const DIMENSOES_BI = ['consultor', 'modelo', 'anoModelo'];
+
+function obterPassoPaginacaoVendasGerais() {
+  if (typeof window !== 'undefined' && window.innerWidth <= 600) {
+    return 10;
+  }
+  return 20;
+}
 
 const rankingState = {
-  periodo: 'mes', // 'dia' | 'semana' | 'mes' (padrão 'mes' — Item E1)
-  modelo: '', // '' = Todos
-  ano: '', // '' = Todos
-  consultorVendasGerais: '', // '' = Todos (filtro extra da seção E5)
-  sortColuna: 'vendas', // 'vendas' | 'nome'
-  sortDirecao: 'desc', // 'asc' | 'desc'
-  dimensaoMatriz: 'modelo', // 'modelo' | 'anoModelo'
-  limiteVendasGerais: ITENS_POR_PAGINA_GERAL
+  periodo: 'mes',
+  modelo: '',
+  ano: '',
+  graficoBI: 'colunas',
+  dimensaoBI: 'modelo',
+  dicaEmpilhadoPorModelo: false,
+  consultorVendasGerais: '',
+  sortColuna: 'vendas',
+  sortDirecao: 'desc',
+  dimensaoMatriz: 'modelo',
+  limiteVendasGerais: 20
 };
 
-/**
- * Inicializa a aba de Ranking Geral, populando selects, lendo parâmetros da URL e registrando eventos.
- */
 export function initRanking() {
+  rankingState.limiteVendasGerais = obterPassoPaginacaoVendasGerais();
   popularSelectModeloFiltro();
   lerFiltrosDaURL();
   popularSelectAnoFiltro();
@@ -52,8 +74,8 @@ export function initRanking() {
 }
 
 /**
- * Lê e valida os parâmetros de filtro da URL (?periodo=...&modelo=...&ano=...),
- * ignorando quaisquer valores inválidos (Item E1).
+ * Lê e valida os parâmetros de filtro e BI da URL (?periodo=...&modelo=...&ano=...&grafico=...&dim=...),
+ * aplicando padrões seguros para valores inválidos (Itens E1 e 2.3).
  */
 export function lerFiltrosDaURL() {
   const params = new URLSearchParams(window.location.search);
@@ -76,10 +98,59 @@ export function lerFiltrosDaURL() {
   } else {
     rankingState.ano = '';
   }
+
+  const graficoParam = (params.get('grafico') || '').trim().toLowerCase();
+  rankingState.graficoBI = TIPOS_GRAFICO_BI.includes(graficoParam) ? graficoParam : 'colunas';
+
+  const dimParam = (params.get('dim') || '').trim();
+  rankingState.dimensaoBI = DIMENSOES_BI.includes(dimParam) ? dimParam : 'modelo';
+
+  aplicarRegrasCompatibilidadeBI();
 }
 
 /**
- * Atualiza a query string na URL refletindo os filtros ativos (ex: ?periodo=semana&modelo=Fan%20160&ano=2026#ranking).
+ * Aplica regras de compatibilidade entre Tipo de Gráfico e Dimensão no BI (Item 2.3):
+ * Em "Colunas empilhadas", o eixo X já é Consultores; se "Consultor" estiver selecionado em "Agrupar por",
+ * muda automaticamente para "Modelo" e ativa a dica "Empilhado por modelo".
+ */
+function aplicarRegrasCompatibilidadeBI() {
+  const selectDim = document.getElementById('selectBIDimensao');
+  const helperDim = document.getElementById('helperBIDimensao');
+
+  if (rankingState.graficoBI === 'empilhadas') {
+    if (rankingState.dimensaoBI === 'consultor') {
+      rankingState.dimensaoBI = 'modelo';
+      rankingState.dicaEmpilhadoPorModelo = true;
+    }
+  } else {
+    rankingState.dicaEmpilhadoPorModelo = false;
+  }
+
+  if (selectDim) {
+    const optConsultor = selectDim.querySelector('option[value="consultor"]');
+    if (optConsultor) {
+      optConsultor.disabled = rankingState.graficoBI === 'empilhadas';
+    }
+    selectDim.value = rankingState.dimensaoBI;
+  }
+
+  if (helperDim) {
+    if (rankingState.graficoBI === 'empilhadas') {
+      helperDim.textContent = rankingState.dicaEmpilhadoPorModelo
+        ? 'Empilhado por modelo (eixo X exibe os consultores).'
+        : 'Eixo X fixo em consultores; escolha a dimensão das pilhas.';
+    } else if (rankingState.graficoBI === 'linha') {
+      helperDim.textContent = 'Exibe linha Total + até 5 maiores itens da dimensão (restante em Outros).';
+    } else if (rankingState.graficoBI === 'dispersao') {
+      helperDim.textContent = 'Cor de cada venda (ponto) agrupada pela dimensão escolhida.';
+    } else {
+      helperDim.textContent = 'Dimensão usada para agrupar as vendas no gráfico.';
+    }
+  }
+}
+
+/**
+ * Atualiza a query string na URL refletindo os filtros e escolhas do BI (Itens E1 e 2.3).
  */
 export function atualizarURLFiltrosRanking() {
   const partes = [];
@@ -93,6 +164,9 @@ export function atualizarURLFiltrosRanking() {
     partes.push(`ano=${encodeURIComponent(rankingState.ano)}`);
   }
 
+  partes.push(`grafico=${encodeURIComponent(rankingState.graficoBI)}`);
+  partes.push(`dim=${encodeURIComponent(rankingState.dimensaoBI)}`);
+
   const queryString = partes.length > 0 ? `?${partes.join('&')}` : '';
   const hashAtual = window.location.hash || '#ranking';
   const novaUrl = `${window.location.pathname}${queryString}${hashAtual}`;
@@ -100,9 +174,6 @@ export function atualizarURLFiltrosRanking() {
   window.history.replaceState(null, '', novaUrl);
 }
 
-/**
- * Preenche o select de Modelos no filtro do Ranking Geral.
- */
 function popularSelectModeloFiltro() {
   const select = document.getElementById('filtroRankingModelo');
   if (!select) return;
@@ -121,11 +192,6 @@ function popularSelectModeloFiltro() {
   });
 }
 
-/**
- * Preenche o select de Ano Modelo no filtro do Ranking Geral.
- * Se um modelo estiver selecionado, exibe apenas os anos válidos daquele modelo,
- * resetando para "Todos" caso o ano anteriormente selecionado não pertença ao modelo (Item E1).
- */
 function popularSelectAnoFiltro() {
   const select = document.getElementById('filtroRankingAno');
   if (!select) return;
@@ -134,7 +200,6 @@ function popularSelectAnoFiltro() {
     ? getAnosPorModelo(rankingState.modelo)
     : getTodosAnos();
 
-  // Reseta o ano para "Todos" se ficar inválido para o modelo atual
   if (rankingState.ano && !anosPermitidos.includes(Number(rankingState.ano))) {
     rankingState.ano = '';
   }
@@ -158,9 +223,6 @@ function popularSelectAnoFiltro() {
   select.value = rankingState.ano;
 }
 
-/**
- * Atualiza o select de filtro extra por consultor da tabela de Vendas Gerais (Item E5).
- */
 export function popularSelectConsultorVendasGerais() {
   const select = document.getElementById('filtroVendasGeraisConsultor');
   if (!select) return;
@@ -193,9 +255,6 @@ export function popularSelectConsultorVendasGerais() {
   }
 }
 
-/**
- * Sincroniza os botões e selects do DOM com os valores em `rankingState`.
- */
 function sincronizarControlesComEstado() {
   const botoesPeriodo = document.querySelectorAll('.btn-ranking-period');
   atualizarBotoesSegmentados(botoesPeriodo, rankingState.periodo, 'period');
@@ -206,20 +265,22 @@ function sincronizarControlesComEstado() {
   const selectAno = document.getElementById('filtroRankingAno');
   if (selectAno) selectAno.value = rankingState.ano;
 
+  const selectBITipo = document.getElementById('selectBITipoGrafico');
+  if (selectBITipo) selectBITipo.value = rankingState.graficoBI;
+
+  aplicarRegrasCompatibilidadeBI();
+
   const botoesMatriz = document.querySelectorAll('.btn-matriz-dimensao');
   atualizarBotoesSegmentados(botoesMatriz, rankingState.dimensaoMatriz, 'dimensao');
 }
 
-/**
- * Configura ouvintes de eventos da aba Ranking Geral.
- */
 function setupRankingListeners() {
   const botoesPeriodo = document.querySelectorAll('.btn-ranking-period');
   configurarControleSegmentado(
     botoesPeriodo,
     (novoPeriodo) => {
       rankingState.periodo = novoPeriodo;
-      rankingState.limiteVendasGerais = ITENS_POR_PAGINA_GERAL;
+      rankingState.limiteVendasGerais = obterPassoPaginacaoVendasGerais();
       atualizarURLFiltrosRanking();
       renderRankingGeral();
     },
@@ -231,7 +292,7 @@ function setupRankingListeners() {
     selectModelo.addEventListener('change', (e) => {
       rankingState.modelo = e.target.value;
       popularSelectAnoFiltro();
-      rankingState.limiteVendasGerais = ITENS_POR_PAGINA_GERAL;
+      rankingState.limiteVendasGerais = obterPassoPaginacaoVendasGerais();
       atualizarURLFiltrosRanking();
       renderRankingGeral();
     });
@@ -241,7 +302,7 @@ function setupRankingListeners() {
   if (selectAno) {
     selectAno.addEventListener('change', (e) => {
       rankingState.ano = e.target.value;
-      rankingState.limiteVendasGerais = ITENS_POR_PAGINA_GERAL;
+      rankingState.limiteVendasGerais = obterPassoPaginacaoVendasGerais();
       atualizarURLFiltrosRanking();
       renderRankingGeral();
     });
@@ -254,13 +315,47 @@ function setupRankingListeners() {
       rankingState.modelo = '';
       rankingState.ano = '';
       rankingState.consultorVendasGerais = '';
-      rankingState.limiteVendasGerais = ITENS_POR_PAGINA_GERAL;
+      rankingState.limiteVendasGerais = obterPassoPaginacaoVendasGerais();
 
       popularSelectAnoFiltro();
       popularSelectConsultorVendasGerais();
       sincronizarControlesComEstado();
       atualizarURLFiltrosRanking();
       renderRankingGeral();
+    });
+  }
+
+  // Controles do BI (Item 2.3)
+  const selectBITipo = document.getElementById('selectBITipoGrafico');
+  if (selectBITipo) {
+    selectBITipo.addEventListener('change', (e) => {
+      const novoTipo = e.target.value;
+      rankingState.graficoBI = TIPOS_GRAFICO_BI.includes(novoTipo) ? novoTipo : 'colunas';
+      aplicarRegrasCompatibilidadeBI();
+      atualizarURLFiltrosRanking();
+      renderSecaoBIRanking();
+    });
+  }
+
+  const selectBIDim = document.getElementById('selectBIDimensao');
+  if (selectBIDim) {
+    selectBIDim.addEventListener('change', (e) => {
+      const novaDim = e.target.value;
+      rankingState.dimensaoBI = DIMENSOES_BI.includes(novaDim) ? novaDim : 'modelo';
+      rankingState.dicaEmpilhadoPorModelo = false;
+      aplicarRegrasCompatibilidadeBI();
+      atualizarURLFiltrosRanking();
+      renderSecaoBIRanking();
+    });
+  }
+
+  const btnBaixarPNGBI = document.getElementById('btnBaixarPNGBI');
+  if (btnBaixarPNGBI) {
+    btnBaixarPNGBI.addEventListener('click', () => {
+      const ok = exportarGraficoPNG('ranking-bi', rankingState.graficoBI);
+      if (!ok) {
+        showToast('Gráfico indisponível para exportação no momento.', 'error');
+      }
     });
   }
 
@@ -310,24 +405,21 @@ function setupRankingListeners() {
   if (selectConsultorGerais) {
     selectConsultorGerais.addEventListener('change', (e) => {
       rankingState.consultorVendasGerais = e.target.value;
-      rankingState.limiteVendasGerais = ITENS_POR_PAGINA_GERAL;
+      rankingState.limiteVendasGerais = obterPassoPaginacaoVendasGerais();
       renderVendasGerais();
     });
   }
 
-  // Botão "Mostrar mais" (20 por vez — Item E5)
+  // Botão "Mostrar mais" (10 no celular / 20 no desktop — Item 1.3 e E5)
   const btnMostrarMais = document.getElementById('btnMostrarMaisVendasGerais');
   if (btnMostrarMais) {
     btnMostrarMais.addEventListener('click', () => {
-      rankingState.limiteVendasGerais += ITENS_POR_PAGINA_GERAL;
+      rankingState.limiteVendasGerais += obterPassoPaginacaoVendasGerais();
       renderVendasGerais();
     });
   }
 }
 
-/**
- * Atualiza os atributos aria-sort e ícones de ordenação dos cabeçalhos do Ranking (Item E3).
- */
 function atualizarCabecalhosSortRanking() {
   const thConsultor = document.getElementById('thSortRankingConsultor');
   const thVendas = document.getElementById('thSortRankingVendas');
@@ -365,10 +457,6 @@ function atualizarCabecalhosSortRanking() {
   }
 }
 
-/**
- * Obtém as vendas do recorte atual da aba Ranking Geral usando a função pura filtrarVendas (Item E6).
- * @returns {Array<Object>}
- */
 function obterVendasFiltradasRanking() {
   const todasVendas = getVendas();
   return filtrarVendas(todasVendas, {
@@ -378,25 +466,76 @@ function obterVendasFiltradasRanking() {
   });
 }
 
-/**
- * Renderiza toda a aba Ranking Geral (KPIs, Tabela de Ranking, Matriz e Vendas Gerais).
- */
 export function renderRankingGeral() {
   popularSelectConsultorVendasGerais();
   const consultores = getConsultores();
   const vendasRecorte = obterVendasFiltradasRanking();
 
   renderKPIsRanking(vendasRecorte, consultores);
+  renderSecaoBIRanking(vendasRecorte, consultores);
   renderTabelaRankingConsultores(vendasRecorte, consultores);
   renderMatrizConsultores(vendasRecorte, consultores);
   renderVendasGerais(vendasRecorte, consultores);
 }
 
 /**
- * Renderiza os 4 KPIs do recorte (Total de vendas, Consultor líder, Modelo mais vendido, Ano mais vendido — Item E2).
- * @param {Array<Object>} vendasRecorte
- * @param {Array<{ id: string, nome: string }>} consultores
+ * Monta o título dinâmico do BI (ex: "Vendas por modelo · Semana atual · Ano 2026")
+ * e renderiza o gráfico da seção "BI · Análise visual" (Item 2.3).
  */
+function renderSecaoBIRanking(
+  vendasRecorte = obterVendasFiltradasRanking(),
+  consultores = getConsultores()
+) {
+  const elTitulo = document.getElementById('tituloDinamicoBI');
+
+  const mapaDimensao = {
+    consultor: 'consultor',
+    modelo: 'modelo',
+    anoModelo: 'ano modelo'
+  };
+  const mapaPeriodo = {
+    dia: 'Hoje',
+    semana: 'Semana atual',
+    mes: 'Mês atual'
+  };
+
+  let prefixo = `Vendas por ${mapaDimensao[rankingState.dimensaoBI] || 'modelo'}`;
+  if (rankingState.graficoBI === 'empilhadas') {
+    const dimPilha = rankingState.dimensaoBI === 'anoModelo' ? 'ano modelo' : 'modelo';
+    prefixo = `Vendas por consultor (empilhado por ${dimPilha})`;
+  } else if (rankingState.graficoBI === 'linha') {
+    prefixo = `Evolução de vendas por ${mapaDimensao[rankingState.dimensaoBI] || 'modelo'}`;
+  } else if (rankingState.graficoBI === 'dispersao') {
+    prefixo = `Horário das vendas por ${mapaDimensao[rankingState.dimensaoBI] || 'modelo'}`;
+  }
+
+  const partesTitulo = [prefixo, mapaPeriodo[rankingState.periodo] || 'Mês atual'];
+  if (rankingState.modelo) partesTitulo.push(rankingState.modelo);
+  if (rankingState.ano) partesTitulo.push(`Ano ${rankingState.ano}`);
+
+  if (elTitulo) {
+    elTitulo.textContent = partesTitulo.join(' · ');
+  }
+
+  renderGraficoRankingBI({
+    vendas: vendasRecorte,
+    consultores,
+    tipo: rankingState.graficoBI,
+    dimensao: rankingState.dimensaoBI,
+    periodo: rankingState.periodo,
+    elementos: {
+      canvas: document.getElementById('canvasGraficoBI'),
+      containerCanvas: document.getElementById('containerCanvasBI'),
+      boxVazio: document.getElementById('emptyStateGraficoBI'),
+      boxErroCDN: document.getElementById('erroCDNGraficoBI'),
+      detailsTabela: document.getElementById('detailsTabelaDadosBI'),
+      theadTabela: document.getElementById('theadTabelaDadosBI'),
+      tbodyTabela: document.getElementById('tbodyTabelaDadosBI'),
+      btnDownload: document.getElementById('btnBaixarPNGBI')
+    }
+  });
+}
+
 function renderKPIsRanking(vendasRecorte, consultores) {
   const elTotal = document.getElementById('kpiRankingTotal');
   const elTotalDetalhe = document.getElementById('kpiRankingTotalDetalhe');
@@ -419,13 +558,11 @@ function renderKPIsRanking(vendasRecorte, consultores) {
   if (elTotal) elTotal.textContent = String(vendasRecorte.length);
   if (elTotalDetalhe) elTotalDetalhe.textContent = partesFiltro.join(' · ');
 
-  // Mapa de ID -> Nome do consultor
   const mapaConsultores = new Map();
   consultores.forEach((c) => {
     if (c && c.id) mapaConsultores.set(c.id, c.nome);
   });
 
-  // Consultor líder (Item E2)
   const liderConsultor = calcularLiderComEmpate(
     vendasRecorte,
     'consultorId',
@@ -436,7 +573,6 @@ function renderKPIsRanking(vendasRecorte, consultores) {
   if (elLider) elLider.textContent = liderConsultor.valorPrincipal;
   if (elLiderDetalhe) elLiderDetalhe.textContent = liderConsultor.detalhe;
 
-  // Modelo mais vendido (Item E2)
   const liderModelo = calcularLiderComEmpate(
     vendasRecorte,
     'modelo',
@@ -447,7 +583,6 @@ function renderKPIsRanking(vendasRecorte, consultores) {
   if (elModelo) elModelo.textContent = liderModelo.valorPrincipal;
   if (elModeloDetalhe) elModeloDetalhe.textContent = liderModelo.detalhe;
 
-  // Ano mais vendido (Item E2)
   const liderAno = calcularLiderComEmpate(
     vendasRecorte,
     'anoModelo',
@@ -459,16 +594,9 @@ function renderKPIsRanking(vendasRecorte, consultores) {
   if (elAnoDetalhe) elAnoDetalhe.textContent = liderAno.detalhe;
 }
 
-/**
- * Cria o elemento de posição com medalha Ouro/Prata/Bronze com texto e aria-label (Item E3).
- * @param {number} posicao
- * @param {number} qtdVendas
- * @returns {HTMLElement}
- */
 function criarElementoPosicaoRanking(posicao, qtdVendas) {
   const badge = document.createElement('span');
 
-  // Destaca top 3 com Ouro/Prata/Bronze quando houver vendas (ou conforme a posição de competição)
   if (posicao === 1 && qtdVendas > 0) {
     badge.className = 'medal-badge medal-gold';
     badge.setAttribute('aria-label', '1º lugar - Medalha de Ouro');
@@ -490,11 +618,6 @@ function criarElementoPosicaoRanking(posicao, qtdVendas) {
   return badge;
 }
 
-/**
- * Renderiza a tabela de Ranking de Consultores (Item E3).
- * @param {Array<Object>} vendasRecorte
- * @param {Array<{ id: string, nome: string }>} consultores
- */
 function renderTabelaRankingConsultores(vendasRecorte, consultores) {
   const tbody = document.getElementById('tbodyRankingConsultores');
   const tabela = document.getElementById('tabelaRankingConsultores');
@@ -514,7 +637,6 @@ function renderTabelaRankingConsultores(vendasRecorte, consultores) {
   if (tabela) tabela.classList.remove('hidden');
   if (emptyState) emptyState.classList.add('hidden');
 
-  // Aplica a ordenação visual selecionada nos cabeçalhos preservando a posição oficial de competição
   const rankingExibicao = [...rankingBase].sort((a, b) => {
     if (rankingState.sortColuna === 'nome') {
       const cmp = String(a.nome).localeCompare(String(b.nome), 'pt-BR');
@@ -522,7 +644,6 @@ function renderTabelaRankingConsultores(vendasRecorte, consultores) {
       return b.vendas - a.vendas;
     }
 
-    // Ordenação por vendas
     const diff =
       rankingState.sortDirecao === 'desc' ? b.vendas - a.vendas : a.vendas - b.vendas;
     if (diff !== 0) return diff;
@@ -540,12 +661,10 @@ function renderTabelaRankingConsultores(vendasRecorte, consultores) {
       tr.classList.add('row-current-user');
     }
 
-    // 1. Posição
     const tdPosicao = document.createElement('td');
     tdPosicao.setAttribute('data-label', 'Posição');
     tdPosicao.appendChild(criarElementoPosicaoRanking(item.posicao, item.vendas));
 
-    // 2. Consultor (+ etiqueta "Você" se for o usuário logado — Item E3)
     const tdConsultor = document.createElement('td');
     tdConsultor.setAttribute('data-label', 'Consultor');
     const wrapperNome = document.createElement('div');
@@ -564,7 +683,6 @@ function renderTabelaRankingConsultores(vendasRecorte, consultores) {
     }
     tdConsultor.appendChild(wrapperNome);
 
-    // 3. Vendas
     const tdVendas = document.createElement('td');
     tdVendas.className = 'text-right';
     tdVendas.setAttribute('data-label', 'Vendas');
@@ -573,14 +691,12 @@ function renderTabelaRankingConsultores(vendasRecorte, consultores) {
     spanVendas.textContent = String(item.vendas);
     tdVendas.appendChild(spanVendas);
 
-    // 4. % do total (com 1 casa decimal — Item E3 / E6)
     const tdPercentual = document.createElement('td');
     tdPercentual.className = 'text-right';
     tdPercentual.setAttribute('data-label', '% do Total');
     const percFormatado = item.percentual.toFixed(1).replace('.', ',');
     tdPercentual.textContent = `${percFormatado}%`;
 
-    // 5. Modelo mais vendido do consultor
     const tdModeloTop = document.createElement('td');
     tdModeloTop.setAttribute('data-label', 'Modelo Mais Vendido');
     tdModeloTop.textContent = item.modeloTop;
@@ -595,11 +711,6 @@ function renderTabelaRankingConsultores(vendasRecorte, consultores) {
   });
 }
 
-/**
- * Renderiza a Matriz Consultor x (Modelo | Ano Modelo) com linha e coluna de totais (Item E4).
- * @param {Array<Object>} vendasRecorte
- * @param {Array<{ id: string, nome: string }>} consultores
- */
 function renderMatrizConsultores(vendasRecorte, consultores) {
   const thead = document.getElementById('theadMatrizRanking');
   const tbody = document.getElementById('tbodyMatrizRanking');
@@ -613,9 +724,9 @@ function renderMatrizConsultores(vendasRecorte, consultores) {
   const matriz = gerarMatriz(vendasRecorte, consultores, rankingState.dimensaoMatriz);
   const usuarioLogado = getSessaoAtiva();
 
-  // Cabeçalho da matriz
   const trHead = document.createElement('tr');
   const thConsultor = document.createElement('th');
+  thConsultor.className = 'sticky-col';
   thConsultor.textContent = 'Consultor';
   trHead.appendChild(thConsultor);
 
@@ -632,7 +743,6 @@ function renderMatrizConsultores(vendasRecorte, consultores) {
   trHead.appendChild(thTotalLinha);
   thead.appendChild(trHead);
 
-  // Corpo da matriz
   matriz.linhas.forEach((linha) => {
     const tr = document.createElement('tr');
     const isUsuarioLogado =
@@ -642,6 +752,7 @@ function renderMatrizConsultores(vendasRecorte, consultores) {
     }
 
     const tdNome = document.createElement('td');
+    tdNome.className = 'sticky-col';
     tdNome.setAttribute('data-label', 'Consultor');
     const wrapperNome = document.createElement('div');
     wrapperNome.className = 'consultor-cell-wrapper';
@@ -682,11 +793,11 @@ function renderMatrizConsultores(vendasRecorte, consultores) {
     tbody.appendChild(tr);
   });
 
-  // Rodapé de totais por coluna e total geral
   const trFoot = document.createElement('tr');
   trFoot.className = 'matrix-footer-row';
 
   const tdLabelTotal = document.createElement('td');
+  tdLabelTotal.className = 'sticky-col';
   tdLabelTotal.setAttribute('data-label', 'Resumo');
   const strongLabel = document.createElement('strong');
   strongLabel.textContent = 'Total Geral';
@@ -715,12 +826,6 @@ function renderMatrizConsultores(vendasRecorte, consultores) {
   tfoot.appendChild(trFoot);
 }
 
-/**
- * Renderiza a seção "Vendas gerais" do recorte (mais recentes primeiro, filtro extra por consultor,
- * paginação de 20 por vez com "Mostrar mais" e sem botão de excluir — Item E5).
- * @param {Array<Object>} [vendasRecorte]
- * @param {Array<{ id: string, nome: string }>} [consultores]
- */
 function renderVendasGerais(
   vendasRecorte = obterVendasFiltradasRanking(),
   consultores = getConsultores()
@@ -735,12 +840,10 @@ function renderVendasGerais(
   if (!tbody) return;
   tbody.replaceChildren();
 
-  // Aplica o filtro extra por consultor caso esteja selecionado
   const vendasComFiltroConsultor = rankingState.consultorVendasGerais
     ? vendasRecorte.filter((v) => v.consultorId === rankingState.consultorVendasGerais)
     : vendasRecorte;
 
-  // Ordena pelas mais recentes primeiro (Item E5)
   const vendasOrdenadas = [...vendasComFiltroConsultor].sort(
     (a, b) => new Date(b.dataVenda) - new Date(a.dataVenda)
   );
@@ -765,19 +868,16 @@ function renderVendasGerais(
   vendasVisiveis.forEach((venda) => {
     const tr = document.createElement('tr');
 
-    // 1. Data/Hora
     const tdData = document.createElement('td');
     tdData.setAttribute('data-label', 'Data/Hora');
     tdData.textContent = formatarDataHora(venda.dataVenda);
 
-    // 2. Consultor
     const tdConsultor = document.createElement('td');
     tdConsultor.setAttribute('data-label', 'Consultor');
     const strongConsultor = document.createElement('strong');
     strongConsultor.textContent = mapaConsultores.get(venda.consultorId) || 'Consultor';
     tdConsultor.appendChild(strongConsultor);
 
-    // 3. Placa
     const tdPlaca = document.createElement('td');
     tdPlaca.setAttribute('data-label', 'Placa');
     const spanPlaca = document.createElement('span');
@@ -785,7 +885,6 @@ function renderVendasGerais(
     spanPlaca.textContent = formatarPlaca(venda.placa);
     tdPlaca.appendChild(spanPlaca);
 
-    // 4. Contrato
     const tdContrato = document.createElement('td');
     tdContrato.setAttribute('data-label', 'Contrato');
     const spanContrato = document.createElement('span');
@@ -793,12 +892,10 @@ function renderVendasGerais(
     spanContrato.textContent = venda.numeroContrato;
     tdContrato.appendChild(spanContrato);
 
-    // 5. Modelo
     const tdModelo = document.createElement('td');
     tdModelo.setAttribute('data-label', 'Modelo');
     tdModelo.textContent = venda.modelo;
 
-    // 6. Ano
     const tdAno = document.createElement('td');
     tdAno.className = 'text-right';
     tdAno.setAttribute('data-label', 'Ano');
@@ -814,19 +911,18 @@ function renderVendasGerais(
     tbody.appendChild(tr);
   });
 
-  // Controle de paginação (20 por vez com "Mostrar mais")
   if (boxPaginacao && infoContagem && btnMostrarMais) {
     boxPaginacao.classList.remove('hidden');
     infoContagem.textContent = `Exibindo ${vendasVisiveis.length} de ${vendasOrdenadas.length} venda${vendasOrdenadas.length === 1 ? '' : 's'}`;
+
+    const passo = obterPassoPaginacaoVendasGerais();
+    btnMostrarMais.textContent = `Mostrar mais (+${passo})`;
 
     const temMais = vendasOrdenadas.length > vendasVisiveis.length;
     btnMostrarMais.classList.toggle('hidden', !temMais);
   }
 }
 
-/**
- * Recarrega filtros da URL e re-renderiza quando ocorre navegação no histórico.
- */
 export function sincronizarRankingComURL() {
   lerFiltrosDaURL();
   popularSelectAnoFiltro();

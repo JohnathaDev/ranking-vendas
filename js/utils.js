@@ -1,51 +1,29 @@
 /**
- * Utilitários puros (sem acesso ao DOM) para validação de dados,
- * formatação de datas/placas, filtros combinados, ranking de competição e matriz analítica.
+ * Utilitários puros (sem acesso ao DOM e sem Chart) para validação de dados,
+ * formatação de datas/placas, filtros combinados, ranking de competição, matriz analítica
+ * e geração de séries de dados para o módulo de BI (Item 2.2).
  */
 
 import { getModelos, getTodosAnos } from './catalog.js';
 
-/**
- * Limite mínimo permitido para a data de venda em todo o sistema (Item A2).
- */
 export const DATA_MINIMA_VENDA = '2023-01-01';
 
-/**
- * Remove caracteres especiais e hífens da placa, convertendo para maiúsculas.
- * @param {string} placaRaw
- * @returns {string} Placa limpa (somente letras e dígitos em maiúsculo)
- */
 export function normalizarPlaca(placaRaw) {
   if (!placaRaw || typeof placaRaw !== 'string') return '';
   return placaRaw.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
 }
 
-/**
- * Valida a placa aceitando como separador APENAS hífen opcional entre as 3 letras e o restante.
- * Rejeita qualquer outro caractere (espaços, pontos, underscores, etc).
- * Formato antigo: ABC1234 ou ABC-1234
- * Formato Mercosul: ABC1D23 ou ABC-1D23
- * @param {string} placaRaw
- * @returns {boolean}
- */
 export function validarPlaca(placaRaw) {
   if (!placaRaw || typeof placaRaw !== 'string') return false;
   const textoLimpo = placaRaw.trim();
-
   const regexEstrita = /^[A-Z]{3}-?(\d{4}|\d[A-Z]\d{2})$/i;
   if (!regexEstrita.test(textoLimpo)) {
     return false;
   }
-
   const normalizada = normalizarPlaca(textoLimpo);
   return normalizada.length === 7;
 }
 
-/**
- * Formata uma placa de 7 caracteres para o padrão visual com hífen (ABC-1234 ou ABC-1D23).
- * @param {string} placaSemHifen
- * @returns {string} Placa formatada
- */
 export function formatarPlaca(placaSemHifen) {
   const placa = normalizarPlaca(placaSemHifen);
   if (placa.length === 7) {
@@ -54,34 +32,17 @@ export function formatarPlaca(placaSemHifen) {
   return placaSemHifen || '';
 }
 
-/**
- * Normaliza o número do contrato removendo espaços nas pontas e convertendo para maiúsculas (Item B2).
- * @param {string} contrato
- * @returns {string}
- */
 export function normalizarContrato(contrato) {
   if (!contrato || typeof contrato !== 'string') return '';
   return contrato.trim().toUpperCase();
 }
 
-/**
- * Valida o número do contrato:
- * Obrigatório, apenas números e/ou letras, ignorando espaços nas pontas (Item B2).
- * @param {string} contrato
- * @returns {boolean}
- */
 export function validarContrato(contrato) {
   if (!contrato || typeof contrato !== 'string') return false;
   const regexContrato = /^[A-Za-z0-9]+$/;
   return regexContrato.test(contrato.trim());
 }
 
-/**
- * Normaliza o nome do consultor para comparação sem diferenciar maiúsculas/minúsculas,
- * acentos e espaços extras.
- * @param {string} nome
- * @returns {string} Nome normalizado
- */
 export function normalizarNomeConsultor(nome) {
   if (!nome || typeof nome !== 'string') return '';
   return nome
@@ -92,22 +53,12 @@ export function normalizarNomeConsultor(nome) {
     .replace(/\s+/g, ' ');
 }
 
-/**
- * Valida os requisitos do nome do consultor (de 3 a 60 caracteres).
- * @param {string} nome
- * @returns {boolean}
- */
 export function validarNomeConsultor(nome) {
   if (!nome || typeof nome !== 'string') return false;
   const limpo = nome.trim();
   return limpo.length >= 3 && limpo.length <= 60;
 }
 
-/**
- * Retorna a data no formato YYYY-MM-DD considerando o fuso local.
- * @param {Date} [data=new Date()]
- * @returns {string} Data em formato YYYY-MM-DD
- */
 export function obterDataHojeISO(data = new Date()) {
   const d = new Date(data);
   const ano = d.getFullYear();
@@ -116,13 +67,6 @@ export function obterDataHojeISO(data = new Date()) {
   return `${ano}-${mes}-${dia}`;
 }
 
-/**
- * Valida se uma string YYYY-MM-DD é uma data válida de calendário,
- * maior ou igual a 2023-01-01 (Item A2) e não futura em relação a hoje.
- * @param {string} dataYMD
- * @param {Date} [dataReferencia=new Date()]
- * @returns {boolean}
- */
 export function validarDataInput(dataYMD, dataReferencia = new Date()) {
   if (!dataYMD || typeof dataYMD !== 'string') return false;
   const limpo = dataYMD.trim();
@@ -143,13 +87,6 @@ export function validarDataInput(dataYMD, dataReferencia = new Date()) {
   return limpo >= DATA_MINIMA_VENDA && limpo <= hojeStr;
 }
 
-/**
- * Combina uma data YYYY-MM-DD com o horário atual local (horas, minutos, segundos).
- * Garante que a data/hora resultante não ultrapasse o momento presente.
- * @param {string} dataYMD Data no formato YYYY-MM-DD
- * @param {Date} [horaRef=new Date()] Objeto Date de referência
- * @returns {string} Data e hora combinadas em formato ISO
- */
 export function combinarDataComHoraAtual(dataYMD, horaRef = new Date()) {
   const [ano, mes, dia] = dataYMD.trim().split('-').map(Number);
   const agora = new Date(horaRef);
@@ -171,13 +108,6 @@ export function combinarDataComHoraAtual(dataYMD, horaRef = new Date()) {
   return dataResultante.toISOString();
 }
 
-/**
- * Valida se a data de venda ISO é uma data válida, maior ou igual a 2023-01-01 (Item A2)
- * e não está no futuro.
- * @param {string} dataIso
- * @param {Date} [dataReferencia=new Date()]
- * @returns {boolean}
- */
 export function validarDataVenda(dataIso, dataReferencia = new Date()) {
   if (!dataIso || typeof dataIso !== 'string') return false;
   const data = new Date(dataIso);
@@ -192,11 +122,6 @@ export function validarDataVenda(dataIso, dataReferencia = new Date()) {
   return data.getTime() <= agora.getTime() + 1000;
 }
 
-/**
- * Formata data ISO para exibição amigável em pt-BR (ex: "28/10/2026 às 14:35").
- * @param {string} dataIso
- * @returns {string} Data e hora formatadas
- */
 export function formatarDataHora(dataIso) {
   if (!dataIso) return '-';
   const data = new Date(dataIso);
@@ -211,13 +136,6 @@ export function formatarDataHora(dataIso) {
   return `${dia}/${mes}/${ano} às ${horas}:${minutos}`;
 }
 
-/**
- * Filtra uma lista de vendas de acordo com o período especificado.
- * @param {Array<Object>} vendas Lista de vendas a filtrar
- * @param {'dia' | 'semana' | 'mes'} periodo Período desejado
- * @param {Date} [dataReferencia=new Date()] Data de referência (padrão hoje)
- * @returns {Array<Object>} Vendas pertencentes ao período
- */
 export function filtrarPorPeriodo(vendas, periodo, dataReferencia = new Date()) {
   if (!Array.isArray(vendas)) return [];
 
@@ -226,17 +144,14 @@ export function filtrarPorPeriodo(vendas, periodo, dataReferencia = new Date()) 
   const mesRef = ref.getMonth();
   const diaRef = ref.getDate();
 
-  // Início e fim do dia
   const inicioDia = new Date(anoRef, mesRef, diaRef, 0, 0, 0, 0);
   const fimDia = new Date(anoRef, mesRef, diaRef, 23, 59, 59, 999);
 
-  // Início e fim do mês
   const inicioMes = new Date(anoRef, mesRef, 1, 0, 0, 0, 0);
   const ultimoDiaMes = new Date(anoRef, mesRef + 1, 0).getDate();
   const fimMes = new Date(anoRef, mesRef, ultimoDiaMes, 23, 59, 59, 999);
 
-  // Início e fim da semana (Segunda a Domingo)
-  const diaSemana = ref.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+  const diaSemana = ref.getDay();
   const diferencaParaSegunda = diaSemana === 0 ? -6 : 1 - diaSemana;
   const inicioSemana = new Date(anoRef, mesRef, diaRef + diferencaParaSegunda, 0, 0, 0, 0);
   const fimSemana = new Date(
@@ -257,26 +172,16 @@ export function filtrarPorPeriodo(vendas, periodo, dataReferencia = new Date()) 
     if (periodo === 'dia') {
       return dataVenda >= inicioDia && dataVenda <= fimDia;
     }
-
     if (periodo === 'semana') {
       return dataVenda >= inicioSemana && dataVenda <= fimSemana;
     }
-
     if (periodo === 'mes') {
       return dataVenda >= inicioMes && dataVenda <= fimMes;
     }
-
     return true;
   });
 }
 
-/**
- * Filtra vendas aplicando múltiplos critérios (período, modelo, ano e consultor) — Item E6.
- * @param {Array<Object>} vendas Lista de vendas
- * @param {Object} [filtros={}] Objeto com { periodo, modelo, ano, consultorId }
- * @param {Date} [dataReferencia=new Date()] Data de referência para o recorte temporal
- * @returns {Array<Object>} Lista de vendas filtradas
- */
 export function filtrarVendas(vendas, filtros = {}, dataReferencia = new Date()) {
   if (!Array.isArray(vendas)) return [];
 
@@ -306,12 +211,6 @@ export function filtrarVendas(vendas, filtros = {}, dataReferencia = new Date())
   return resultado;
 }
 
-/**
- * Agrupa as vendas por uma chave específica (ex: 'modelo', 'anoModelo', 'consultorId').
- * @param {Array<Object>} vendas Lista de vendas
- * @param {string} campo Nome do campo para agrupamento
- * @returns {Array<{ chave: string|number, quantidade: number }>} Lista agrupada
- */
 export function agruparPor(vendas, campo) {
   if (!Array.isArray(vendas) || !campo) return [];
 
@@ -331,15 +230,6 @@ export function agruparPor(vendas, campo) {
   }));
 }
 
-/**
- * Calcula o item mais frequente (líder) de um campo nas vendas, tratando empates como "A / B · empate".
- * @param {Array<Object>} vendas Lista de vendas
- * @param {string} campo Campo a agrupar ('modelo' | 'anoModelo' | 'consultorId')
- * @param {Map<string, string>|Object|null} [mapaLabels=null] Mapa opcional para traduzir ID em nome
- * @param {string} [unidadeSingular='unidade']
- * @param {string} [unidadePlural='unidades']
- * @returns {{ valorPrincipal: string, detalhe: string, quantidadeMax: number, empatados: string[] }}
- */
 export function calcularLiderComEmpate(
   vendas,
   campo,
@@ -399,12 +289,6 @@ export function calcularLiderComEmpate(
   };
 }
 
-/**
- * Gera o ranking de competição (1, 1, 3) para todos os consultores (inclusive com 0 vendas) — Item E3 e E6.
- * @param {Array<Object>} vendas Vendas já filtradas no recorte
- * @param {Array<{ id: string, nome: string }>} consultores Lista de todos os consultores
- * @returns {Array<{ posicao: number, consultorId: string, nome: string, vendas: number, percentual: number, modeloTop: string }>}
- */
 export function gerarRanking(vendas, consultores) {
   if (!Array.isArray(consultores) || consultores.length === 0) return [];
   const listaVendas = Array.isArray(vendas) ? vendas.filter(Boolean) : [];
@@ -434,14 +318,12 @@ export function gerarRanking(vendas, consultores) {
       };
     });
 
-  // Ordenação padrão: vendas decrescente, desempate por nome em ordem alfabética crescente
   itens.sort((a, b) => {
     const diff = b.vendas - a.vendas;
     if (diff !== 0) return diff;
     return String(a.nome).localeCompare(String(b.nome), 'pt-BR');
   });
 
-  // Posição em ranking de competição (1, 1, 3)
   itens.forEach((item, index) => {
     if (index === 0) {
       item.posicao = 1;
@@ -455,18 +337,6 @@ export function gerarRanking(vendas, consultores) {
   return itens;
 }
 
-/**
- * Gera a matriz cruzada Consultor x (Modelo | Ano Modelo) com totais por linha, coluna e geral — Item E4 e E6.
- * @param {Array<Object>} vendas Vendas já filtradas no recorte
- * @param {Array<{ id: string, nome: string }>} consultores Lista de consultores
- * @param {'modelo' | 'anoModelo'} [dimensao='modelo'] Dimensão das colunas
- * @returns {{
- *   colunas: Array<string|number>,
- *   linhas: Array<{ consultorId: string, nome: string, valores: Object, celulas: number[], total: number }>,
- *   totaisColuna: Object,
- *   totalGeral: number
- * }}
- */
 export function gerarMatriz(vendas, consultores, dimensao = 'modelo') {
   const listaVendas = Array.isArray(vendas) ? vendas.filter(Boolean) : [];
   const listaConsultores = Array.isArray(consultores) ? consultores.filter((c) => c && c.id) : [];
@@ -525,7 +395,6 @@ export function gerarMatriz(vendas, consultores, dimensao = 'modelo') {
     };
   });
 
-  // Ordena linhas por total decrescente e desempate por nome
   linhas.sort((a, b) => {
     const diff = b.total - a.total;
     if (diff !== 0) return diff;
@@ -538,4 +407,305 @@ export function gerarMatriz(vendas, consultores, dimensao = 'modelo') {
     totaisColuna,
     totalGeral
   };
+}
+
+// ==========================================
+// FUNÇÕES PURAS DE BI / GRÁFICOS (ITEM 2.2)
+// ==========================================
+
+/**
+ * Gera série de categorias para Colunas, Barras, Pizza e Rosca (Item 2.2).
+ * Ordena por quantidade desc (desempate alfabético; anos em ordem crescente quando dimensao = 'anoModelo').
+ */
+export function serieCategorias(vendas, dimensao = 'modelo', consultores = []) {
+  const listaVendas = Array.isArray(vendas) ? vendas.filter(Boolean) : [];
+  if (listaVendas.length === 0) {
+    return { labels: [], valores: [] };
+  }
+
+  const mapaConsultores = new Map();
+  if (Array.isArray(consultores)) {
+    consultores.forEach((c) => {
+      if (c && c.id) mapaConsultores.set(c.id, c.nome);
+    });
+  }
+
+  const contagem = new Map();
+
+  listaVendas.forEach((venda) => {
+    let chave = '';
+    if (dimensao === 'consultor') {
+      chave =
+        mapaConsultores.get(venda.consultorId) ||
+        venda.consultorNome ||
+        venda.consultorId ||
+        'Consultor';
+    } else if (dimensao === 'anoModelo') {
+      if (venda.anoModelo === undefined || venda.anoModelo === null) return;
+      chave = String(venda.anoModelo);
+    } else {
+      if (!venda.modelo) return;
+      chave = String(venda.modelo);
+    }
+
+    contagem.set(chave, (contagem.get(chave) || 0) + 1);
+  });
+
+  const pares = Array.from(contagem.entries()).map(([label, valor]) => ({
+    label: String(label),
+    valor: Number(valor) || 0
+  }));
+
+  if (dimensao === 'anoModelo') {
+    pares.sort((a, b) => Number(a.label) - Number(b.label));
+  } else {
+    pares.sort((a, b) => {
+      const diff = b.valor - a.valor;
+      if (diff !== 0) return diff;
+      return a.label.localeCompare(b.label, 'pt-BR');
+    });
+  }
+
+  return {
+    labels: pares.map((p) => p.label),
+    valores: pares.map((p) => p.valor)
+  };
+}
+
+/**
+ * Agrupa fatias menores em "Outros" quando houver mais de 6 fatias para Pizza/Rosca (Item 2.3).
+ */
+export function agruparFatiasPizza(labels, valores, maxFatias = 6) {
+  if (!Array.isArray(labels) || !Array.isArray(valores) || labels.length <= maxFatias) {
+    return {
+      labels: Array.isArray(labels) ? [...labels] : [],
+      valores: Array.isArray(valores) ? valores.map((v) => Number(v) || 0) : []
+    };
+  }
+
+  const pares = labels.map((label, idx) => ({
+    label: String(label),
+    valor: Number(valores[idx]) || 0
+  }));
+
+  pares.sort((a, b) => {
+    const diff = b.valor - a.valor;
+    if (diff !== 0) return diff;
+    return a.label.localeCompare(b.label, 'pt-BR');
+  });
+
+  const principais = pares.slice(0, maxFatias - 1);
+  const restantes = pares.slice(maxFatias - 1);
+  const somaOutros = restantes.reduce((acc, item) => acc + (Number(item.valor) || 0), 0);
+
+  return {
+    labels: [...principais.map((p) => p.label), 'Outros'],
+    valores: [...principais.map((p) => p.valor), somaOutros]
+  };
+}
+
+/**
+ * Gera série empilhada por consultor reaproveitando gerarMatriz (Item 2.2).
+ */
+export function serieEmpilhada(vendas, consultores, dimensao = 'modelo') {
+  const dimValida = dimensao === 'anoModelo' ? 'anoModelo' : 'modelo';
+  const matriz = gerarMatriz(vendas, consultores, dimValida);
+
+  const labels = matriz.linhas.map((linha) => linha.nome);
+  const datasets = matriz.colunas.map((col) => ({
+    label: String(col),
+    valores: matriz.linhas.map((linha) => Number(linha.valores[col]) || 0)
+  }));
+
+  return { labels, datasets };
+}
+
+/**
+ * Gera série temporal contínua (incluindo zeros) para 'dia' (00h–23h), 'semana' (Seg–Dom) e 'mes' (1..último dia) — Item 2.2.
+ */
+export function serieTemporal(vendas, periodo = 'mes', dataReferencia = new Date()) {
+  const listaVendas = Array.isArray(vendas) ? vendas.filter(Boolean) : [];
+  const ref = new Date(dataReferencia);
+
+  if (periodo === 'dia') {
+    const labels = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, '0')}h`);
+    const valores = new Array(24).fill(0);
+
+    listaVendas.forEach((venda) => {
+      if (!venda.dataVenda) return;
+      const d = new Date(venda.dataVenda);
+      if (isNaN(d.getTime())) return;
+      const hora = d.getHours();
+      if (hora >= 0 && hora < 24) {
+        valores[hora] += 1;
+      }
+    });
+
+    return { labels, valores };
+  }
+
+  if (periodo === 'semana') {
+    const labels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+    const valores = new Array(7).fill(0);
+
+    listaVendas.forEach((venda) => {
+      if (!venda.dataVenda) return;
+      const d = new Date(venda.dataVenda);
+      if (isNaN(d.getTime())) return;
+      const indiceSegADom = (d.getDay() + 6) % 7;
+      if (indiceSegADom >= 0 && indiceSegADom < 7) {
+        valores[indiceSegADom] += 1;
+      }
+    });
+
+    return { labels, valores };
+  }
+
+  const ultimoDia = new Date(ref.getFullYear(), ref.getMonth() + 1, 0).getDate();
+  const labels = Array.from({ length: ultimoDia }, (_, i) => String(i + 1));
+  const valores = new Array(ultimoDia).fill(0);
+
+  listaVendas.forEach((venda) => {
+    if (!venda.dataVenda) return;
+    const d = new Date(venda.dataVenda);
+    if (isNaN(d.getTime())) return;
+    const dia = d.getDate();
+    if (dia >= 1 && dia <= ultimoDia) {
+      valores[dia - 1] += 1;
+    }
+  });
+
+  return { labels, valores };
+}
+
+/**
+ * Gera séries para o gráfico de Linha do BI: linha "Total" + até 5 itens mais vendidos + "Outros" (Item 2.3).
+ */
+export function gerarSeriesLinhaPorDimensao(
+  vendas,
+  dimensao = 'modelo',
+  periodo = 'mes',
+  consultores = [],
+  dataReferencia = new Date()
+) {
+  const baseTotal = serieTemporal(vendas, periodo, dataReferencia);
+  const labels = baseTotal.labels;
+  const datasets = [
+    {
+      label: 'Total',
+      valores: baseTotal.valores,
+      isTotal: true
+    }
+  ];
+
+  const listaVendas = Array.isArray(vendas) ? vendas.filter(Boolean) : [];
+  if (listaVendas.length === 0) {
+    return { labels, datasets };
+  }
+
+  const mapaConsultores = new Map();
+  if (Array.isArray(consultores)) {
+    consultores.forEach((c) => {
+      if (c && c.id) mapaConsultores.set(c.id, c.nome);
+    });
+  }
+
+  function obterChaveVenda(v) {
+    if (dimensao === 'consultor') {
+      return mapaConsultores.get(v.consultorId) || v.consultorId || 'Consultor';
+    }
+    if (dimensao === 'anoModelo') {
+      return String(v.anoModelo ?? '-');
+    }
+    return String(v.modelo ?? '-');
+  }
+
+  const contagem = new Map();
+  listaVendas.forEach((v) => {
+    const ch = obterChaveVenda(v);
+    contagem.set(ch, (contagem.get(ch) || 0) + 1);
+  });
+
+  const ordenados = Array.from(contagem.entries())
+    .map(([chave, qtd]) => ({ chave, qtd }))
+    .sort((a, b) => {
+      const diff = b.qtd - a.qtd;
+      if (diff !== 0) return diff;
+      return String(a.chave).localeCompare(String(b.chave), 'pt-BR');
+    });
+
+  const top5 = ordenados.slice(0, 5).map((i) => i.chave);
+  const temOutros = ordenados.length > 5;
+  const top5Set = new Set(top5);
+
+  top5.forEach((chaveItem) => {
+    const vendasDoItem = listaVendas.filter((v) => obterChaveVenda(v) === chaveItem);
+    const serieItem = serieTemporal(vendasDoItem, periodo, dataReferencia);
+    datasets.push({
+      label: String(chaveItem),
+      valores: serieItem.valores,
+      isTotal: false
+    });
+  });
+
+  if (temOutros) {
+    const vendasOutros = listaVendas.filter((v) => !top5Set.has(obterChaveVenda(v)));
+    const serieOutros = serieTemporal(vendasOutros, periodo, dataReferencia);
+    datasets.push({
+      label: 'Outros',
+      valores: serieOutros.valores,
+      isTotal: false
+    });
+  }
+
+  return { labels, datasets };
+}
+
+/**
+ * Gera os pontos para o gráfico de Dispersão (horário das vendas — Item 2.2):
+ * [{ x: diaDoMes (ou dia da semana no filtro semana), y: hora decimal (ex.: 14.5), consultor, modelo, placa }]
+ */
+export function pontosDispersao(vendas, consultores = [], periodo = 'mes') {
+  const listaVendas = Array.isArray(vendas) ? vendas.filter(Boolean) : [];
+  if (listaVendas.length === 0) return [];
+
+  const mapaConsultores = new Map();
+  if (Array.isArray(consultores)) {
+    consultores.forEach((c) => {
+      if (c && c.id) mapaConsultores.set(c.id, c.nome);
+    });
+  }
+
+  const pontos = [];
+
+  listaVendas.forEach((venda) => {
+    if (!venda.dataVenda) return;
+    const d = new Date(venda.dataVenda);
+    if (isNaN(d.getTime())) return;
+
+    const x =
+      periodo === 'semana' ? ((d.getDay() + 6) % 7) + 1 : d.getDate();
+
+    const y = Number((d.getHours() + d.getMinutes() / 60).toFixed(2));
+    if (isNaN(x) || isNaN(y)) return;
+
+    const nomeConsultor =
+      mapaConsultores.get(venda.consultorId) ||
+      venda.consultor ||
+      venda.consultorNome ||
+      venda.consultorId ||
+      'Consultor';
+
+    pontos.push({
+      x,
+      y,
+      consultor: String(nomeConsultor),
+      modelo: String(venda.modelo || '-'),
+      anoModelo: Number(venda.anoModelo) || 0,
+      placa: formatarPlaca(venda.placa),
+      dataHora: formatarDataHora(venda.dataVenda)
+    });
+  });
+
+  return pontos;
 }

@@ -13,6 +13,14 @@
   --bg-muted: #f3f4f6;
   --bg-input: #ffffff;
 
+  --bg-gradient-accent: rgba(37, 99, 235, 0.05);
+  --bg-gradient-fade: rgba(247, 248, 250, 0);
+  --bg-gradient: radial-gradient(
+    120% 650px at 50% 0%,
+    var(--bg-gradient-accent) 0%,
+    var(--bg-gradient-fade) 100%
+  );
+
   --font-family:
     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --text-main: #111827;
@@ -75,6 +83,7 @@ body {
 }
 
 body {
+  position: relative;
   font-family: var(--font-family);
   background-color: var(--bg-page);
   color: var(--text-main);
@@ -83,6 +92,19 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image: var(--bg-gradient);
+  background-repeat: no-repeat;
+  background-position: top center;
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* ============================================================
@@ -99,6 +121,14 @@ body {
   --bg-card: #121826;
   --bg-muted: #1e293b;
   --bg-input: #0f172a;
+
+  --bg-gradient-accent: rgba(59, 130, 246, 0.07);
+  --bg-gradient-fade: rgba(11, 15, 23, 0);
+  --bg-gradient: radial-gradient(
+    120% 650px at 50% 0%,
+    var(--bg-gradient-accent) 0%,
+    var(--bg-gradient-fade) 100%
+  );
 
   --text-main: #f3f4f6;
   --text-secondary: #9ca3af;

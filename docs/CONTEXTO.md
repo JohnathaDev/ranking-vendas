@@ -15,12 +15,32 @@ SPA estática para registrar vendas de motos por consultor, com ranking geral, p
 
 ```mermaid
 graph TD
-  app[app.js<br/>bootstrap, painel, nova venda] --> auth[auth.js]
+  app[app.js<br/>bootstrap, abas e eventos globais] --> auth[auth.js]
   app --> ranking[ranking.js]
-  app --> charts[charts.js]
+  app --> painel[painel.js]
+  app --> formVenda[formVenda.js]
+  app --> modais[modais.js]
+  app --> sessao[sessao.js]
+  app --> state[state.js]
   app --> storage[storage.js]
   app --> ui[ui.js]
-  app --> utils[utils.js]
+  painel --> state
+  painel --> storage
+  painel --> utils[utils.js]
+  painel --> ui
+  painel --> charts[charts.js]
+  formVenda --> state
+  formVenda --> catalog[catalog.js]
+  formVenda --> utils
+  formVenda --> storage
+  formVenda --> ui
+  formVenda --> auth
+  modais --> state
+  modais --> utils
+  modais --> storage
+  modais --> ui
+  modais --> auth
+  sessao --> storage
   ranking --> charts
   ranking --> storage
   ranking --> utils
@@ -28,7 +48,7 @@ graph TD
   auth --> storage
   auth --> ui
   charts --> utils
-  charts --> catalog[catalog.js]
+  charts --> catalog
   storage --> utils
   storage --> catalog
   utils --> catalog
@@ -39,11 +59,16 @@ graph TD
 | `catalog.js` | Catálogo fixo de modelos e anos e paletas de cores (`getCorConsistente`) | Não |
 | `utils.js` | Funções **puras**: validação (placa, contrato, datas), filtros por período, ranking com empate, matriz e séries para gráficos | Não |
 | `storage.js` | Camada de dados no `localStorage`: CRUD, sessão, login com SHA-256, bloqueio de tentativas, permissões, seed e migração de schema | Não (só `localStorage`/`crypto`) |
+| `state.js` | Estado compartilhado (`appState`) e referências de elementos do DOM (`DOM`) | Sim (leitura de elementos na carga) |
 | `ui.js` | Helpers de UI: toast, erros de campo, controles segmentados, abas acessíveis com hash na URL, `<details>` recolhíveis | Sim |
 | `auth.js` | Modal de login (`<dialog>`), contagem de bloqueio e alternância da UI entre logado e deslogado, com callbacks | Sim |
+| `sessao.js` | Monitoramento proativo da expiração de sessão (timer de 8 h e verificação em `visibilitychange`), com callback para a UI | Sim (`document.visibilityState`) |
 | `charts.js` | Wrapper do Chart.js: instâncias em `Map`, estados vazio e erro de CDN, tabela acessível e exportação em PNG | Sim |
 | `ranking.js` | Aba "Ranking geral": filtros sincronizados com a query string, KPIs, tabela ordenável, matriz, vendas gerais paginadas e BI | Sim |
-| `app.js` | Ponto de entrada (`initApp`): painel do consultor, cadastro e exclusão de venda, reset da demo e roteamento de abas | Sim |
+| `painel.js` | Aba "Painel do consultor": seletor de consultor, filtro de período, KPIs, gráfico individual, tabelas por modelo/ano e histórico | Sim |
+| `formVenda.js` | Aba "Nova venda": limites de data, selects dependentes de modelo/ano, validação dos campos e envio de nova venda | Sim |
+| `modais.js` | Modais `<dialog>` de confirmação de exclusão de venda e de restauração dos dados de demonstração | Sim |
+| `app.js` | Ponto de entrada (`initApp`): bootstrap dos submódulos, roteamento de abas e listeners globais (`hashchange`, `popstate`, `resize`, `storage`) | Sim |
 
 ## Modelo de dados (`localStorage`, prefixo `ranking_motos_`)
 
@@ -110,8 +135,8 @@ Severidade: **A** = bug ou risco funcional, **M** = qualidade ou manutenção, *
 | P4 | M | **PNG exportado com fundo transparente:** não há plugin que pinte o fundo do canvas, então em visualizadores com tema escuro o gráfico fica ilegível. *Provável, precisa ser confirmado no navegador.* | `charts.js:187` |
 | P5 | M | **Código morto:** `addConsultor` não é usada em lugar nenhum. | `storage.js:189` |
 | P6 | M | **Handler de exclusão registrado duas vezes** (`click` do botão e `submit` do form). Hoje funciona porque o `preventDefault` do clique cancela o submit, mas a ligação é frágil. | `app.js:969-974` |
-| P7 | M | **Arquivos grandes:** `app.js` (≈1k linhas) mistura bootstrap, painel, formulário e modais; `ranking.js` (≈930) e `charts.js` (≈850) também são grandes. | — |
-| P8 | M | **Efeito colateral em leitura:** `getSessaoAtiva()` chama `logout()` (escreve no storage), o que pode disparar eventos `storage` em outras abas durante um render. `getEstadoBloqueioLogin()` faz o mesmo ao limpar as tentativas. | `storage.js:343-359`, `storage.js:267` |
+| P7 | M | ~~**Arquivos grandes:** `app.js` (≈1k linhas) mistura bootstrap, painel, formulário e modais; `ranking.js` (≈930) e `charts.js` (≈850) também são grandes.~~ **Resolvido para `app.js` na tarefa 7:** dividido em `state.js`, `sessao.js`, `formVenda.js`, `modais.js`, `painel.js` e `app.js` (≈206 linhas). | `js/` |
+| P8 | M | ~~**Efeito colateral em leitura:** `getSessaoAtiva()` chama `logout()` (escreve no storage), o que pode disparar eventos `storage` em outras abas durante um render. `getEstadoBloqueioLogin()` faz o mesmo ao limpar as tentativas.~~ **Resolvido na tarefa 7:** leituras puras e funções explícitas `limparSessaoInvalida()` e `limparTentativasVencidas()`. | `storage.js` |
 | P9 | B | **Chart.js por CDN sem `integrity` (SRI)** e sem fallback local. Há uma mensagem de erro, mas sem gráfico. | `index.html:877` |
 | P10 | B | **Dispersão no filtro "dia"**: o eixo X usa o dia do mês, então todos os pontos caem numa única coluna. | `utils.js:686` |
 | P12 | B | `combinarDataComHoraAtual` lança `TypeError` se `dataYMD` não for string; as demais funções de `utils.js` tratam tipos inválidos sem lançar erro. Hoje só é chamada com valor já validado. | `utils.js:90` |

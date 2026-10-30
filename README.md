@@ -26,18 +26,33 @@ Usuário `JoaoVitor` · senha `123456`
 ## Estrutura
 
 ```text
-├── index.html        # Página única com as abas Ranking geral, Painel e Nova venda
+├── .github/workflows/ci.yml  # Pipeline de CI (lint, format:check e testes)
+├── index.html                # Página única com as abas Ranking geral, Painel e Nova venda
+├── package.json              # Scripts e dependências de desenvolvimento (ESLint e Prettier)
+├── eslint.config.js          # Configuração do ESLint (flat config)
+├── .prettierrc.json          # Configuração do Prettier
 ├── css/
-│   └── style.css     # Estilos e responsividade
-└── js/
-    ├── app.js        # Inicialização, painel do consultor e cadastro de vendas
-    ├── auth.js       # Login e logout
-    ├── catalog.js    # Modelos, anos e cores dos gráficos
-    ├── charts.js     # Gráficos (Chart.js)
-    ├── ranking.js    # Aba Ranking geral
-    ├── storage.js    # Dados, sessão e regras de permissão
-    ├── ui.js         # Componentes de interface
-    └── utils.js      # Validações, filtros e cálculos
+│   └── style.css             # Estilos e responsividade
+├── docs/
+│   └── CONTEXTO.md           # Documentação de arquitetura, módulos e convenções
+├── js/
+│   ├── app.js                # Bootstrap, roteamento de abas e eventos globais
+│   ├── auth.js               # Login, logout e contagem de bloqueio
+│   ├── catalog.js            # Modelos, anos e cores dos gráficos
+│   ├── charts.js             # Gráficos (Chart.js) e exportação em PNG
+│   ├── formVenda.js          # Formulário e validação da aba Nova venda
+│   ├── modais.js             # Modais de exclusão de venda e restauração da demo
+│   ├── painel.js             # Aba Painel do consultor (KPIs, gráfico e tabelas)
+│   ├── ranking.js            # Aba Ranking geral, matriz e gráficos de BI
+│   ├── sessao.js             # Monitoramento proativo de expiração da sessão
+│   ├── state.js              # Estado compartilhado (appState) e referências DOM
+│   ├── storage.js            # Dados no localStorage, sessão e regras de permissão
+│   ├── ui.js                 # Componentes de interface (toast, abas, controles)
+│   └── utils.js              # Funções puras de validação, filtros e cálculos
+└── tests/
+    ├── helpers/              # Mocks utilitários para ambiente Node (localStorage)
+    ├── storage.test.js       # Testes de autenticação, sessão, vendas, seed e migração
+    └── utils.test.js         # Testes de validação, datas, filtros, ranking e séries BI
 ```
 
 ## Desenvolvimento

@@ -111,11 +111,14 @@ Severidade: **A** = bug ou risco funcional, **M** = qualidade ou manutenção, *
 | P5 | M | **Código morto:** `addConsultor` não é usada em lugar nenhum. | `storage.js:189` |
 | P6 | M | **Handler de exclusão registrado duas vezes** (`click` do botão e `submit` do form). Hoje funciona porque o `preventDefault` do clique cancela o submit, mas a ligação é frágil. | `app.js:969-974` |
 | P7 | M | **Arquivos grandes:** `app.js` (≈1k linhas) mistura bootstrap, painel, formulário e modais; `ranking.js` (≈930) e `charts.js` (≈850) também são grandes. | — |
-| P8 | M | **Efeito colateral em leitura:** `getSessaoAtiva()` chama `logout()` (escreve no storage), o que pode disparar eventos `storage` em outras abas durante um render. | `storage.js:343-359` |
+| P8 | M | **Efeito colateral em leitura:** `getSessaoAtiva()` chama `logout()` (escreve no storage), o que pode disparar eventos `storage` em outras abas durante um render. `getEstadoBloqueioLogin()` faz o mesmo ao limpar as tentativas. | `storage.js:343-359`, `storage.js:267` |
 | P9 | B | **Chart.js por CDN sem `integrity` (SRI)** e sem fallback local. Há uma mensagem de erro, mas sem gráfico. | `index.html:877` |
 | P10 | B | **Dispersão no filtro "dia"**: o eixo X usa o dia do mês, então todos os pontos caem numa única coluna. | `utils.js:686` |
 | P12 | B | `combinarDataComHoraAtual` lança `TypeError` se `dataYMD` não for string; as demais funções de `utils.js` tratam tipos inválidos sem lançar erro. Hoje só é chamada com valor já validado. | `utils.js:90` |
 | P13 | B | `formatarPlaca` formata qualquer texto de 7 caracteres alfanuméricos (por exemplo `1234567` → `123-4567`) sem verificar se é placa válida. As placas gravadas já são validadas, então o impacto é baixo. | `utils.js:27` |
+| P14 | B | `addVenda` grava `numeroContrato` com as letras como foram digitadas (`trim()`), embora a unicidade seja verificada em maiúsculas. Assim, a mesma lista pode ter `ct123` e `CT124`. | `storage.js:509` |
+| P15 | B | A migração v2 só gera vendas de demonstração para João Vitor se o consultor foi criado agora; se ele já existia sem vendas, fica com 0. | `storage.js:829` |
+| P16 | B | `resetarDadosDemonstracao` sempre recria a sessão como JoaoVitor, mesmo que outro usuário a tenha chamado (hoje só existe esse usuário), e não limpa as tentativas de login. | `storage.js:882` |
 | P11 | B | **Login é só demonstrativo**: hash e bloqueio no cliente podem ser contornados. Já está documentado; só seria resolvido com um backend. | `storage.js` |
 
 ## Plano de próximos passos (priorizado)
@@ -124,10 +127,10 @@ Severidade: **A** = bug ou risco funcional, **M** = qualidade ou manutenção, *
 |---|---|---|---|
 | 0 | ✓ Feito: pasta ligada a `github.com/johnathadev/ranking-vendas` (`main` em `1a74d9a`) | Pré-requisito do fluxo | — |
 | 1 | ✓ Feito (branch `feat/testes-utils`, 27 testes): base de testes e cobertura de `utils.js` | P2 | 0 |
-| 2 | Testes de `storage.js`: login, bloqueio, sessão, permissões de `addVenda`/`deleteVenda`, seed e migração | P2 | 1 |
-| 3 | Teste que garante a regra decidida: a placa pode se repetir, o contrato não | P1 | 2 |
+| 2 | ✓ Feito (branch `feat/testes-storage`, 41 testes no total): login, bloqueio, sessão, permissões, seed, migração e reset | P2 | 1 |
+| 3 | ✓ Feito dentro da tarefa 2: teste da placa repetida aceita e do contrato duplicado rejeitado | P1 | 2 |
 | 4 | Lint e formatação: ESLint e Prettier (**explicar ao dono antes de executar**) | Padronização | 1 |
-| 5 | Pequenas correções: expiração de sessão refletida na UI, fundo branco no PNG, remover `addConsultor` e `isPlacaExistente`, unificar o handler de exclusão, tornar `combinarDataComHoraAtual` e `formatarPlaca` defensivas | P3–P6, P12, P13 | 2 |
+| 5 | Pequenas correções: expiração de sessão refletida na UI, fundo branco no PNG, remover `addConsultor` e `isPlacaExistente`, unificar o handler de exclusão, tornar `combinarDataComHoraAtual` e `formatarPlaca` defensivas, gravar o contrato normalizado | P3–P6, P12–P14 | 2 |
 | 6 | CI no GitHub Actions rodando `test` e `lint` em cada PR | Garantia contínua | 0, 1, 4 |
 | 7 | Refatoração gradual de `app.js` (painel, formulário e modais em módulos) | P7, P8 | 2, 6 |
 | 8 | Melhorias: SRI e fallback do Chart.js, eixo da dispersão no filtro "dia" | P9, P10 | — |

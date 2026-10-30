@@ -243,7 +243,10 @@ describe('Filtros por período e filtros combinados de vendas', () => {
 
   it('filtra vendas do dia na referência informada', () => {
     const doDia = filtrarPorPeriodo(vendasBase, 'dia', refQuarta);
-    assert.deepEqual(doDia.map((v) => v.id), ['v-quarta-manha']);
+    assert.deepEqual(
+      doDia.map((v) => v.id),
+      ['v-quarta-manha']
+    );
   });
 
   it('filtra vendas da semana (segunda a domingo), inclusive quando a referência é um domingo', () => {
@@ -251,21 +254,30 @@ describe('Filtros por período e filtros combinados de vendas', () => {
     const daSemanaQuarta = filtrarPorPeriodo(vendasBase, 'semana', refQuarta);
     const daSemanaDomingo = filtrarPorPeriodo(vendasBase, 'semana', refDomingo);
 
-    assert.deepEqual(daSemanaQuarta.map((v) => v.id), idsEsperadosSemana);
-    assert.deepEqual(daSemanaDomingo.map((v) => v.id), idsEsperadosSemana);
+    assert.deepEqual(
+      daSemanaQuarta.map((v) => v.id),
+      idsEsperadosSemana
+    );
+    assert.deepEqual(
+      daSemanaDomingo.map((v) => v.id),
+      idsEsperadosSemana
+    );
   });
 
   it('filtra vendas do mês respeitando virada de mês (1º até último dia)', () => {
     const doMes = filtrarPorPeriodo(vendasBase, 'mes', refQuarta);
-    assert.deepEqual(doMes.map((v) => v.id), [
-      'v-inicio-mes',
-      'v-dom-ant',
-      'v-segunda',
-      'v-quarta-manha',
-      'v-domingo',
-      'v-prox-seg',
-      'v-fim-mes'
-    ]);
+    assert.deepEqual(
+      doMes.map((v) => v.id),
+      [
+        'v-inicio-mes',
+        'v-dom-ant',
+        'v-segunda',
+        'v-quarta-manha',
+        'v-domingo',
+        'v-prox-seg',
+        'v-fim-mes'
+      ]
+    );
   });
 
   it('retorna array vazio para entrada não-array e ignora itens inválidos', () => {
@@ -273,8 +285,17 @@ describe('Filtros por período e filtros combinados de vendas', () => {
     assert.deepEqual(filtrarPorPeriodo('invalido', 'mes', refQuarta), []);
     assert.deepEqual(filtrarVendas(null, { periodo: 'mes' }, refQuarta), []);
 
-    const comInvalidos = [null, undefined, { id: 'sem-data' }, { id: 'data-ruim', dataVenda: 'abc' }, vendasBase[4]];
-    assert.deepEqual(filtrarPorPeriodo(comInvalidos, 'dia', refQuarta).map((v) => v.id), ['v-quarta-manha']);
+    const comInvalidos = [
+      null,
+      undefined,
+      { id: 'sem-data' },
+      { id: 'data-ruim', dataVenda: 'abc' },
+      vendasBase[4]
+    ];
+    assert.deepEqual(
+      filtrarPorPeriodo(comInvalidos, 'dia', refQuarta).map((v) => v.id),
+      ['v-quarta-manha']
+    );
   });
 
   it('filtrarVendas combina filtros de período, modelo, ano e consultorId', () => {
@@ -288,7 +309,10 @@ describe('Filtros por período e filtros combinados de vendas', () => {
       },
       refQuarta
     );
-    assert.deepEqual(filtradas.map((v) => v.id), ['v-inicio-mes']);
+    assert.deepEqual(
+      filtradas.map((v) => v.id),
+      ['v-inicio-mes']
+    );
 
     const todosMes = filtrarVendas(
       vendasBase,

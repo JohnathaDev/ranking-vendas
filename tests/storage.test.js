@@ -36,10 +36,7 @@ describe('Hash SHA-256, login, bloqueio de tentativas e sessão', () => {
 
   it('gerarHashSHA256 retorna o digest hexadecimal esperado para "123456"', async () => {
     const hash = await gerarHashSHA256('123456');
-    assert.equal(
-      hash,
-      '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'
-    );
+    assert.equal(hash, '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92');
   });
 
   it('login autentica de forma case-insensitive no usuário, cria sessão e define consultor ativo', async () => {
@@ -297,17 +294,10 @@ describe('Operações e permissões de addVenda e deleteVenda', () => {
     assert.throws(() => deleteVenda(vendasIniciais[0].id), /Acesso negado/);
 
     const usuario = await login('JoaoVitor', '123456');
-    const vendaOutroConsultor = vendasIniciais.find(
-      (v) => v.consultorId !== usuario.consultorId
-    );
-    const vendaPropria = vendasIniciais.find(
-      (v) => v.consultorId === usuario.consultorId
-    );
+    const vendaOutroConsultor = vendasIniciais.find((v) => v.consultorId !== usuario.consultorId);
+    const vendaPropria = vendasIniciais.find((v) => v.consultorId === usuario.consultorId);
 
-    assert.throws(
-      () => deleteVenda(vendaOutroConsultor.id),
-      /Permissão negada/
-    );
+    assert.throws(() => deleteVenda(vendaOutroConsultor.id), /Permissão negada/);
 
     assert.equal(deleteVenda('id-que-nao-existe'), false);
 

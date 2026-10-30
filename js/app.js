@@ -49,15 +49,8 @@ import {
   fecharModalLogin,
   verificarEIniciarContagemBloqueio
 } from './auth.js';
-import {
-  initRanking,
-  renderRankingGeral,
-  sincronizarRankingComURL
-} from './ranking.js';
-import {
-  renderGraficoConsultorPainel,
-  exportarGraficoPNG
-} from './charts.js';
+import { initRanking, renderRankingGeral, sincronizarRankingComURL } from './ranking.js';
+import { renderGraficoConsultorPainel, exportarGraficoPNG } from './charts.js';
 
 const appState = {
   abaAtiva: 'ranking',
@@ -459,8 +452,7 @@ function carregarListaConsultores(preferenciaConsultorId = null) {
     if (!c) return;
     const opt = document.createElement('option');
     opt.value = c.id;
-    opt.textContent =
-      sessao && sessao.consultorId === c.id ? `${c.nome} (Você)` : c.nome;
+    opt.textContent = sessao && sessao.consultorId === c.id ? `${c.nome} (Você)` : c.nome;
     if (c.id === salvoId) {
       opt.selected = true;
       idEscolhido = c.id;
@@ -486,9 +478,7 @@ function atualizarPainelConsultor() {
     carregarListaConsultores(idAtual);
   }
 
-  const consultorSelecionado = consultores.find(
-    (c) => c && c.id === appState.consultorAtivoId
-  );
+  const consultorSelecionado = consultores.find((c) => c && c.id === appState.consultorAtivoId);
 
   if (!consultorSelecionado) {
     if (DOM.labelNomeConsultor) {
@@ -498,8 +488,7 @@ function atualizarPainelConsultor() {
     return;
   }
 
-  const ehProprioUsuario =
-    Boolean(sessao) && sessao.consultorId === consultorSelecionado.id;
+  const ehProprioUsuario = Boolean(sessao) && sessao.consultorId === consultorSelecionado.id;
 
   if (DOM.labelNomeConsultor) {
     DOM.labelNomeConsultor.textContent = `Painel de Vendas: ${consultorSelecionado.nome}`;
@@ -602,23 +591,11 @@ function renderGraficoDoConsultorNoPainel(
 function renderKPIsPainel(vendasPeriodo) {
   DOM.kpiTotalVendas.textContent = String(vendasPeriodo.length);
 
-  const liderModelo = calcularLiderComEmpate(
-    vendasPeriodo,
-    'modelo',
-    null,
-    'unidade',
-    'unidades'
-  );
+  const liderModelo = calcularLiderComEmpate(vendasPeriodo, 'modelo', null, 'unidade', 'unidades');
   DOM.kpiModeloMaisVendido.textContent = liderModelo.valorPrincipal;
   DOM.kpiModeloDetalhe.textContent = liderModelo.detalhe;
 
-  const liderAno = calcularLiderComEmpate(
-    vendasPeriodo,
-    'anoModelo',
-    null,
-    'unidade',
-    'unidades'
-  );
+  const liderAno = calcularLiderComEmpate(vendasPeriodo, 'anoModelo', null, 'unidade', 'unidades');
   DOM.kpiAnoMaisVendido.textContent = liderAno.valorPrincipal;
   DOM.kpiAnoDetalhe.textContent = liderAno.detalhe;
 }
@@ -677,9 +654,7 @@ function renderTabelaAnosPainel(vendasPeriodo = getVendasDoPeriodoPainel()) {
 
   agrupado.sort((a, b) => {
     const diffQtd =
-      appState.sortAnoOrdem === 'desc'
-        ? b.quantidade - a.quantidade
-        : a.quantidade - b.quantidade;
+      appState.sortAnoOrdem === 'desc' ? b.quantidade - a.quantidade : a.quantidade - b.quantidade;
     if (diffQtd !== 0) return diffQtd;
     return Number(b.chave) - Number(a.chave);
   });
@@ -941,9 +916,7 @@ function setupEventListeners() {
   if (DOM.selectPainelGraficoTipo) {
     DOM.selectPainelGraficoTipo.addEventListener('change', (e) => {
       const val = e.target.value;
-      appState.tipoGraficoPainel = ['colunas', 'pizza', 'linha'].includes(val)
-        ? val
-        : 'colunas';
+      appState.tipoGraficoPainel = ['colunas', 'pizza', 'linha'].includes(val) ? val : 'colunas';
       atualizarPainelConsultor();
     });
   }

@@ -5,12 +5,7 @@
  * cabeçalho logado/deslogado (Item D1) e callbacks de transição após login/logout (Item D4 / 1.2).
  */
 
-import {
-  login,
-  logout,
-  getSessaoAtiva,
-  getEstadoBloqueioLogin
-} from './storage.js';
+import { login, logout, getSessaoAtiva, getEstadoBloqueioLogin } from './storage.js';
 import { showToast, exibirErroCampo, limparErroCampo } from './ui.js';
 
 let intervaloContagemBloqueio = null;
@@ -49,10 +44,7 @@ export function initAuth(handlers = {}) {
       const estaOculta = inputLoginSenha.type === 'password';
       inputLoginSenha.type = estaOculta ? 'text' : 'password';
       btnToggleSenha.setAttribute('aria-pressed', estaOculta ? 'true' : 'false');
-      btnToggleSenha.setAttribute(
-        'aria-label',
-        estaOculta ? 'Ocultar senha' : 'Mostrar senha'
-      );
+      btnToggleSenha.setAttribute('aria-label', estaOculta ? 'Ocultar senha' : 'Mostrar senha');
       btnToggleSenha.textContent = estaOculta ? '🙈 Ocultar' : '👁️ Mostrar';
       inputLoginSenha.focus();
     });

@@ -75,11 +75,7 @@ export function validarDataInput(dataYMD, dataReferencia = new Date()) {
 
   const [ano, mes, dia] = limpo.split('-').map(Number);
   const data = new Date(ano, mes - 1, dia);
-  if (
-    data.getFullYear() !== ano ||
-    data.getMonth() !== mes - 1 ||
-    data.getDate() !== dia
-  ) {
+  if (data.getFullYear() !== ano || data.getMonth() !== mes - 1 || data.getDate() !== dia) {
     return false;
   }
 
@@ -313,8 +309,7 @@ export function gerarRanking(vendas, consultores) {
     .map((consultor) => {
       const vendasConsultor = listaVendas.filter((v) => v.consultorId === consultor.id);
       const qtd = vendasConsultor.length;
-      const percentual =
-        totalGeral > 0 ? Number(((qtd / totalGeral) * 100).toFixed(1)) : 0;
+      const percentual = totalGeral > 0 ? Number(((qtd / totalGeral) * 100).toFixed(1)) : 0;
 
       let modeloTop = '-';
       if (qtd > 0) {
@@ -697,8 +692,7 @@ export function pontosDispersao(vendas, consultores = [], periodo = 'mes') {
     const d = new Date(venda.dataVenda);
     if (isNaN(d.getTime())) return;
 
-    const x =
-      periodo === 'semana' ? ((d.getDay() + 6) % 7) + 1 : d.getDate();
+    const x = periodo === 'semana' ? ((d.getDay() + 6) % 7) + 1 : d.getDate();
 
     const y = Number((d.getHours() + d.getMinutes() / 60).toFixed(2));
     if (isNaN(x) || isNaN(y)) return;

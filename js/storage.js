@@ -91,7 +91,11 @@ function setItem(key, value) {
  */
 export async function gerarHashSHA256(texto) {
   const str = String(texto ?? '');
-  if (typeof crypto !== 'undefined' && crypto.subtle && typeof crypto.subtle.digest === 'function') {
+  if (
+    typeof crypto !== 'undefined' &&
+    crypto.subtle &&
+    typeof crypto.subtle.digest === 'function'
+  ) {
     const encoder = new TextEncoder();
     const dados = encoder.encode(str);
     const hashBuffer = await crypto.subtle.digest('SHA-256', dados);
@@ -136,7 +140,7 @@ function sha256Fallback(ascii) {
   words[words.length - 2] = Math.floor(asciiBitLength / maxWord);
   words[words.length - 1] = asciiBitLength;
 
-  for (let j = 0; j < words.length; ) {
+  for (let j = 0; j < words.length;) {
     const w = words.slice(j, (j += 16));
     const oldHash = hash.slice(0);
     for (let i = 0; i < 64; i++) {
@@ -306,9 +310,7 @@ export function obterMsAteExpirarSessao(agora = Date.now()) {
   }
 
   const expiraEmMs =
-    typeof sessao.expiraEm === 'number'
-      ? sessao.expiraEm
-      : new Date(sessao.expiraEm).getTime();
+    typeof sessao.expiraEm === 'number' ? sessao.expiraEm : new Date(sessao.expiraEm).getTime();
 
   if (isNaN(expiraEmMs)) {
     return null;
@@ -330,9 +332,7 @@ export function getSessaoAtiva() {
 
   const agora = Date.now();
   const expiraEmMs =
-    typeof sessao.expiraEm === 'number'
-      ? sessao.expiraEm
-      : new Date(sessao.expiraEm).getTime();
+    typeof sessao.expiraEm === 'number' ? sessao.expiraEm : new Date(sessao.expiraEm).getTime();
 
   if (isNaN(expiraEmMs) || agora >= expiraEmMs) {
     logout();
@@ -378,7 +378,8 @@ export async function login(usuarioInput, senhaInput) {
     throw erroBloqueio;
   }
 
-  const usuarioNormalizado = typeof usuarioInput === 'string' ? usuarioInput.trim().toLowerCase() : '';
+  const usuarioNormalizado =
+    typeof usuarioInput === 'string' ? usuarioInput.trim().toLowerCase() : '';
   const senhaBruta = typeof senhaInput === 'string' ? senhaInput : '';
 
   if (!usuarioNormalizado || !senhaBruta) {
@@ -484,7 +485,9 @@ export function addVenda(dadosVenda) {
   }
 
   if (!placa || typeof placa !== 'string' || !validarPlaca(placa)) {
-    throw new Error('Placa inválida. Utilize o formato Mercosul (ABC1D23) ou antigo (ABC1234/ABC-1234).');
+    throw new Error(
+      'Placa inválida. Utilize o formato Mercosul (ABC1D23) ou antigo (ABC1234/ABC-1234).'
+    );
   }
   const placaNormalizada = normalizarPlaca(placa);
 
@@ -613,15 +616,7 @@ export function obterLimitesTemporaisSeed(dataRef = new Date()) {
     agora = new Date(agora.getTime() - 1000);
   }
 
-  const inicioHoje = new Date(
-    agora.getFullYear(),
-    agora.getMonth(),
-    agora.getDate(),
-    0,
-    0,
-    0,
-    0
-  );
+  const inicioHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), 0, 0, 0, 0);
 
   const diaSemana = agora.getDay();
   const diffSegunda = diaSemana === 0 ? -6 : 1 - diaSemana;
@@ -652,7 +647,10 @@ function obterMaiorSequenciaContrato(vendas) {
 
   vendas.forEach((v) => {
     if (!v || typeof v.numeroContrato !== 'string') return;
-    const match = v.numeroContrato.trim().toUpperCase().match(/^CT(\d+)$/);
+    const match = v.numeroContrato
+      .trim()
+      .toUpperCase()
+      .match(/^CT(\d+)$/);
     if (match) {
       const num = Number(match[1]);
       if (!isNaN(num) && num > maxSeq) {
@@ -867,7 +865,9 @@ export function inicializarSeedSeNecessario(dataRef = new Date()) {
 export function resetarDadosDemonstracao(dataRef = new Date()) {
   const sessaoAntes = getSessaoAtiva();
   if (!sessaoAntes) {
-    throw new Error('Acesso negado: apenas usuários autenticados podem restaurar os dados de demonstração.');
+    throw new Error(
+      'Acesso negado: apenas usuários autenticados podem restaurar os dados de demonstração.'
+    );
   }
 
   localStorage.removeItem(STORAGE_KEYS.CONSULTORES);

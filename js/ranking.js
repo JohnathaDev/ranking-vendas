@@ -6,11 +6,7 @@
  */
 
 import { getModelos, getAnosPorModelo, getTodosAnos } from './catalog.js';
-import {
-  getConsultores,
-  getVendas,
-  getSessaoAtiva
-} from './storage.js';
+import { getConsultores, getVendas, getSessaoAtiva } from './storage.js';
 import {
   filtrarVendas,
   gerarRanking,
@@ -19,24 +15,11 @@ import {
   formatarDataHora,
   formatarPlaca
 } from './utils.js';
-import {
-  atualizarBotoesSegmentados,
-  configurarControleSegmentado,
-  showToast
-} from './ui.js';
-import {
-  renderGraficoRankingBI,
-  exportarGraficoPNG
-} from './charts.js';
+import { atualizarBotoesSegmentados, configurarControleSegmentado, showToast } from './ui.js';
+import { renderGraficoRankingBI, exportarGraficoPNG } from './charts.js';
 
 const PERIODOS_VALIDOS = ['dia', 'semana', 'mes'];
-export const TIPOS_GRAFICO_BI = [
-  'colunas',
-  'pizza',
-  'empilhadas',
-  'linha',
-  'dispersao'
-];
+export const TIPOS_GRAFICO_BI = ['colunas', 'pizza', 'empilhadas', 'linha', 'dispersao'];
 export const DIMENSOES_BI = ['consultor', 'modelo', 'anoModelo'];
 
 function obterPassoPaginacaoVendasGerais() {
@@ -138,7 +121,8 @@ function aplicarRegrasCompatibilidadeBI() {
         ? 'Empilhado por modelo (eixo X exibe os consultores).'
         : 'Eixo X fixo em consultores; escolha a dimensão das pilhas.';
     } else if (rankingState.graficoBI === 'linha') {
-      helperDim.textContent = 'Exibe linha Total + até 5 maiores itens da dimensão (restante em Outros).';
+      helperDim.textContent =
+        'Exibe linha Total + até 5 maiores itens da dimensão (restante em Outros).';
     } else if (rankingState.graficoBI === 'dispersao') {
       helperDim.textContent = 'Cor de cada venda (ponto) agrupada pela dimensão escolhida.';
     } else {
@@ -571,23 +555,11 @@ function renderKPIsRanking(vendasRecorte, consultores) {
   if (elLider) elLider.textContent = liderConsultor.valorPrincipal;
   if (elLiderDetalhe) elLiderDetalhe.textContent = liderConsultor.detalhe;
 
-  const liderModelo = calcularLiderComEmpate(
-    vendasRecorte,
-    'modelo',
-    null,
-    'unidade',
-    'unidades'
-  );
+  const liderModelo = calcularLiderComEmpate(vendasRecorte, 'modelo', null, 'unidade', 'unidades');
   if (elModelo) elModelo.textContent = liderModelo.valorPrincipal;
   if (elModeloDetalhe) elModeloDetalhe.textContent = liderModelo.detalhe;
 
-  const liderAno = calcularLiderComEmpate(
-    vendasRecorte,
-    'anoModelo',
-    null,
-    'unidade',
-    'unidades'
-  );
+  const liderAno = calcularLiderComEmpate(vendasRecorte, 'anoModelo', null, 'unidade', 'unidades');
   if (elAno) elAno.textContent = liderAno.valorPrincipal;
   if (elAnoDetalhe) elAnoDetalhe.textContent = liderAno.detalhe;
 }
@@ -642,8 +614,7 @@ function renderTabelaRankingConsultores(vendasRecorte, consultores) {
       return b.vendas - a.vendas;
     }
 
-    const diff =
-      rankingState.sortDirecao === 'desc' ? b.vendas - a.vendas : a.vendas - b.vendas;
+    const diff = rankingState.sortDirecao === 'desc' ? b.vendas - a.vendas : a.vendas - b.vendas;
     if (diff !== 0) return diff;
     return String(a.nome).localeCompare(String(b.nome), 'pt-BR');
   });

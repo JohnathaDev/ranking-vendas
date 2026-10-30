@@ -19,8 +19,7 @@ import {
 
 const instanciasGraficos = new Map();
 
-export const MENSAGEM_ERRO_CDN =
-  'Não foi possível carregar os gráficos. Verifique sua conexão.';
+export const MENSAGEM_ERRO_CDN = 'Não foi possível carregar os gráficos. Verifique sua conexão.';
 export const MENSAGEM_ESTADO_VAZIO = 'Sem vendas para os filtros selecionados';
 
 function isChartDisponivel() {
@@ -154,13 +153,7 @@ function gerarResumoAriaCategorias(nomeTipo, labels, valores) {
 }
 
 function alternarVisibilidadeElementos(els, modo) {
-  const {
-    containerCanvas,
-    boxVazio,
-    boxErroCDN,
-    detailsTabela,
-    btnDownload
-  } = els;
+  const { containerCanvas, boxVazio, boxErroCDN, detailsTabela, btnDownload } = els;
 
   if (modo === 'vazio') {
     if (containerCanvas) containerCanvas.classList.add('hidden');
@@ -260,18 +253,12 @@ export function renderGraficoRankingBI(params) {
   let linhasTabela = [];
 
   const labelDimensao =
-    dimensao === 'consultor'
-      ? 'Consultor'
-      : dimensao === 'anoModelo'
-      ? 'Ano Modelo'
-      : 'Modelo';
+    dimensao === 'consultor' ? 'Consultor' : dimensao === 'anoModelo' ? 'Ano Modelo' : 'Modelo';
 
   if (tipo === 'colunas' || tipo === 'pizza') {
     const base = serieCategorias(listaVendas, dimensao, consultores);
     const ehCircular = tipo === 'pizza';
-    const serieFinal = ehCircular
-      ? agruparFatiasPizza(base.labels, base.valores, 6)
-      : base;
+    const serieFinal = ehCircular ? agruparFatiasPizza(base.labels, base.valores, 6) : base;
 
     const coresFatias = serieFinal.labels.map((lbl) => getCorConsistente(dimensao, lbl));
 
@@ -425,12 +412,7 @@ export function renderGraficoRankingBI(params) {
       }
     };
   } else if (tipo === 'linha') {
-    const seriesLinha = gerarSeriesLinhaPorDimensao(
-      listaVendas,
-      dimensao,
-      periodo,
-      consultores
-    );
+    const seriesLinha = gerarSeriesLinhaPorDimensao(listaVendas, dimensao, periodo, consultores);
 
     cabecalhosTabela = ['Período', ...seriesLinha.datasets.map((d) => d.label)];
     linhasTabela = seriesLinha.labels.map((rotuloTempo, idxTempo) => [
@@ -445,9 +427,7 @@ export function renderGraficoRankingBI(params) {
       data: {
         labels: seriesLinha.labels,
         datasets: seriesLinha.datasets.map((ds) => {
-          const cor = ds.isTotal
-            ? '#0f172a'
-            : getCorConsistente(dimensao, ds.label);
+          const cor = ds.isTotal ? '#0f172a' : getCorConsistente(dimensao, ds.label);
           return {
             label: ds.label,
             data: ds.valores,
@@ -504,8 +484,8 @@ export function renderGraficoRankingBI(params) {
         dimensao === 'consultor'
           ? pt.consultor
           : dimensao === 'anoModelo'
-          ? String(pt.anoModelo)
-          : pt.modelo;
+            ? String(pt.anoModelo)
+            : pt.modelo;
       if (!grupos.has(chaveCor)) {
         grupos.set(chaveCor, []);
       }
@@ -540,7 +520,11 @@ export function renderGraficoRankingBI(params) {
             position: 'bottom',
             min: 0,
             max: 24,
-            title: { display: true, text: 'Horário da Venda (00h–24h)', color: coresTema.textSecondary },
+            title: {
+              display: true,
+              text: 'Horário da Venda (00h–24h)',
+              color: coresTema.textSecondary
+            },
             ticks: { color: coresTema.textSecondary, stepSize: 2, callback: formatarHoraTick },
             grid: { color: coresTema.borderColor }
           },
@@ -771,9 +755,7 @@ export function renderGraficoConsultorPainel(params) {
   } else {
     const base = serieCategorias(listaVendas, dimValida);
     const ehCircular = tipo === 'pizza';
-    const serieFinal = ehCircular
-      ? agruparFatiasPizza(base.labels, base.valores, 6)
-      : base;
+    const serieFinal = ehCircular ? agruparFatiasPizza(base.labels, base.valores, 6) : base;
 
     const cores = serieFinal.labels.map((lbl) => getCorConsistente(dimValida, lbl));
 

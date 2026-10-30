@@ -1,446 +1,176 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MotoRanking | Ranking Geral, BI e Gestão de Vendas</title>
-  <meta name="description" content="Sistema de ranking geral, BI analítico, matriz e gestão de vendas para consultores de concessionária de motos.">
-  <link rel="stylesheet" href="./css/style.css">
-</head>
-<body>
-
-  <!-- CABEÇALHO PRINCIPAL & NAVEGAÇÃO POR ABAS (ITEM D1) -->
-  <header class="app-header">
-    <div class="header-container">
-      <div class="brand-wrapper">
-        <div class="brand-icon" aria-hidden="true">🏍️</div>
-        <div class="brand-text">
-          <h1>MotoRanking <span class="brand-badge">Etapa 2 · BI</span></h1>
-          <p class="brand-subtitle">Ranking Geral, BI &amp; Gestão de Vendas da Concessionária</p>
-        </div>
-      </div>
-
-      <div class="header-actions">
-        <div id="authDeslogadoBox" class="auth-status-box">
-          <span class="visitor-pill">👁️ Visitante</span>
-          <button type="button" id="btnAbrirLogin" class="btn-primary btn-sm">
-            <span aria-hidden="true">🔐</span> Entrar
-          </button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MotoRanking | Ranking Geral, BI e Gestão de Vendas</title>
+    <meta
+      name="description"
+      content="Sistema de ranking geral, BI analítico, matriz e gestão de vendas para consultores de concessionária de motos."
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <!-- CABEÇALHO PRINCIPAL & NAVEGAÇÃO POR ABAS (ITEM D1) -->
+    <header class="app-header">
+      <div class="header-container">
+        <div class="brand-wrapper">
+          <div class="brand-icon" aria-hidden="true">🏍️</div>
+          <div class="brand-text">
+            <h1>MotoRanking <span class="brand-badge">Etapa 2 · BI</span></h1>
+            <p class="brand-subtitle">Ranking Geral, BI &amp; Gestão de Vendas da Concessionária</p>
+          </div>
         </div>
 
-        <div id="authLogadoBox" class="auth-status-box hidden">
-          <span id="saudacaoUsuario" class="user-greeting">Olá, João Vitor</span>
-          <button type="button" id="btnLogout" class="btn-secondary btn-sm">
-            <span aria-hidden="true">🚪</span> Sair
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="tabs-bar">
-      <div class="tabs-container" role="tablist" aria-label="Seções do MotoRanking">
-        <button
-          type="button"
-          role="tab"
-          id="tabRanking"
-          class="tab-btn active"
-          data-tab="ranking"
-          aria-controls="panelRanking"
-          aria-selected="true"
-          tabindex="0"
-        >
-          <span aria-hidden="true">🏆</span> Ranking geral
-        </button>
-
-        <button
-          type="button"
-          role="tab"
-          id="tabPainel"
-          class="tab-btn"
-          data-tab="painel"
-          aria-controls="panelPainel"
-          aria-selected="false"
-          tabindex="-1"
-        >
-          <span aria-hidden="true">📊</span> Painel do consultor
-        </button>
-
-        <button
-          type="button"
-          role="tab"
-          id="tabNovaVenda"
-          class="tab-btn hidden"
-          data-tab="nova-venda"
-          aria-controls="panelNovaVenda"
-          aria-selected="false"
-          tabindex="-1"
-        >
-          <span aria-hidden="true">📝</span> Nova venda
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="main-layout">
-
-    <!-- ==========================================================
-         ABA 1: RANKING GERAL (#ranking — Parte E, Item 1.3 e BI 2.3)
-         ========================================================== -->
-    <section
-      id="panelRanking"
-      class="tab-panel"
-      role="tabpanel"
-      data-tabpanel="ranking"
-      aria-labelledby="tabRanking"
-    >
-      <!-- E1. Barra de Filtros Globais da Aba Ranking -->
-      <div class="card filter-toolbar-card">
-        <div class="ranking-filters-bar">
-          <div class="filter-item">
-            <span class="filter-label">Período</span>
-            <div class="period-segmented-control" role="group" aria-label="Filtro de período do ranking">
-              <button type="button" class="btn-period btn-ranking-period" data-period="dia" aria-pressed="false">Dia</button>
-              <button type="button" class="btn-period btn-ranking-period" data-period="semana" aria-pressed="false">Semana</button>
-              <button type="button" class="btn-period btn-ranking-period active" data-period="mes" aria-pressed="true">Mês</button>
-            </div>
+        <div class="header-actions">
+          <div id="authDeslogadoBox" class="auth-status-box">
+            <span class="visitor-pill">👁️ Visitante</span>
+            <button type="button" id="btnAbrirLogin" class="btn-primary btn-sm">
+              <span aria-hidden="true">🔐</span> Entrar
+            </button>
           </div>
 
-          <div class="filter-item">
-            <label for="filtroRankingModelo" class="filter-label">Modelo</label>
-            <select id="filtroRankingModelo" class="form-select filter-select">
-              <option value="">Todos os modelos</option>
-            </select>
-          </div>
-
-          <div class="filter-item">
-            <label for="filtroRankingAno" class="filter-label">Ano modelo</label>
-            <select id="filtroRankingAno" class="form-select filter-select">
-              <option value="">Todos os anos</option>
-            </select>
-          </div>
-
-          <div class="filter-item filter-actions">
-            <button type="button" id="btnLimparFiltrosRanking" class="btn-secondary">
-              <span aria-hidden="true">🧹</span> Limpar filtros
+          <div id="authLogadoBox" class="auth-status-box hidden">
+            <span id="saudacaoUsuario" class="user-greeting">Olá, João Vitor</span>
+            <button type="button" id="btnLogout" class="btn-secondary btn-sm">
+              <span aria-hidden="true">🚪</span> Sair
             </button>
           </div>
         </div>
       </div>
 
-      <!-- E2. KPIs do Recorte (4 Indicadores) -->
-      <div class="kpi-cards-grid kpi-cards-4">
-        <div class="kpi-card highlight">
-          <div class="kpi-header">
-            <span class="kpi-title">Total de Vendas</span>
-            <span class="kpi-icon" aria-hidden="true">📈</span>
-          </div>
-          <div id="kpiRankingTotal" class="kpi-value">0</div>
-          <div id="kpiRankingTotalDetalhe" class="kpi-detail">Neste mês</div>
-        </div>
+      <div class="tabs-bar">
+        <div class="tabs-container" role="tablist" aria-label="Seções do MotoRanking">
+          <button
+            type="button"
+            role="tab"
+            id="tabRanking"
+            class="tab-btn active"
+            data-tab="ranking"
+            aria-controls="panelRanking"
+            aria-selected="true"
+            tabindex="0"
+          >
+            <span aria-hidden="true">🏆</span> Ranking geral
+          </button>
 
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <span class="kpi-title">Consultor Líder</span>
-            <span class="kpi-icon" aria-hidden="true">👑</span>
-          </div>
-          <div id="kpiRankingLider" class="kpi-value">-</div>
-          <div id="kpiRankingLiderDetalhe" class="kpi-detail">0 vendas</div>
-        </div>
+          <button
+            type="button"
+            role="tab"
+            id="tabPainel"
+            class="tab-btn"
+            data-tab="painel"
+            aria-controls="panelPainel"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            <span aria-hidden="true">📊</span> Painel do consultor
+          </button>
 
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <span class="kpi-title">Modelo Mais Vendido</span>
-            <span class="kpi-icon" aria-hidden="true">🏍️</span>
-          </div>
-          <div id="kpiRankingModelo" class="kpi-value">-</div>
-          <div id="kpiRankingModeloDetalhe" class="kpi-detail">0 unidades</div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <span class="kpi-title">Ano Mais Vendido</span>
-            <span class="kpi-icon" aria-hidden="true">📅</span>
-          </div>
-          <div id="kpiRankingAno" class="kpi-value">-</div>
-          <div id="kpiRankingAnoDetalhe" class="kpi-detail">0 unidades</div>
+          <button
+            type="button"
+            role="tab"
+            id="tabNovaVenda"
+            class="tab-btn hidden"
+            data-tab="nova-venda"
+            aria-controls="panelNovaVenda"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            <span aria-hidden="true">📝</span> Nova venda
+          </button>
         </div>
       </div>
+    </header>
 
-      <!-- 2.3 Seção "BI · Análise visual" (logo abaixo dos KPIs, recolhível com <details>/<summary> — Item 1.3) -->
-      <details id="detailsSecaoBI" class="card collapsible-section" open>
-        <summary class="collapsible-summary">
-          <div class="card-title-group">
-            <h2 class="card-title">
-              <span aria-hidden="true">📊</span> BI · Análise visual
-            </h2>
-            <p class="card-subtitle">Exploração gráfica sincronizada com os filtros de período, modelo e ano</p>
-          </div>
-          <span class="summary-chevron" aria-hidden="true">▾</span>
-        </summary>
-
-        <div class="collapsible-content">
-          <div class="chart-controls-bar">
+    <main class="main-layout">
+      <!-- ==========================================================
+         ABA 1: RANKING GERAL (#ranking — Parte E, Item 1.3 e BI 2.3)
+         ========================================================== -->
+      <section
+        id="panelRanking"
+        class="tab-panel"
+        role="tabpanel"
+        data-tabpanel="ranking"
+        aria-labelledby="tabRanking"
+      >
+        <!-- E1. Barra de Filtros Globais da Aba Ranking -->
+        <div class="card filter-toolbar-card">
+          <div class="ranking-filters-bar">
             <div class="filter-item">
-              <label for="selectBITipoGrafico" class="filter-label">Tipo de gráfico</label>
-              <select id="selectBITipoGrafico" class="form-select filter-select">
-                <option value="colunas">Colunas</option>
-                <option value="pizza">Pizza</option>
-                <option value="empilhadas">Colunas empilhadas</option>
-                <option value="linha">Linha (evolução)</option>
-                <option value="dispersao">Dispersão (horário das vendas)</option>
+              <span class="filter-label">Período</span>
+              <div
+                class="period-segmented-control"
+                role="group"
+                aria-label="Filtro de período do ranking"
+              >
+                <button
+                  type="button"
+                  class="btn-period btn-ranking-period"
+                  data-period="dia"
+                  aria-pressed="false"
+                >
+                  Dia
+                </button>
+                <button
+                  type="button"
+                  class="btn-period btn-ranking-period"
+                  data-period="semana"
+                  aria-pressed="false"
+                >
+                  Semana
+                </button>
+                <button
+                  type="button"
+                  class="btn-period btn-ranking-period active"
+                  data-period="mes"
+                  aria-pressed="true"
+                >
+                  Mês
+                </button>
+              </div>
+            </div>
+
+            <div class="filter-item">
+              <label for="filtroRankingModelo" class="filter-label">Modelo</label>
+              <select id="filtroRankingModelo" class="form-select filter-select">
+                <option value="">Todos os modelos</option>
               </select>
             </div>
 
             <div class="filter-item">
-              <label for="selectBIDimensao" class="filter-label">Agrupar por</label>
-              <select id="selectBIDimensao" class="form-select filter-select" aria-describedby="helperBIDimensao">
-                <option value="consultor">Consultor</option>
-                <option value="modelo" selected>Modelo</option>
-                <option value="anoModelo">Ano modelo</option>
+              <label for="filtroRankingAno" class="filter-label">Ano modelo</label>
+              <select id="filtroRankingAno" class="form-select filter-select">
+                <option value="">Todos os anos</option>
               </select>
-              <span id="helperBIDimensao" class="form-helper">Dimensão usada para agrupar as vendas no gráfico.</span>
             </div>
 
             <div class="filter-item filter-actions">
-              <button type="button" id="btnBaixarPNGBI" class="btn-secondary">
-                <span aria-hidden="true">📥</span> Baixar PNG
+              <button type="button" id="btnLimparFiltrosRanking" class="btn-secondary">
+                <span aria-hidden="true">🧹</span> Limpar filtros
               </button>
             </div>
           </div>
-
-          <h3 id="tituloDinamicoBI" class="chart-dynamic-title">Vendas por modelo · Mês atual</h3>
-
-          <div id="containerCanvasBI" class="chart-canvas-container">
-            <canvas
-              id="canvasGraficoBI"
-              role="img"
-              aria-label="Gráfico de análise visual de vendas"
-            ></canvas>
-          </div>
-
-          <div id="emptyStateGraficoBI" class="chart-feedback-box hidden" role="status">
-            Sem vendas para os filtros selecionados
-          </div>
-
-          <div id="erroCDNGraficoBI" class="chart-feedback-box chart-error-box hidden" role="alert">
-            Não foi possível carregar os gráficos. Verifique sua conexão.
-          </div>
-
-          <details id="detailsTabelaDadosBI" class="chart-data-details">
-            <summary class="chart-data-summary">Ver dados em tabela</summary>
-            <div class="table-wrapper">
-              <table class="data-table">
-                <thead id="theadTabelaDadosBI"></thead>
-                <tbody id="tbodyTabelaDadosBI"></tbody>
-              </table>
-            </div>
-          </details>
-        </div>
-      </details>
-
-      <!-- E3. Tabela de Ranking de Consultores -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title-group">
-            <h2 class="card-title">
-              <span aria-hidden="true">🏆</span> Classificação de Consultores
-            </h2>
-            <p class="card-subtitle">Ranking de competição (1, 1, 3) considerando todos os consultores no recorte</p>
-          </div>
-          <span class="form-helper">Clique em Consultor ou Vendas para ordenar</span>
         </div>
 
-        <div class="table-wrapper">
-          <table class="data-table table-responsive-cards" id="tabelaRankingConsultores">
-            <thead>
-              <tr>
-                <th>Posição</th>
-                <th id="thSortRankingConsultor" aria-sort="none">
-                  <button
-                    type="button"
-                    class="th-sort-btn th-sort-left"
-                    id="btnSortRankingConsultor"
-                    aria-label="Ordenar ranking por nome do consultor"
-                  >
-                    <span>Consultor</span>
-                    <span class="sort-icon" id="sortIconRankingConsultor" aria-hidden="true">↕</span>
-                  </button>
-                </th>
-                <th class="text-right" id="thSortRankingVendas" aria-sort="descending">
-                  <button
-                    type="button"
-                    class="th-sort-btn"
-                    id="btnSortRankingVendas"
-                    aria-label="Ordenar ranking por quantidade de vendas"
-                  >
-                    <span>Vendas</span>
-                    <span class="sort-icon active" id="sortIconRankingVendas" aria-hidden="true">▼</span>
-                  </button>
-                </th>
-                <th class="text-right">% do Total</th>
-                <th>Modelo Mais Vendido do Consultor</th>
-              </tr>
-            </thead>
-            <tbody id="tbodyRankingConsultores"></tbody>
-          </table>
-        </div>
-
-        <div id="emptyStateRankingConsultores" class="empty-state hidden">
-          <div class="empty-state-icon" aria-hidden="true">👥</div>
-          <h4>Nenhum consultor cadastrado</h4>
-          <p>Não há consultores disponíveis para exibição no momento.</p>
-        </div>
-      </div>
-
-      <!-- E4. Matriz Consultor x (Modelo | Ano Modelo) — Recolhível e com rolagem horizontal + Consultor fixo (Item 1.3) -->
-      <details id="detailsSecaoMatriz" class="card collapsible-section" open>
-        <summary class="collapsible-summary">
-          <div class="card-title-group">
-            <h2 class="card-title">
-              <span aria-hidden="true">🧮</span> Matriz de Desempenho Cruzada
-            </h2>
-            <p class="card-subtitle">Distribuição de vendas por consultor com totais por linha e coluna</p>
-          </div>
-          <span class="summary-chevron" aria-hidden="true">▾</span>
-        </summary>
-
-        <div class="collapsible-content">
-          <div class="section-subtoolbar">
-            <div class="period-segmented-control" role="group" aria-label="Dimensão da matriz de vendas">
-              <button
-                type="button"
-                class="btn-period btn-matriz-dimensao active"
-                data-dimensao="modelo"
-                aria-pressed="true"
-              >
-                Por Modelo
-              </button>
-              <button
-                type="button"
-                class="btn-period btn-matriz-dimensao"
-                data-dimensao="anoModelo"
-                aria-pressed="false"
-              >
-                Por Ano Modelo
-              </button>
-            </div>
-          </div>
-
-          <div class="table-wrapper">
-            <table class="data-table matrix-table" id="tabelaMatrizRanking">
-              <thead id="theadMatrizRanking"></thead>
-              <tbody id="tbodyMatrizRanking"></tbody>
-              <tfoot id="tfootMatrizRanking"></tfoot>
-            </table>
-          </div>
-        </div>
-      </details>
-
-      <!-- E5. Vendas Gerais do Recorte — Recolhível e paginada 10 no celular / 20 no desktop (Item 1.3) -->
-      <details id="detailsSecaoVendasGerais" class="card collapsible-section" open>
-        <summary class="collapsible-summary">
-          <div class="card-title-group">
-            <h2 class="card-title">
-              <span aria-hidden="true">🗂️</span> Vendas Gerais do Recorte
-            </h2>
-            <p class="card-subtitle">Listagem consolidada de vendas (mais recentes primeiro)</p>
-          </div>
-          <span class="summary-chevron" aria-hidden="true">▾</span>
-        </summary>
-
-        <div class="collapsible-content">
-          <div class="section-subtoolbar">
-            <div class="consultor-selector-box">
-              <label for="filtroVendasGeraisConsultor">Filtrar consultor:</label>
-              <select
-                id="filtroVendasGeraisConsultor"
-                class="select-consultor"
-                aria-label="Filtrar listagem de vendas gerais por consultor"
-              >
-                <option value="">Todos os consultores</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="table-wrapper">
-            <table class="data-table table-responsive-cards" id="tabelaVendasGerais">
-              <thead>
-                <tr>
-                  <th>Data/Hora</th>
-                  <th>Consultor</th>
-                  <th>Placa</th>
-                  <th>Contrato</th>
-                  <th>Modelo</th>
-                  <th class="text-right">Ano</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyVendasGerais"></tbody>
-            </table>
-          </div>
-
-          <div id="emptyStateVendasGerais" class="empty-state hidden">
-            <div class="empty-state-icon" aria-hidden="true">🛵</div>
-            <h4>Nenhuma venda encontrada</h4>
-            <p>Não há vendas registradas que correspondam aos filtros selecionados.</p>
-          </div>
-
-          <div id="paginacaoVendasGeraisBox" class="pagination-box hidden">
-            <span id="infoContagemVendasGerais" class="pagination-info">Exibindo 0 de 0 vendas</span>
-            <button type="button" id="btnMostrarMaisVendasGerais" class="btn-secondary">
-              Mostrar mais (+20)
-            </button>
-          </div>
-        </div>
-      </details>
-    </section>
-
-    <!-- ==========================================================
-         ABA 2: PAINEL DO CONSULTOR (#painel — Itens D3, D4 e 2.4)
-         ========================================================== -->
-    <section
-      id="panelPainel"
-      class="tab-panel hidden"
-      role="tabpanel"
-      data-tabpanel="painel"
-      aria-labelledby="tabPainel"
-    >
-      <div class="panel-container">
-
-        <div class="period-filter-wrapper">
-          <div class="panel-header-left">
-            <div class="period-title">
-              <h2 id="labelNomeConsultor" class="panel-main-title">Painel do Consultor</h2>
-              <span id="badgeModoPainel" class="panel-mode-badge mode-readonly">Modo visitante · somente leitura</span>
-            </div>
-          </div>
-
-          <div class="panel-header-controls">
-            <div class="consultor-selector-box">
-              <label for="selectConsultor">Ver consultor:</label>
-              <select
-                id="selectConsultor"
-                class="select-consultor"
-                aria-label="Selecionar consultor para visualizar o painel"
-              ></select>
-            </div>
-
-            <div class="period-segmented-control" role="group" aria-label="Filtro de período do painel do consultor">
-              <button type="button" class="btn-period btn-painel-period" data-period="dia" aria-pressed="false">Dia</button>
-              <button type="button" class="btn-period btn-painel-period" data-period="semana" aria-pressed="false">Semana</button>
-              <button type="button" class="btn-period btn-painel-period active" data-period="mes" aria-pressed="true">Mês</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- KPIs Individuais -->
-        <div class="kpi-cards-grid">
+        <!-- E2. KPIs do Recorte (4 Indicadores) -->
+        <div class="kpi-cards-grid kpi-cards-4">
           <div class="kpi-card highlight">
             <div class="kpi-header">
               <span class="kpi-title">Total de Vendas</span>
-              <span class="kpi-icon" aria-hidden="true">📊</span>
+              <span class="kpi-icon" aria-hidden="true">📈</span>
             </div>
-            <div id="kpiTotalVendas" class="kpi-value">0</div>
-            <div id="kpiPeriodoTexto" class="kpi-detail">Neste mês</div>
+            <div id="kpiRankingTotal" class="kpi-value">0</div>
+            <div id="kpiRankingTotalDetalhe" class="kpi-detail">Neste mês</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">Consultor Líder</span>
+              <span class="kpi-icon" aria-hidden="true">👑</span>
+            </div>
+            <div id="kpiRankingLider" class="kpi-value">-</div>
+            <div id="kpiRankingLiderDetalhe" class="kpi-detail">0 vendas</div>
           </div>
 
           <div class="kpi-card">
@@ -448,8 +178,8 @@
               <span class="kpi-title">Modelo Mais Vendido</span>
               <span class="kpi-icon" aria-hidden="true">🏍️</span>
             </div>
-            <div id="kpiModeloMaisVendido" class="kpi-value">-</div>
-            <div id="kpiModeloDetalhe" class="kpi-detail">0 unidades</div>
+            <div id="kpiRankingModelo" class="kpi-value">-</div>
+            <div id="kpiRankingModeloDetalhe" class="kpi-detail">0 unidades</div>
           </div>
 
           <div class="kpi-card">
@@ -457,421 +187,818 @@
               <span class="kpi-title">Ano Mais Vendido</span>
               <span class="kpi-icon" aria-hidden="true">📅</span>
             </div>
-            <div id="kpiAnoMaisVendido" class="kpi-value">-</div>
-            <div id="kpiAnoDetalhe" class="kpi-detail">0 unidades</div>
+            <div id="kpiRankingAno" class="kpi-value">-</div>
+            <div id="kpiRankingAnoDetalhe" class="kpi-detail">0 unidades</div>
           </div>
         </div>
 
-        <!-- 2.4 Card "Gráfico do consultor" -->
-        <div class="card">
-          <div class="card-header">
+        <!-- 2.3 Seção "BI · Análise visual" (logo abaixo dos KPIs, recolhível com <details>/<summary> — Item 1.3) -->
+        <details id="detailsSecaoBI" class="card collapsible-section" open>
+          <summary class="collapsible-summary">
             <div class="card-title-group">
-              <h3 class="card-title">
-                <span aria-hidden="true">📈</span> Gráfico do consultor
-              </h3>
-              <p class="card-subtitle">Análise visual das vendas do consultor selecionado no período</p>
+              <h2 class="card-title"><span aria-hidden="true">📊</span> BI · Análise visual</h2>
+              <p class="card-subtitle">
+                Exploração gráfica sincronizada com os filtros de período, modelo e ano
+              </p>
             </div>
-          </div>
+            <span class="summary-chevron" aria-hidden="true">▾</span>
+          </summary>
 
-          <div class="card-body">
+          <div class="collapsible-content">
             <div class="chart-controls-bar">
               <div class="filter-item">
-                <label for="selectPainelGraficoDimensao" class="filter-label">Ver por</label>
-                <select id="selectPainelGraficoDimensao" class="form-select filter-select" aria-describedby="helperPainelGraficoDimensao">
+                <label for="selectBITipoGrafico" class="filter-label">Tipo de gráfico</label>
+                <select id="selectBITipoGrafico" class="form-select filter-select">
+                  <option value="colunas">Colunas</option>
+                  <option value="pizza">Pizza</option>
+                  <option value="empilhadas">Colunas empilhadas</option>
+                  <option value="linha">Linha (evolução)</option>
+                  <option value="dispersao">Dispersão (horário das vendas)</option>
+                </select>
+              </div>
+
+              <div class="filter-item">
+                <label for="selectBIDimensao" class="filter-label">Agrupar por</label>
+                <select
+                  id="selectBIDimensao"
+                  class="form-select filter-select"
+                  aria-describedby="helperBIDimensao"
+                >
+                  <option value="consultor">Consultor</option>
                   <option value="modelo" selected>Modelo</option>
                   <option value="anoModelo">Ano modelo</option>
                 </select>
-                <span id="helperPainelGraficoDimensao" class="form-helper">Agrupamento das vendas do consultor.</span>
-              </div>
-
-              <div class="filter-item">
-                <label for="selectPainelGraficoTipo" class="filter-label">Tipo</label>
-                <select id="selectPainelGraficoTipo" class="form-select filter-select">
-                  <option value="colunas" selected>Colunas</option>
-                  <option value="pizza">Pizza</option>
-                  <option value="linha">Linha (evolução no período)</option>
-                </select>
+                <span id="helperBIDimensao" class="form-helper"
+                  >Dimensão usada para agrupar as vendas no gráfico.</span
+                >
               </div>
 
               <div class="filter-item filter-actions">
-                <button type="button" id="btnBaixarPNGPainel" class="btn-secondary">
+                <button type="button" id="btnBaixarPNGBI" class="btn-secondary">
                   <span aria-hidden="true">📥</span> Baixar PNG
                 </button>
               </div>
             </div>
 
-            <div id="containerCanvasPainel" class="chart-canvas-container">
+            <h3 id="tituloDinamicoBI" class="chart-dynamic-title">Vendas por modelo · Mês atual</h3>
+
+            <div id="containerCanvasBI" class="chart-canvas-container">
               <canvas
-                id="canvasGraficoPainel"
+                id="canvasGraficoBI"
                 role="img"
-                aria-label="Gráfico de vendas do consultor"
+                aria-label="Gráfico de análise visual de vendas"
               ></canvas>
             </div>
 
-            <div id="emptyStateGraficoPainel" class="chart-feedback-box hidden" role="status">
+            <div id="emptyStateGraficoBI" class="chart-feedback-box hidden" role="status">
               Sem vendas para os filtros selecionados
             </div>
 
-            <div id="erroCDNGraficoPainel" class="chart-feedback-box chart-error-box hidden" role="alert">
+            <div
+              id="erroCDNGraficoBI"
+              class="chart-feedback-box chart-error-box hidden"
+              role="alert"
+            >
               Não foi possível carregar os gráficos. Verifique sua conexão.
             </div>
 
-            <details id="detailsTabelaDadosPainel" class="chart-data-details">
+            <details id="detailsTabelaDadosBI" class="chart-data-details">
               <summary class="chart-data-summary">Ver dados em tabela</summary>
               <div class="table-wrapper">
                 <table class="data-table">
-                  <thead id="theadTabelaDadosPainel"></thead>
-                  <tbody id="tbodyTabelaDadosPainel"></tbody>
+                  <thead id="theadTabelaDadosBI"></thead>
+                  <tbody id="tbodyTabelaDadosBI"></tbody>
                 </table>
               </div>
             </details>
           </div>
-        </div>
+        </details>
 
-        <!-- Tabelas de Agrupamento (Vendas por Modelo e por Ano) -->
-        <div class="breakdown-grid">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Vendas por Modelo</h3>
-              <span class="form-helper">Clique p/ ordenar</span>
-            </div>
-            <div class="table-wrapper">
-              <table class="data-table" id="tabelaVendasPorModelo">
-                <thead>
-                  <tr>
-                    <th>Modelo</th>
-                    <th class="text-right" id="thSortModelo" aria-sort="descending">
-                      <button type="button" class="th-sort-btn" id="btnSortModeloQtd" aria-label="Ordenar vendas por quantidade">
-                        <span>Qtd</span>
-                        <span class="sort-icon active" id="sortIconModelo" aria-hidden="true">▼</span>
-                      </button>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody id="tbodyVendasPorModelo"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Vendas por Ano Modelo</h3>
-              <span class="form-helper">Clique p/ ordenar</span>
-            </div>
-            <div class="table-wrapper">
-              <table class="data-table" id="tabelaVendasPorAno">
-                <thead>
-                  <tr>
-                    <th>Ano Modelo</th>
-                    <th class="text-right" id="thSortAno" aria-sort="descending">
-                      <button type="button" class="th-sort-btn" id="btnSortAnoQtd" aria-label="Ordenar vendas por ano modelo">
-                        <span>Qtd</span>
-                        <span class="sort-icon active" id="sortIconAno" aria-hidden="true">▼</span>
-                      </button>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody id="tbodyVendasPorAno"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tabela Detalhada de Vendas do Consultor -->
+        <!-- E3. Tabela de Ranking de Consultores -->
         <div class="card">
           <div class="card-header">
             <div class="card-title-group">
-              <h3 class="card-title">Vendas Registradas no Período</h3>
-              <p class="card-subtitle">Listagem de veículos vendidos pelo consultor selecionado</p>
+              <h2 class="card-title">
+                <span aria-hidden="true">🏆</span> Classificação de Consultores
+              </h2>
+              <p class="card-subtitle">
+                Ranking de competição (1, 1, 3) considerando todos os consultores no recorte
+              </p>
             </div>
+            <span class="form-helper">Clique em Consultor ou Vendas para ordenar</span>
           </div>
 
           <div class="table-wrapper">
-            <table class="data-table table-responsive-cards" id="tabelaListaVendas">
+            <table class="data-table table-responsive-cards" id="tabelaRankingConsultores">
               <thead>
                 <tr>
-                  <th>Data/Hora</th>
-                  <th>Placa</th>
-                  <th>Contrato</th>
-                  <th>Modelo</th>
-                  <th>Ano</th>
-                  <th class="text-right" id="thColunaAcoesPainel">Ações</th>
+                  <th>Posição</th>
+                  <th id="thSortRankingConsultor" aria-sort="none">
+                    <button
+                      type="button"
+                      class="th-sort-btn th-sort-left"
+                      id="btnSortRankingConsultor"
+                      aria-label="Ordenar ranking por nome do consultor"
+                    >
+                      <span>Consultor</span>
+                      <span class="sort-icon" id="sortIconRankingConsultor" aria-hidden="true"
+                        >↕</span
+                      >
+                    </button>
+                  </th>
+                  <th class="text-right" id="thSortRankingVendas" aria-sort="descending">
+                    <button
+                      type="button"
+                      class="th-sort-btn"
+                      id="btnSortRankingVendas"
+                      aria-label="Ordenar ranking por quantidade de vendas"
+                    >
+                      <span>Vendas</span>
+                      <span class="sort-icon active" id="sortIconRankingVendas" aria-hidden="true"
+                        >▼</span
+                      >
+                    </button>
+                  </th>
+                  <th class="text-right">% do Total</th>
+                  <th>Modelo Mais Vendido do Consultor</th>
                 </tr>
               </thead>
-              <tbody id="tbodyListaVendas"></tbody>
+              <tbody id="tbodyRankingConsultores"></tbody>
             </table>
           </div>
 
-          <div id="emptyStateVendas" class="empty-state hidden">
-            <div class="empty-state-icon" aria-hidden="true">🛵</div>
-            <h4>Nenhuma venda no período</h4>
-            <p id="emptyStateTextoPainel">Não há vendas registradas para este consultor no período selecionado.</p>
+          <div id="emptyStateRankingConsultores" class="empty-state hidden">
+            <div class="empty-state-icon" aria-hidden="true">👥</div>
+            <h4>Nenhum consultor cadastrado</h4>
+            <p>Não há consultores disponíveis para exibição no momento.</p>
           </div>
         </div>
 
-      </div>
-    </section>
+        <!-- E4. Matriz Consultor x (Modelo | Ano Modelo) — Recolhível e com rolagem horizontal + Consultor fixo (Item 1.3) -->
+        <details id="detailsSecaoMatriz" class="card collapsible-section" open>
+          <summary class="collapsible-summary">
+            <div class="card-title-group">
+              <h2 class="card-title">
+                <span aria-hidden="true">🧮</span> Matriz de Desempenho Cruzada
+              </h2>
+              <p class="card-subtitle">
+                Distribuição de vendas por consultor com totais por linha e coluna
+              </p>
+            </div>
+            <span class="summary-chevron" aria-hidden="true">▾</span>
+          </summary>
 
-    <!-- ==========================================================
-         ABA 3: NOVA VENDA (#nova-venda — Itens A2, A3, B1, B2, D3, D4)
-         ========================================================== -->
-    <section
-      id="panelNovaVenda"
-      class="tab-panel hidden"
-      role="tabpanel"
-      data-tabpanel="nova-venda"
-      aria-labelledby="tabNovaVenda"
-    >
-      <div id="cardLoginNecessario" class="card auth-guard-card">
-        <div class="empty-state">
-          <div class="empty-state-icon" aria-hidden="true">🔒</div>
-          <h2>Faça login para cadastrar vendas</h2>
-          <p>O registro de novas vendas é exclusivo para consultores autenticados. Visitantes possuem acesso de visualização ao Ranking Geral e ao Painel do Consultor.</p>
-          <button type="button" id="btnEntrarNovaVenda" class="btn-primary btn-inline-cta">
-            <span aria-hidden="true">🔐</span> Entrar
-          </button>
-        </div>
-      </div>
-
-      <div id="cardFormularioVenda" class="card form-venda-card hidden" inert>
-        <div class="card-header">
-          <div class="card-title-group">
-            <h2 id="tituloCadastroVenda" class="card-title">
-              <span aria-hidden="true">📝</span> Cadastrar Nova Venda
-            </h2>
-            <p class="card-subtitle">
-              Venda vinculada automaticamente ao consultor logado: <strong id="labelConsultorLogadoForm">-</strong>
-            </p>
-          </div>
-        </div>
-
-        <div class="card-body">
-          <form id="formCadastroVenda" class="form-venda" novalidate>
-            <div class="form-venda-grid">
-              <div class="form-group">
-                <label for="inputDataVenda" class="form-label">
-                  Data da Venda <span class="required">*</span>
-                </label>
-                <input
-                  type="date"
-                  id="inputDataVenda"
-                  name="dataVenda"
-                  class="form-input"
-                  min="2023-01-01"
-                  required
-                  aria-describedby="erroDataVenda helperDataVenda"
+          <div class="collapsible-content">
+            <div class="section-subtoolbar">
+              <div
+                class="period-segmented-control"
+                role="group"
+                aria-label="Dimensão da matriz de vendas"
+              >
+                <button
+                  type="button"
+                  class="btn-period btn-matriz-dimensao active"
+                  data-dimensao="modelo"
+                  aria-pressed="true"
                 >
-                <span id="helperDataVenda" class="form-helper">Entre 01/01/2023 e a data de hoje</span>
-                <div id="erroDataVenda" class="error-message" role="alert"></div>
-              </div>
-
-              <div class="form-group">
-                <label for="inputPlaca" class="form-label">
-                  Placa do Veículo <span class="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="inputPlaca"
-                  name="placa"
-                  class="form-input"
-                  placeholder="Ex: ABC1D23 ou ABC-1234"
-                  maxlength="8"
-                  autocomplete="off"
-                  required
-                  aria-describedby="erroPlaca helperPlaca"
+                  Por Modelo
+                </button>
+                <button
+                  type="button"
+                  class="btn-period btn-matriz-dimensao"
+                  data-dimensao="anoModelo"
+                  aria-pressed="false"
                 >
-                <span id="helperPlaca" class="form-helper">Mercosul ou antigo (hífen opcional). Placas repetidas são permitidas.</span>
-                <div id="erroPlaca" class="error-message" role="alert"></div>
-              </div>
-
-              <div class="form-group">
-                <label for="inputContrato" class="form-label">
-                  Número do Contrato <span class="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="inputContrato"
-                  name="numeroContrato"
-                  class="form-input"
-                  placeholder="Ex: CT2050"
-                  autocomplete="off"
-                  required
-                  aria-describedby="erroContrato helperContrato"
-                >
-                <span id="helperContrato" class="form-helper">Apenas letras e números, sem espaços. Único em todo o sistema.</span>
-                <div id="erroContrato" class="error-message" role="alert"></div>
-              </div>
-
-              <div class="form-group">
-                <label for="selectModelo" class="form-label">
-                  Modelo da Moto <span class="required">*</span>
-                </label>
-                <select
-                  id="selectModelo"
-                  name="modelo"
-                  class="form-select"
-                  required
-                  aria-describedby="erroModelo"
-                >
-                  <option value="">Selecione um modelo...</option>
-                </select>
-                <div id="erroModelo" class="error-message" role="alert"></div>
-              </div>
-
-              <div class="form-group">
-                <label for="selectAnoModelo" class="form-label">
-                  Ano Modelo <span class="required">*</span>
-                </label>
-                <select
-                  id="selectAnoModelo"
-                  name="anoModelo"
-                  class="form-select"
-                  disabled
-                  required
-                  aria-describedby="erroAnoModelo"
-                >
-                  <option value="">Selecione o modelo primeiro...</option>
-                </select>
-                <div id="erroAnoModelo" class="error-message" role="alert"></div>
+                  Por Ano Modelo
+                </button>
               </div>
             </div>
 
-            <div class="form-submit-row">
-              <button type="submit" id="btnSalvarVenda" class="btn-primary">
-                <span aria-hidden="true">💾</span> Salvar Venda
+            <div class="table-wrapper">
+              <table class="data-table matrix-table" id="tabelaMatrizRanking">
+                <thead id="theadMatrizRanking"></thead>
+                <tbody id="tbodyMatrizRanking"></tbody>
+                <tfoot id="tfootMatrizRanking"></tfoot>
+              </table>
+            </div>
+          </div>
+        </details>
+
+        <!-- E5. Vendas Gerais do Recorte — Recolhível e paginada 10 no celular / 20 no desktop (Item 1.3) -->
+        <details id="detailsSecaoVendasGerais" class="card collapsible-section" open>
+          <summary class="collapsible-summary">
+            <div class="card-title-group">
+              <h2 class="card-title">
+                <span aria-hidden="true">🗂️</span> Vendas Gerais do Recorte
+              </h2>
+              <p class="card-subtitle">Listagem consolidada de vendas (mais recentes primeiro)</p>
+            </div>
+            <span class="summary-chevron" aria-hidden="true">▾</span>
+          </summary>
+
+          <div class="collapsible-content">
+            <div class="section-subtoolbar">
+              <div class="consultor-selector-box">
+                <label for="filtroVendasGeraisConsultor">Filtrar consultor:</label>
+                <select
+                  id="filtroVendasGeraisConsultor"
+                  class="select-consultor"
+                  aria-label="Filtrar listagem de vendas gerais por consultor"
+                >
+                  <option value="">Todos os consultores</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table class="data-table table-responsive-cards" id="tabelaVendasGerais">
+                <thead>
+                  <tr>
+                    <th>Data/Hora</th>
+                    <th>Consultor</th>
+                    <th>Placa</th>
+                    <th>Contrato</th>
+                    <th>Modelo</th>
+                    <th class="text-right">Ano</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyVendasGerais"></tbody>
+              </table>
+            </div>
+
+            <div id="emptyStateVendasGerais" class="empty-state hidden">
+              <div class="empty-state-icon" aria-hidden="true">🛵</div>
+              <h4>Nenhuma venda encontrada</h4>
+              <p>Não há vendas registradas que correspondam aos filtros selecionados.</p>
+            </div>
+
+            <div id="paginacaoVendasGeraisBox" class="pagination-box hidden">
+              <span id="infoContagemVendasGerais" class="pagination-info"
+                >Exibindo 0 de 0 vendas</span
+              >
+              <button type="button" id="btnMostrarMaisVendasGerais" class="btn-secondary">
+                Mostrar mais (+20)
               </button>
             </div>
-          </form>
+          </div>
+        </details>
+      </section>
+
+      <!-- ==========================================================
+         ABA 2: PAINEL DO CONSULTOR (#painel — Itens D3, D4 e 2.4)
+         ========================================================== -->
+      <section
+        id="panelPainel"
+        class="tab-panel hidden"
+        role="tabpanel"
+        data-tabpanel="painel"
+        aria-labelledby="tabPainel"
+      >
+        <div class="panel-container">
+          <div class="period-filter-wrapper">
+            <div class="panel-header-left">
+              <div class="period-title">
+                <h2 id="labelNomeConsultor" class="panel-main-title">Painel do Consultor</h2>
+                <span id="badgeModoPainel" class="panel-mode-badge mode-readonly"
+                  >Modo visitante · somente leitura</span
+                >
+              </div>
+            </div>
+
+            <div class="panel-header-controls">
+              <div class="consultor-selector-box">
+                <label for="selectConsultor">Ver consultor:</label>
+                <select
+                  id="selectConsultor"
+                  class="select-consultor"
+                  aria-label="Selecionar consultor para visualizar o painel"
+                ></select>
+              </div>
+
+              <div
+                class="period-segmented-control"
+                role="group"
+                aria-label="Filtro de período do painel do consultor"
+              >
+                <button
+                  type="button"
+                  class="btn-period btn-painel-period"
+                  data-period="dia"
+                  aria-pressed="false"
+                >
+                  Dia
+                </button>
+                <button
+                  type="button"
+                  class="btn-period btn-painel-period"
+                  data-period="semana"
+                  aria-pressed="false"
+                >
+                  Semana
+                </button>
+                <button
+                  type="button"
+                  class="btn-period btn-painel-period active"
+                  data-period="mes"
+                  aria-pressed="true"
+                >
+                  Mês
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPIs Individuais -->
+          <div class="kpi-cards-grid">
+            <div class="kpi-card highlight">
+              <div class="kpi-header">
+                <span class="kpi-title">Total de Vendas</span>
+                <span class="kpi-icon" aria-hidden="true">📊</span>
+              </div>
+              <div id="kpiTotalVendas" class="kpi-value">0</div>
+              <div id="kpiPeriodoTexto" class="kpi-detail">Neste mês</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Modelo Mais Vendido</span>
+                <span class="kpi-icon" aria-hidden="true">🏍️</span>
+              </div>
+              <div id="kpiModeloMaisVendido" class="kpi-value">-</div>
+              <div id="kpiModeloDetalhe" class="kpi-detail">0 unidades</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Ano Mais Vendido</span>
+                <span class="kpi-icon" aria-hidden="true">📅</span>
+              </div>
+              <div id="kpiAnoMaisVendido" class="kpi-value">-</div>
+              <div id="kpiAnoDetalhe" class="kpi-detail">0 unidades</div>
+            </div>
+          </div>
+
+          <!-- 2.4 Card "Gráfico do consultor" -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h3 class="card-title"><span aria-hidden="true">📈</span> Gráfico do consultor</h3>
+                <p class="card-subtitle">
+                  Análise visual das vendas do consultor selecionado no período
+                </p>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="chart-controls-bar">
+                <div class="filter-item">
+                  <label for="selectPainelGraficoDimensao" class="filter-label">Ver por</label>
+                  <select
+                    id="selectPainelGraficoDimensao"
+                    class="form-select filter-select"
+                    aria-describedby="helperPainelGraficoDimensao"
+                  >
+                    <option value="modelo" selected>Modelo</option>
+                    <option value="anoModelo">Ano modelo</option>
+                  </select>
+                  <span id="helperPainelGraficoDimensao" class="form-helper"
+                    >Agrupamento das vendas do consultor.</span
+                  >
+                </div>
+
+                <div class="filter-item">
+                  <label for="selectPainelGraficoTipo" class="filter-label">Tipo</label>
+                  <select id="selectPainelGraficoTipo" class="form-select filter-select">
+                    <option value="colunas" selected>Colunas</option>
+                    <option value="pizza">Pizza</option>
+                    <option value="linha">Linha (evolução no período)</option>
+                  </select>
+                </div>
+
+                <div class="filter-item filter-actions">
+                  <button type="button" id="btnBaixarPNGPainel" class="btn-secondary">
+                    <span aria-hidden="true">📥</span> Baixar PNG
+                  </button>
+                </div>
+              </div>
+
+              <div id="containerCanvasPainel" class="chart-canvas-container">
+                <canvas
+                  id="canvasGraficoPainel"
+                  role="img"
+                  aria-label="Gráfico de vendas do consultor"
+                ></canvas>
+              </div>
+
+              <div id="emptyStateGraficoPainel" class="chart-feedback-box hidden" role="status">
+                Sem vendas para os filtros selecionados
+              </div>
+
+              <div
+                id="erroCDNGraficoPainel"
+                class="chart-feedback-box chart-error-box hidden"
+                role="alert"
+              >
+                Não foi possível carregar os gráficos. Verifique sua conexão.
+              </div>
+
+              <details id="detailsTabelaDadosPainel" class="chart-data-details">
+                <summary class="chart-data-summary">Ver dados em tabela</summary>
+                <div class="table-wrapper">
+                  <table class="data-table">
+                    <thead id="theadTabelaDadosPainel"></thead>
+                    <tbody id="tbodyTabelaDadosPainel"></tbody>
+                  </table>
+                </div>
+              </details>
+            </div>
+          </div>
+
+          <!-- Tabelas de Agrupamento (Vendas por Modelo e por Ano) -->
+          <div class="breakdown-grid">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Vendas por Modelo</h3>
+                <span class="form-helper">Clique p/ ordenar</span>
+              </div>
+              <div class="table-wrapper">
+                <table class="data-table" id="tabelaVendasPorModelo">
+                  <thead>
+                    <tr>
+                      <th>Modelo</th>
+                      <th class="text-right" id="thSortModelo" aria-sort="descending">
+                        <button
+                          type="button"
+                          class="th-sort-btn"
+                          id="btnSortModeloQtd"
+                          aria-label="Ordenar vendas por quantidade"
+                        >
+                          <span>Qtd</span>
+                          <span class="sort-icon active" id="sortIconModelo" aria-hidden="true"
+                            >▼</span
+                          >
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyVendasPorModelo"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Vendas por Ano Modelo</h3>
+                <span class="form-helper">Clique p/ ordenar</span>
+              </div>
+              <div class="table-wrapper">
+                <table class="data-table" id="tabelaVendasPorAno">
+                  <thead>
+                    <tr>
+                      <th>Ano Modelo</th>
+                      <th class="text-right" id="thSortAno" aria-sort="descending">
+                        <button
+                          type="button"
+                          class="th-sort-btn"
+                          id="btnSortAnoQtd"
+                          aria-label="Ordenar vendas por ano modelo"
+                        >
+                          <span>Qtd</span>
+                          <span class="sort-icon active" id="sortIconAno" aria-hidden="true"
+                            >▼</span
+                          >
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyVendasPorAno"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela Detalhada de Vendas do Consultor -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h3 class="card-title">Vendas Registradas no Período</h3>
+                <p class="card-subtitle">
+                  Listagem de veículos vendidos pelo consultor selecionado
+                </p>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table class="data-table table-responsive-cards" id="tabelaListaVendas">
+                <thead>
+                  <tr>
+                    <th>Data/Hora</th>
+                    <th>Placa</th>
+                    <th>Contrato</th>
+                    <th>Modelo</th>
+                    <th>Ano</th>
+                    <th class="text-right" id="thColunaAcoesPainel">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyListaVendas"></tbody>
+              </table>
+            </div>
+
+            <div id="emptyStateVendas" class="empty-state hidden">
+              <div class="empty-state-icon" aria-hidden="true">🛵</div>
+              <h4>Nenhuma venda no período</h4>
+              <p id="emptyStateTextoPainel">
+                Não há vendas registradas para este consultor no período selecionado.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-  </main>
-
-  <!-- MODAL 1: LOGIN DO CONSULTOR -->
-  <dialog id="modalLogin" aria-labelledby="tituloModalLogin">
-    <form id="formLogin" novalidate>
-      <div class="modal-header">
-        <h3 id="tituloModalLogin">Entrar no MotoRanking</h3>
-      </div>
-
-      <div class="modal-body">
-        <div class="demo-credentials-box">
-          <strong>Conta de demonstração:</strong>
-          <span>Usuário: <code>JoaoVitor</code> · Senha: <code>123456</code></span>
-        </div>
-
-        <div id="erroLoginGeral" class="login-alert-error hidden" role="alert"></div>
-
-        <div class="form-group">
-          <label for="inputLoginUsuario" class="form-label">
-            Usuário <span class="required">*</span>
-          </label>
-          <input
-            type="text"
-            id="inputLoginUsuario"
-            name="username"
-            class="form-input"
-            placeholder="Ex: JoaoVitor"
-            autocomplete="username"
-            spellcheck="false"
-            autocorrect="off"
-            autocapitalize="none"
-            required
-            autofocus
-            aria-describedby="erroLoginUsuario"
-          >
-          <div id="erroLoginUsuario" class="error-message" role="alert"></div>
-        </div>
-
-        <div class="form-group">
-          <label for="inputLoginSenha" class="form-label">
-            Senha <span class="required">*</span>
-          </label>
-          <div class="password-input-wrapper">
-            <input
-              type="password"
-              id="inputLoginSenha"
-              name="password"
-              class="form-input"
-              placeholder="Digite sua senha"
-              autocomplete="current-password"
-              required
-              aria-describedby="erroLoginSenha"
-            >
-            <button
-              type="button"
-              id="btnToggleSenha"
-              class="btn-toggle-password"
-              aria-pressed="false"
-              aria-label="Mostrar senha"
-            >
-              👁️ Mostrar
+      <!-- ==========================================================
+         ABA 3: NOVA VENDA (#nova-venda — Itens A2, A3, B1, B2, D3, D4)
+         ========================================================== -->
+      <section
+        id="panelNovaVenda"
+        class="tab-panel hidden"
+        role="tabpanel"
+        data-tabpanel="nova-venda"
+        aria-labelledby="tabNovaVenda"
+      >
+        <div id="cardLoginNecessario" class="card auth-guard-card">
+          <div class="empty-state">
+            <div class="empty-state-icon" aria-hidden="true">🔒</div>
+            <h2>Faça login para cadastrar vendas</h2>
+            <p>
+              O registro de novas vendas é exclusivo para consultores autenticados. Visitantes
+              possuem acesso de visualização ao Ranking Geral e ao Painel do Consultor.
+            </p>
+            <button type="button" id="btnEntrarNovaVenda" class="btn-primary btn-inline-cta">
+              <span aria-hidden="true">🔐</span> Entrar
             </button>
           </div>
-          <div id="erroLoginSenha" class="error-message" role="alert"></div>
         </div>
-      </div>
 
-      <div class="modal-footer">
-        <button type="button" id="btnCancelarLogin" class="btn-secondary">Cancelar</button>
-        <button type="submit" id="btnSubmeterLogin" class="btn-primary btn-modal-submit">Entrar</button>
-      </div>
-    </form>
-  </dialog>
+        <div id="cardFormularioVenda" class="card form-venda-card hidden" inert>
+          <div class="card-header">
+            <div class="card-title-group">
+              <h2 id="tituloCadastroVenda" class="card-title">
+                <span aria-hidden="true">📝</span> Cadastrar Nova Venda
+              </h2>
+              <p class="card-subtitle">
+                Venda vinculada automaticamente ao consultor logado:
+                <strong id="labelConsultorLogadoForm">-</strong>
+              </p>
+            </div>
+          </div>
 
-  <!-- MODAL 2: CONFIRMAÇÃO DE EXCLUSÃO DE VENDA -->
-  <dialog id="modalConfirmarExclusao" aria-labelledby="tituloModalExclusao">
-    <form id="formConfirmarExclusao" method="dialog" novalidate>
-      <div class="modal-header">
-        <h3 id="tituloModalExclusao">Confirmar Exclusão</h3>
-      </div>
-      <div class="modal-body">
+          <div class="card-body">
+            <form id="formCadastroVenda" class="form-venda" novalidate>
+              <div class="form-venda-grid">
+                <div class="form-group">
+                  <label for="inputDataVenda" class="form-label">
+                    Data da Venda <span class="required">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    id="inputDataVenda"
+                    name="dataVenda"
+                    class="form-input"
+                    min="2023-01-01"
+                    required
+                    aria-describedby="erroDataVenda helperDataVenda"
+                  />
+                  <span id="helperDataVenda" class="form-helper"
+                    >Entre 01/01/2023 e a data de hoje</span
+                  >
+                  <div id="erroDataVenda" class="error-message" role="alert"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="inputPlaca" class="form-label">
+                    Placa do Veículo <span class="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="inputPlaca"
+                    name="placa"
+                    class="form-input"
+                    placeholder="Ex: ABC1D23 ou ABC-1234"
+                    maxlength="8"
+                    autocomplete="off"
+                    required
+                    aria-describedby="erroPlaca helperPlaca"
+                  />
+                  <span id="helperPlaca" class="form-helper"
+                    >Mercosul ou antigo (hífen opcional). Placas repetidas são permitidas.</span
+                  >
+                  <div id="erroPlaca" class="error-message" role="alert"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="inputContrato" class="form-label">
+                    Número do Contrato <span class="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="inputContrato"
+                    name="numeroContrato"
+                    class="form-input"
+                    placeholder="Ex: CT2050"
+                    autocomplete="off"
+                    required
+                    aria-describedby="erroContrato helperContrato"
+                  />
+                  <span id="helperContrato" class="form-helper"
+                    >Apenas letras e números, sem espaços. Único em todo o sistema.</span
+                  >
+                  <div id="erroContrato" class="error-message" role="alert"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="selectModelo" class="form-label">
+                    Modelo da Moto <span class="required">*</span>
+                  </label>
+                  <select
+                    id="selectModelo"
+                    name="modelo"
+                    class="form-select"
+                    required
+                    aria-describedby="erroModelo"
+                  >
+                    <option value="">Selecione um modelo...</option>
+                  </select>
+                  <div id="erroModelo" class="error-message" role="alert"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="selectAnoModelo" class="form-label">
+                    Ano Modelo <span class="required">*</span>
+                  </label>
+                  <select
+                    id="selectAnoModelo"
+                    name="anoModelo"
+                    class="form-select"
+                    disabled
+                    required
+                    aria-describedby="erroAnoModelo"
+                  >
+                    <option value="">Selecione o modelo primeiro...</option>
+                  </select>
+                  <div id="erroAnoModelo" class="error-message" role="alert"></div>
+                </div>
+              </div>
+
+              <div class="form-submit-row">
+                <button type="submit" id="btnSalvarVenda" class="btn-primary">
+                  <span aria-hidden="true">💾</span> Salvar Venda
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- MODAL 1: LOGIN DO CONSULTOR -->
+    <dialog id="modalLogin" aria-labelledby="tituloModalLogin">
+      <form id="formLogin" novalidate>
+        <div class="modal-header">
+          <h3 id="tituloModalLogin">Entrar no MotoRanking</h3>
+        </div>
+
+        <div class="modal-body">
+          <div class="demo-credentials-box">
+            <strong>Conta de demonstração:</strong>
+            <span>Usuário: <code>JoaoVitor</code> · Senha: <code>123456</code></span>
+          </div>
+
+          <div id="erroLoginGeral" class="login-alert-error hidden" role="alert"></div>
+
+          <div class="form-group">
+            <label for="inputLoginUsuario" class="form-label">
+              Usuário <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="inputLoginUsuario"
+              name="username"
+              class="form-input"
+              placeholder="Ex: JoaoVitor"
+              autocomplete="username"
+              spellcheck="false"
+              autocorrect="off"
+              autocapitalize="none"
+              required
+              autofocus
+              aria-describedby="erroLoginUsuario"
+            />
+            <div id="erroLoginUsuario" class="error-message" role="alert"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="inputLoginSenha" class="form-label">
+              Senha <span class="required">*</span>
+            </label>
+            <div class="password-input-wrapper">
+              <input
+                type="password"
+                id="inputLoginSenha"
+                name="password"
+                class="form-input"
+                placeholder="Digite sua senha"
+                autocomplete="current-password"
+                required
+                aria-describedby="erroLoginSenha"
+              />
+              <button
+                type="button"
+                id="btnToggleSenha"
+                class="btn-toggle-password"
+                aria-pressed="false"
+                aria-label="Mostrar senha"
+              >
+                👁️ Mostrar
+              </button>
+            </div>
+            <div id="erroLoginSenha" class="error-message" role="alert"></div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="btnCancelarLogin" class="btn-secondary">Cancelar</button>
+          <button type="submit" id="btnSubmeterLogin" class="btn-primary btn-modal-submit">
+            Entrar
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- MODAL 2: CONFIRMAÇÃO DE EXCLUSÃO DE VENDA -->
+    <dialog id="modalConfirmarExclusao" aria-labelledby="tituloModalExclusao">
+      <form id="formConfirmarExclusao" method="dialog" novalidate>
+        <div class="modal-header">
+          <h3 id="tituloModalExclusao">Confirmar Exclusão</h3>
+        </div>
+        <div class="modal-body">
+          <p>
+            Tem certeza de que deseja excluir a venda do veículo placa
+            <strong id="excluirPlacaModal">-</strong> (Contrato
+            <span id="excluirContratoModal">-</span>)?
+          </p>
+          <p class="modal-warning-text">Esta ação não poderá ser desfeita.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btnCancelarExclusao" class="btn-secondary" autofocus>
+            Cancelar
+          </button>
+          <button type="submit" id="btnConfirmarExclusaoFinal" class="btn-danger">
+            Sim, Excluir
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- MODAL 3: CONFIRMAÇÃO DE RESTAURAÇÃO DE DADOS DEMO -->
+    <dialog id="modalConfirmarReset" aria-labelledby="tituloModalReset">
+      <form id="formConfirmarReset" method="dialog" novalidate>
+        <div class="modal-header">
+          <h3 id="tituloModalReset">Restaurar Dados de Demonstração</h3>
+        </div>
+        <div class="modal-body">
+          <p>
+            Deseja apagar todas as alterações e recriar o conjunto original de dados de demonstração
+            (consultores, vendas fictícias e usuário <strong>João Vitor</strong>)?
+          </p>
+          <p class="modal-warning-text">Todas as vendas cadastradas manualmente serão removidas.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btnCancelarReset" class="btn-secondary" autofocus>
+            Cancelar
+          </button>
+          <button type="submit" id="btnConfirmarResetFinal" class="btn-danger">
+            Sim, Restaurar
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <footer class="app-footer">
+      <div class="footer-container">
         <p>
-          Tem certeza de que deseja excluir a venda do veículo placa
-          <strong id="excluirPlacaModal">-</strong> (Contrato <span id="excluirContratoModal">-</span>)?
+          MotoRanking &copy; 2026 — Sistema de Gestão, BI e Ranking de Vendas de Motocicletas. Etapa
+          2.
         </p>
-        <p class="modal-warning-text">Esta ação não poderá ser desfeita.</p>
+        <button type="button" id="btnRestaurarDemo" class="btn-secondary btn-sm hidden">
+          <span aria-hidden="true">🔄</span> Restaurar dados de demonstração
+        </button>
       </div>
-      <div class="modal-footer">
-        <button type="button" id="btnCancelarExclusao" class="btn-secondary" autofocus>Cancelar</button>
-        <button type="submit" id="btnConfirmarExclusaoFinal" class="btn-danger">Sim, Excluir</button>
-      </div>
-    </form>
-  </dialog>
+    </footer>
 
-  <!-- MODAL 3: CONFIRMAÇÃO DE RESTAURAÇÃO DE DADOS DEMO -->
-  <dialog id="modalConfirmarReset" aria-labelledby="tituloModalReset">
-    <form id="formConfirmarReset" method="dialog" novalidate>
-      <div class="modal-header">
-        <h3 id="tituloModalReset">Restaurar Dados de Demonstração</h3>
-      </div>
-      <div class="modal-body">
-        <p>
-          Deseja apagar todas as alterações e recriar o conjunto original de dados de demonstração (consultores, vendas fictícias e usuário <strong>João Vitor</strong>)?
-        </p>
-        <p class="modal-warning-text">Todas as vendas cadastradas manualmente serão removidas.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" id="btnCancelarReset" class="btn-secondary" autofocus>Cancelar</button>
-        <button type="submit" id="btnConfirmarResetFinal" class="btn-danger">Sim, Restaurar</button>
-      </div>
-    </form>
-  </dialog>
-
-  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
-
-  <footer class="app-footer">
-    <div class="footer-container">
-      <p>MotoRanking &copy; 2026 — Sistema de Gestão, BI e Ranking de Vendas de Motocicletas. Etapa 2.</p>
-      <button type="button" id="btnRestaurarDemo" class="btn-secondary btn-sm hidden">
-        <span aria-hidden="true">🔄</span> Restaurar dados de demonstração
-      </button>
-    </div>
-  </footer>
-
-  <!-- Chart.js 4.4.1 via CDN carregado ANTES dos scripts do app, sem atributo integrity (Item 2.1) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-  <script type="module" src="./js/app.js"></script>
-</body>
+    <!-- Chart.js 4.4.1 via CDN carregado ANTES dos scripts do app, sem atributo integrity (Item 2.1) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    <script type="module" src="./js/app.js"></script>
+  </body>
 </html>

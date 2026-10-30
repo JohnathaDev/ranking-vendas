@@ -266,6 +266,10 @@ body {
   min-width: 0;
 }
 
+.tab-panel:not(.hidden) {
+  animation: fadeIn 180ms ease-out;
+}
+
 .panel-container {
   display: flex;
   flex-direction: column;
@@ -1473,10 +1477,21 @@ dialog::backdrop {
   border-color: #fecaca;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -1501,6 +1516,35 @@ dialog::backdrop {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.85rem;
+}
+
+/* ============================================================
+   ACESSIBILIDADE: PREFERS-REDUCED-MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  dialog,
+  dialog[open] {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .toast {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .tab-panel:not(.hidden) {
+    animation: none !important;
+  }
 }
 
 /* ============================================================

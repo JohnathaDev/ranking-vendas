@@ -6,7 +6,7 @@ Resumo de arquitetura e padrões, para orientar quem for mexer no código.
 
 SPA estática para registrar vendas de motos por consultor, com ranking geral, painel individual e gráficos de BI. Hospedada no GitHub Pages e sem backend: todos os dados ficam no `localStorage` do navegador.
 
-- **Stack:** HTML5, CSS3 e JavaScript puro em ES Modules. Não há bundler, `package.json` nem dependências npm.
+- **Stack:** HTML5, CSS3 e JavaScript puro em ES Modules. Não há bundler. O `package.json` serve só para as ferramentas de desenvolvimento (`npm test`, `npm run lint`, `npm run format`, `npm run format:check`); o site não tem dependência npm em tempo de execução.
 - **Dependência externa:** Chart.js 4.4.1 carregado por CDN (`index.html`, antes de `js/app.js`) e usado como global `Chart`.
 - **Execução local:** como usa ES Modules, precisa de um servidor HTTP, por exemplo `npx serve .` ou `python -m http.server`. Abrir pelo `file://` não funciona.
 - **Tamanho:** cerca de 7,5 mil linhas (JS ≈ 5,1k, CSS ≈ 1,6k, HTML ≈ 0,9k).
@@ -80,7 +80,7 @@ graph TD
 - **XSS:** não se usa `innerHTML` em nenhum lugar. O DOM é montado com `createElement` e `textContent`. **Manter essa regra.**
 - **Erros:** `storage.js` lança `Error` com mensagem pronta para o usuário, e a UI captura e mostra com `showToast(msg, 'error')` ou `exibirErroCampo`.
 - **Acessibilidade:** `role="tablist/tab/tabpanel"`, `aria-pressed`, `aria-invalid`, `<dialog>` nativo, uma tabela de dados alternativa para cada gráfico e respeito a `prefers-reduced-motion`.
-- **Estilo:** indentação de 2 espaços, aspas simples, ponto e vírgula. Funções com data aceitam um parâmetro `dataReferencia`/`dataRef = new Date()` para facilitar testes.
+- **Estilo:** imposto pelo Prettier (`.prettierrc.json`: 2 espaços, aspas simples, ponto e vírgula, sem vírgula no final, 100 colunas) e pelo ESLint (`eslint.config.js`: recommended, `eqeqeq`, `no-var`, `no-unused-vars`). Rode `npm run format` e `npm run lint` antes de commitar. Funções com data aceitam um parâmetro `dataReferencia`/`dataRef = new Date()` para facilitar testes.
 - **CSS:** design tokens em `:root` (`--primary`, `--bg-*`, `--text-*`, `--radius-*`), responsivo com breakpoint principal em 600 px e tabelas que viram cards no celular (`table-responsive-cards`).
 - Comentários citam itens de especificação ("Item 1.1", "Item C5" etc.), herdados de rodadas anteriores de requisitos.
 
@@ -91,9 +91,9 @@ As funcionalidades do README estão implementadas e o site está publicado no Gi
 | Item | Situação |
 |---|---|
 | Controle de versão | Git ligado a `origin` = `github.com/johnathadev/ranking-vendas`, branch principal `main` |
-| Testes automatizados | **Ausentes**: sem runner, script ou arquivo de teste |
-| Lint / formatter | **Ausentes**: sem ESLint nem Prettier |
-| `package.json` | Ausente, o que é aceitável para o site, mas necessário para padronizar scripts de teste e lint |
+| Testes automatizados | `node --test` em `tests/` (42 testes: `utils.js` e `storage.js`) |
+| Lint / formatter | ESLint 9 (flat config) e Prettier 3; formatação em massa registrada em `.git-blame-ignore-revs` |
+| `package.json` | Só dependências de desenvolvimento (`eslint`, `@eslint/js`, `globals`, `prettier`) e os scripts |
 | CI | Ausente |
 | Documentação | README bom; este arquivo |
 | TODO/FIXME no código | Nenhum |
@@ -129,7 +129,7 @@ Severidade: **A** = bug ou risco funcional, **M** = qualidade ou manutenção, *
 | 1 | ✓ Feito (branch `feat/testes-utils`, 27 testes): base de testes e cobertura de `utils.js` | P2 | 0 |
 | 2 | ✓ Feito (branch `feat/testes-storage`, 41 testes no total): login, bloqueio, sessão, permissões, seed, migração e reset | P2 | 1 |
 | 3 | ✓ Feito dentro da tarefa 2: teste da placa repetida aceita e do contrato duplicado rejeitado | P1 | 2 |
-| 4 | Lint e formatação: ESLint e Prettier (explicado e aprovado pelo dono em 29/10/2026) | Padronização | 1 |
+| 4 | ✓ Feito (branch `chore/lint-prettier`): ESLint e Prettier, lint com 0 problemas | Padronização | 1 |
 | 5 | ✓ Feito (branch `fix/correcoes-pequenas`, 42 testes). Pequenas correções: expiração de sessão refletida na UI, fundo branco no PNG, remover `addConsultor` e `isPlacaExistente`, unificar o handler de exclusão, tornar `combinarDataComHoraAtual` e `formatarPlaca` defensivas, gravar o contrato normalizado | P3–P6, P12–P14 | 2 |
 | 6 | CI no GitHub Actions rodando `test` e `lint` em cada PR | Garantia contínua | 0, 1, 4 |
 | 7 | Refatoração gradual de `app.js` (painel, formulário e modais em módulos) | P7, P8 | 2, 6 |

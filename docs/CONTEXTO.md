@@ -7,7 +7,7 @@ Resumo de arquitetura e padrões, para orientar quem for mexer no código.
 SPA estática para registrar vendas de motos por consultor, com ranking geral, painel individual e gráficos de BI. Hospedada no GitHub Pages e sem backend: todos os dados ficam no `localStorage` do navegador.
 
 - **Stack:** HTML5, CSS3 e JavaScript puro em ES Modules. Não há bundler. O `package.json` serve só para as ferramentas de desenvolvimento (`npm test`, `npm run lint`, `npm run format`, `npm run format:check`); o site não tem dependência npm em tempo de execução.
-- **Dependência externa:** Chart.js 4.4.1 carregado por CDN (`index.html`, antes de `js/app.js`) e usado como global `Chart`.
+- **Dependência externa:** Chart.js 4.4.1, servido localmente de `vendor/chart.js/chart.umd.js` (cópia fixa do pacote npm) e usado como global `Chart`. O `index.html` carrega esse arquivo antes de `js/app.js`.
 - **Execução local:** como usa ES Modules, precisa de um servidor HTTP, por exemplo `npx serve .` ou `python -m http.server`. Abrir pelo `file://` não funciona.
 - **Tamanho:** cerca de 7,5 mil linhas (JS ≈ 5,1k, CSS ≈ 1,6k, HTML ≈ 0,9k).
 
@@ -137,7 +137,7 @@ Severidade: **A** = bug ou risco funcional, **M** = qualidade ou manutenção, *
 | P6 | M | **Handler de exclusão registrado duas vezes** (`click` do botão e `submit` do form). Hoje funciona porque o `preventDefault` do clique cancela o submit, mas a ligação é frágil. | `app.js:969-974` |
 | P7 | M | ~~**Arquivos grandes:** `app.js` (≈1k linhas) mistura bootstrap, painel, formulário e modais; `ranking.js` (≈930) e `charts.js` (≈850) também são grandes.~~ **Resolvido para `app.js` na tarefa 7:** dividido em `state.js`, `sessao.js`, `formVenda.js`, `modais.js`, `painel.js` e `app.js` (≈206 linhas). | `js/` |
 | P8 | M | ~~**Efeito colateral em leitura:** `getSessaoAtiva()` chama `logout()` (escreve no storage), o que pode disparar eventos `storage` em outras abas durante um render. `getEstadoBloqueioLogin()` faz o mesmo ao limpar as tentativas.~~ **Resolvido na tarefa 7:** leituras puras e funções explícitas `limparSessaoInvalida()` e `limparTentativasVencidas()`. | `storage.js` |
-| P9 | B | **Chart.js por CDN sem `integrity` (SRI)** e sem fallback local. Há uma mensagem de erro, mas sem gráfico. | `index.html:877` |
+| P9 | — | ~~**Chart.js por CDN sem `integrity` (SRI)** e sem fallback local. Há uma mensagem de erro, mas sem gráfico.~~ **Resolvido no passo 8:** cópia local em `vendor/chart.js/`. | `index.html:877` |
 | P10 | — | ~~Dispersão no filtro "dia" cai numa única coluna.~~ **Não é bug (revisado em 29/10/2026):** `pontosDispersao` devolve o dia do mês em `x`, mas `charts.js` (cerca da linha 499) transforma o gráfico numa linha do tempo no filtro "dia" (x = horário, y = item da dimensão). | `charts.js:499` |
 | P12 | B | `combinarDataComHoraAtual` lança `TypeError` se `dataYMD` não for string; as demais funções de `utils.js` tratam tipos inválidos sem lançar erro. Hoje só é chamada com valor já validado. | `utils.js:90` |
 | P13 | B | `formatarPlaca` formata qualquer texto de 7 caracteres alfanuméricos (por exemplo `1234567` → `123-4567`) sem verificar se é placa válida. As placas gravadas já são validadas, então o impacto é baixo. | `utils.js:27` |
@@ -159,7 +159,7 @@ Severidade: **A** = bug ou risco funcional, **M** = qualidade ou manutenção, *
 | 6 | ✓ Feito (branch `chore/ci`): `.github/workflows/ci.yml` (lint, format:check, test) e badge no README. Só roda depois do push | Garantia contínua | 0, 1, 4 |
 | 6b | ✓ Feito na tarefa 7: seção "Estrutura" do README atualizada | Documentação | 6 |
 | 7 | ✓ Feito (branch `refactor/app-modulos`, 43 testes): `app.js` dividido em `state.js`, `sessao.js`, `formVenda.js`, `modais.js` e `painel.js`; leituras de sessão e bloqueio sem escrita | P7, P8 | 2, 6 |
-| 8 | Chart.js servido localmente (`vendor/`), sem depender de CDN | P9 | — |
+| 8 | ✓ Feito (branch `chore/chartjs-local`): Chart.js 4.4.1 servido de `vendor/chart.js/`, idêntico ao pacote npm (SHA-256 conferido), sem CDN | P9 | — |
 
 ## Fluxo de trabalho
 

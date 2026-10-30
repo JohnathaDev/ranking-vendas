@@ -19,7 +19,7 @@ Usuário `JoaoVitor` · senha `123456`
 ## Tecnologias
 
 - HTML5, CSS3 e JavaScript (ES Modules)
-- [Chart.js 4.4.1](https://www.chartjs.org/) (via CDN)
+- [Chart.js 4.4.1](https://www.chartjs.org/) (servido localmente em `vendor/`)
 - localStorage para guardar os dados no navegador
 - GitHub Pages para a hospedagem
 
@@ -49,10 +49,12 @@ Usuário `JoaoVitor` · senha `123456`
 │   ├── storage.js            # Dados no localStorage, sessão e regras de permissão
 │   ├── ui.js                 # Componentes de interface (toast, abas, controles)
 │   └── utils.js              # Funções puras de validação, filtros e cálculos
-└── tests/
-    ├── helpers/              # Mocks utilitários para ambiente Node (localStorage)
-    ├── storage.test.js       # Testes de autenticação, sessão, vendas, seed e migração
-    └── utils.test.js         # Testes de validação, datas, filtros, ranking e séries BI
+├── tests/
+│   ├── helpers/              # Mocks utilitários para ambiente Node (localStorage)
+│   ├── storage.test.js       # Testes de autenticação, sessão, vendas, seed e migração
+│   └── utils.test.js         # Testes de validação, datas, filtros, ranking e séries BI
+└── vendor/
+    └── chart.js/             # Cópia local fixada do Chart.js 4.4.1 (UMD) e licença
 ```
 
 ## Desenvolvimento

@@ -86,6 +86,176 @@ body {
 }
 
 /* ============================================================
+   TOKENS E ESTILOS DO MODO ESCURO (:root[data-tema="escuro"])
+   ============================================================ */
+:root[data-tema='escuro'] {
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --primary-active: #2563eb;
+  --primary-light: #172554;
+  --primary-border: #1e40af;
+
+  --bg-page: #0b0f17;
+  --bg-card: #121826;
+  --bg-muted: #1e293b;
+  --bg-input: #0f172a;
+
+  --text-main: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --text-inverse: #0b0f17;
+
+  --border-color: #1f2937;
+  --border-focus: #3b82f6;
+  --focus-ring: rgba(59, 130, 246, 0.35);
+
+  --color-success: #22c55e;
+  --color-success-bg: #052e16;
+  --color-success-border: #14532d;
+  --color-error: #ef4444;
+  --color-error-bg: #450a0a;
+  --color-error-border: #7f1d1d;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #451a03;
+  --color-warning-border: #78350f;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --shadow-toast: 0 12px 24px -4px rgba(0, 0, 0, 0.7), 0 4px 8px -2px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-tema='escuro'] .data-table thead th,
+:root[data-tema='escuro'] .matrix-table thead th:first-child,
+:root[data-tema='escuro'] .matrix-table .matrix-total-col,
+:root[data-tema='escuro'] .matrix-table tfoot tr.matrix-footer-row td,
+:root[data-tema='escuro'] .modal-footer {
+  background-color: #161f30;
+  border-color: #1f2937;
+}
+
+:root[data-tema='escuro'] .data-table tbody tr:hover,
+:root[data-tema='escuro'] .matrix-table tbody tr:hover td:first-child,
+:root[data-tema='escuro'] .collapsible-section > summary.collapsible-summary:hover {
+  background-color: #172033;
+}
+
+:root[data-tema='escuro'] .data-table tbody tr.row-current-user,
+:root[data-tema='escuro'] .matrix-table tbody tr.row-current-user td:first-child {
+  background-color: #172554;
+}
+
+:root[data-tema='escuro'] .data-table tbody tr.row-current-user:hover,
+:root[data-tema='escuro'] .matrix-table tbody tr.row-current-user:hover td:first-child {
+  background-color: #1e3a8a;
+}
+
+:root[data-tema='escuro'] .plate-tag {
+  background-color: #0b0f17;
+  color: #f9fafb;
+  border-color: #374151;
+}
+
+:root[data-tema='escuro'] .contract-tag {
+  background-color: #1e293b;
+  color: #d1d5db;
+  border-color: #374151;
+}
+
+:root[data-tema='escuro'] .medal-gold {
+  background-color: #451a03;
+  color: #fde68a;
+  border-color: #78350f;
+}
+
+:root[data-tema='escuro'] .medal-silver {
+  background-color: #1e293b;
+  color: #cbd5e1;
+  border-color: #334155;
+}
+
+:root[data-tema='escuro'] .medal-bronze {
+  background-color: #431407;
+  color: #fed7aa;
+  border-color: #7c2d12;
+}
+
+:root[data-tema='escuro'] .medal-regular {
+  background-color: #1f2937;
+  color: #9ca3af;
+  border-color: #374151;
+}
+
+:root[data-tema='escuro'] .badge-voce {
+  background-color: #172554;
+  color: #60a5fa;
+  border-color: #1e40af;
+}
+
+:root[data-tema='escuro'] .btn-secondary {
+  background-color: #161f30;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+:root[data-tema='escuro'] .btn-secondary:hover:not(:disabled) {
+  background-color: #1e293b;
+  border-color: #374151;
+  color: #ffffff;
+}
+
+:root[data-tema='escuro'] .btn-delete {
+  border-color: #7f1d1d;
+  color: #f87171;
+}
+
+:root[data-tema='escuro'] .btn-delete:hover {
+  background-color: #450a0a;
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+:root[data-tema='escuro'] .toast {
+  background-color: #161f30;
+  color: #f3f4f6;
+  border-color: #1f2937;
+}
+
+:root[data-tema='escuro'] .toast.toast-error {
+  background-color: #161f30;
+  border-color: #7f1d1d;
+}
+
+:root[data-tema='escuro'] .demo-credentials-box {
+  background-color: #161f30;
+  border-color: #1f2937;
+  border-left: 3px solid var(--primary);
+  color: #9ca3af;
+}
+
+:root[data-tema='escuro'] .demo-credentials-box code {
+  background-color: #0b0f17;
+  border-color: #1f2937;
+  color: #f3f4f6;
+}
+
+:root[data-tema='escuro'] .login-alert-error {
+  background-color: #450a0a;
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+:root[data-tema='escuro'] dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+@media (max-width: 600px) {
+  :root[data-tema='escuro'] .table-responsive-cards td {
+    border-bottom: 1px solid #1f2937;
+  }
+}
+
+/* ============================================================
    HEADER, STATUS DE LOGIN E ABAS DE NAVEGAÇÃO
    ============================================================ */
 .app-header {
@@ -169,6 +339,48 @@ body {
   gap: 0.75rem;
   flex-wrap: wrap;
   min-width: 0;
+}
+
+.btn-theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.btn-theme-toggle:hover {
+  background-color: var(--bg-muted);
+  color: var(--text-main);
+  border-color: var(--primary);
+}
+
+.btn-theme-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+html.tema-transicao,
+html.tema-transicao *,
+html.tema-transicao *::before,
+html.tema-transicao *::after {
+  transition:
+    background-color 180ms ease-out,
+    border-color 180ms ease-out,
+    color 180ms ease-out !important;
 }
 
 .auth-status-box {
@@ -427,7 +639,7 @@ body {
   margin-top: 0.5rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
-  background-color: #fcfcfd;
+  background-color: var(--bg-card);
   overflow: hidden;
 }
 

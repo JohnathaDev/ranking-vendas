@@ -1,5 +1,7 @@
 # Ranking de Vendas
 
+[![CI](https://github.com/johnathadev/ranking-vendas/actions/workflows/ci.yml/badge.svg)](https://github.com/johnathadev/ranking-vendas/actions/workflows/ci.yml)
+
 Sistema web para registrar e acompanhar vendas de motos por consultor, com ranking geral, painel individual e gráficos.
 
 **Demonstração:** https://johnathadev.github.io/ranking-vendas/
@@ -36,6 +38,17 @@ Usuário `JoaoVitor` · senha `123456`
     ├── storage.js    # Dados, sessão e regras de permissão
     ├── ui.js         # Componentes de interface
     └── utils.js      # Validações, filtros e cálculos
+```
+
+## Desenvolvimento
+
+```bash
+npm ci                 # Instala dependências de desenvolvimento
+npm test               # Executa a suíte de testes (node --test)
+npm run lint           # Verifica regras do ESLint
+npm run format         # Formata o código com Prettier
+npm run format:check   # Checa a formatação sem alterar arquivos
+npx serve .            # Inicia um servidor HTTP local (ou: python -m http.server)
 ```
 
 > O login é apenas demonstrativo: sem servidor, os dados ficam no navegador de cada visitante.

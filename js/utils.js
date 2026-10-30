@@ -88,8 +88,22 @@ export function validarDataInput(dataYMD, dataReferencia = new Date()) {
 }
 
 export function combinarDataComHoraAtual(dataYMD, horaRef = new Date()) {
-  const [ano, mes, dia] = dataYMD.trim().split('-').map(Number);
+  if (!dataYMD || typeof dataYMD !== 'string') return null;
+  const limpo = dataYMD.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(limpo)) return null;
+
+  const [ano, mes, dia] = limpo.split('-').map(Number);
+  const dataCheck = new Date(ano, mes - 1, dia);
+  if (
+    dataCheck.getFullYear() !== ano ||
+    dataCheck.getMonth() !== mes - 1 ||
+    dataCheck.getDate() !== dia
+  ) {
+    return null;
+  }
+
   const agora = new Date(horaRef);
+  if (isNaN(agora.getTime())) return null;
 
   const dataResultante = new Date(
     ano,

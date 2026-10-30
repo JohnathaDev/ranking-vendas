@@ -139,6 +139,11 @@ describe('Datas de venda e formatação', () => {
     const isoFuturo = combinarDataComHoraAtual('2026-05-20', refFixa);
     assert.equal(isoFuturo, refFixa.toISOString());
     assert.ok(new Date(isoFuturo).getTime() <= refFixa.getTime());
+
+    assert.equal(combinarDataComHoraAtual(null, refFixa), null);
+    assert.equal(combinarDataComHoraAtual(20260515, refFixa), null);
+    assert.equal(combinarDataComHoraAtual('2026-02-30', refFixa), null);
+    assert.equal(combinarDataComHoraAtual('15/05/2026', refFixa), null);
   });
 
   it('validarDataVenda valida ISO dentro do intervalo permitido e rejeita futuro ou inválido', () => {

@@ -357,6 +357,10 @@ function handleSalvarVenda(e) {
 
   try {
     const dataIsoFinal = combinarDataComHoraAtual(dataVendaStr);
+    if (!dataIsoFinal) {
+      exibirErroCampo(DOM.inputDataVenda, DOM.erroDataVenda, 'Data de venda inválida.');
+      return;
+    }
 
     const novaVenda = addVenda({
       consultorId: usuarioLogado.consultorId,

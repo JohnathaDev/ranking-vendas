@@ -131,7 +131,8 @@ Severidade: **A** = bug ou risco funcional, **M** = qualidade ou manutenção, *
 | 3 | ✓ Feito dentro da tarefa 2: teste da placa repetida aceita e do contrato duplicado rejeitado | P1 | 2 |
 | 4 | ✓ Feito (branch `chore/lint-prettier`): ESLint e Prettier, lint com 0 problemas | Padronização | 1 |
 | 5 | ✓ Feito (branch `fix/correcoes-pequenas`, 42 testes). Pequenas correções: expiração de sessão refletida na UI, fundo branco no PNG, remover `addConsultor` e `isPlacaExistente`, unificar o handler de exclusão, tornar `combinarDataComHoraAtual` e `formatarPlaca` defensivas, gravar o contrato normalizado | P3–P6, P12–P14 | 2 |
-| 6 | CI no GitHub Actions rodando `test` e `lint` em cada PR | Garantia contínua | 0, 1, 4 |
+| 6 | ✓ Feito (branch `chore/ci`): `.github/workflows/ci.yml` (lint, format:check, test) e badge no README. Só roda depois do push | Garantia contínua | 0, 1, 4 |
+| 6b | Atualizar a seção "Estrutura" do README (`tests/`, `docs/`, `package.json`, configs), junto com a tarefa 7 | Documentação | 6 | Garantia contínua | 0, 1, 4 |
 | 7 | Refatoração gradual de `app.js` (painel, formulário e modais em módulos) | P7, P8 | 2, 6 |
 | 8 | Melhorias: SRI e fallback do Chart.js, eixo da dispersão no filtro "dia" | P9, P10 | — |
 

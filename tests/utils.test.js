@@ -56,13 +56,15 @@ describe('Validação e formatação de placa', () => {
     assert.equal(validarPlaca(undefined), false);
   });
 
-  it('formata placa de 7 caracteres com hífen e preserva entradas inválidas', () => {
+  it('formata placa de 7 caracteres com hífen apenas se válida e preserva entradas inválidas', () => {
     assert.equal(formatarPlaca('ABC1234'), 'ABC-1234');
     assert.equal(formatarPlaca('abc1d23'), 'ABC-1D23');
     assert.equal(formatarPlaca('ABC-1234'), 'ABC-1234');
+    assert.equal(formatarPlaca('1234567'), '1234567');
     assert.equal(formatarPlaca('CURTA'), 'CURTA');
     assert.equal(formatarPlaca(''), '');
     assert.equal(formatarPlaca(null), '');
+    assert.equal(formatarPlaca(undefined), '');
   });
 });
 

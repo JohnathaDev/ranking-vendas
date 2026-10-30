@@ -26,7 +26,7 @@ export function validarPlaca(placaRaw) {
 
 export function formatarPlaca(placaSemHifen) {
   const placa = normalizarPlaca(placaSemHifen);
-  if (placa.length === 7) {
+  if (placa.length === 7 && validarPlaca(placa)) {
     return `${placa.slice(0, 3)}-${placa.slice(3)}`;
   }
   return placaSemHifen || '';

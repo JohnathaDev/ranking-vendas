@@ -13,13 +13,14 @@
   --bg-muted: #f3f4f6;
   --bg-input: #ffffff;
 
-  --bg-gradient-accent: rgba(37, 99, 235, 0.05);
-  --bg-gradient-fade: rgba(247, 248, 250, 0);
-  --bg-gradient: radial-gradient(
+  --bg-gradiente-acento: rgba(37, 99, 235, 0.05);
+  --bg-gradiente-fim: rgba(247, 248, 250, 0);
+  --bg-gradiente: radial-gradient(
     120% 650px at 50% 0%,
-    var(--bg-gradient-accent) 0%,
-    var(--bg-gradient-fade) 100%
+    var(--bg-gradiente-acento) 0%,
+    var(--bg-gradiente-fim) 100%
   );
+  --bg-gradient: var(--bg-gradiente);
 
   --font-family:
     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -100,7 +101,7 @@ body::before {
   inset: 0;
   width: 100%;
   height: 100%;
-  background-image: var(--bg-gradient);
+  background-image: var(--bg-gradiente);
   background-repeat: no-repeat;
   background-position: top center;
   pointer-events: none;
@@ -122,13 +123,14 @@ body::before {
   --bg-muted: #1e293b;
   --bg-input: #0f172a;
 
-  --bg-gradient-accent: rgba(59, 130, 246, 0.07);
-  --bg-gradient-fade: rgba(11, 15, 23, 0);
-  --bg-gradient: radial-gradient(
+  --bg-gradiente-acento: rgba(59, 130, 246, 0.07);
+  --bg-gradiente-fim: rgba(11, 15, 23, 0);
+  --bg-gradiente: radial-gradient(
     120% 650px at 50% 0%,
-    var(--bg-gradient-accent) 0%,
-    var(--bg-gradient-fade) 100%
+    var(--bg-gradiente-acento) 0%,
+    var(--bg-gradiente-fim) 100%
   );
+  --bg-gradient: var(--bg-gradiente);
 
   --text-main: #f3f4f6;
   --text-secondary: #9ca3af;
@@ -403,14 +405,16 @@ body::before {
   box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
-html.tema-transicao,
-html.tema-transicao *,
-html.tema-transicao *::before,
-html.tema-transicao *::after {
-  transition:
-    background-color 180ms ease-out,
-    border-color 180ms ease-out,
-    color 180ms ease-out !important;
+@media (prefers-reduced-motion: no-preference) {
+  html.tema-transicao,
+  html.tema-transicao *,
+  html.tema-transicao *::before,
+  html.tema-transicao *::after {
+    transition:
+      background-color 180ms ease-out,
+      border-color 180ms ease-out,
+      color 180ms ease-out !important;
+  }
 }
 
 .auth-status-box {

@@ -20,7 +20,7 @@ export const TEMAS = {
 export function resolverTema(salvo, prefereEscuro) {
   if (salvo === TEMAS.ESCURO) return TEMAS.ESCURO;
   if (salvo === TEMAS.CLARO) return TEMAS.CLARO;
-  return Boolean(prefereEscuro) ? TEMAS.ESCURO : TEMAS.CLARO;
+  return prefereEscuro ? TEMAS.ESCURO : TEMAS.CLARO;
 }
 
 /**
@@ -79,7 +79,12 @@ export function aplicarTema(tema, { salvar = false, transicao = true } = {}) {
   if (typeof document !== 'undefined' && document.documentElement) {
     const html = document.documentElement;
 
-    if (transicao && !html.classList.contains('tema-transicao')) {
+    const prefereReduzido =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (transicao && !prefereReduzido && !html.classList.contains('tema-transicao')) {
       html.classList.add('tema-transicao');
       setTimeout(() => {
         html.classList.remove('tema-transicao');
@@ -92,7 +97,9 @@ export function aplicarTema(tema, { salvar = false, transicao = true } = {}) {
   if (salvar && typeof localStorage !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_KEYS.TEMA, temaFinal);
-    } catch (_) {}
+    } catch {
+      /* Ignora indisponibilidade ou restrição de gravação no localStorage */
+    }
   }
 
   atualizarBotaoTema(temaFinal);
@@ -121,7 +128,9 @@ export function initTema({ aoMudarTema } = {}) {
   let salvo = null;
   try {
     salvo = localStorage.getItem(STORAGE_KEYS.TEMA);
-  } catch (_) {}
+  } catch {
+    /* Ignora indisponibilidade ou restrição de leitura no localStorage */
+  }
 
   const prefereEscuro = obterPreferenciaSistemaEscuro();
   const temaInicial = resolverTema(salvo, prefereEscuro);
@@ -140,9 +149,12 @@ export function initTema({ aoMudarTema } = {}) {
       let escolhaSalva = null;
       try {
         escolhaSalva = localStorage.getItem(STORAGE_KEYS.TEMA);
-      } catch (_) {}
-      if (!escolhaSalva) {
-        const temaSistema = e.matches ? TEMAS.ESCURO : TEMAS.CLARO;
+      } catch {
+        /* Ignora indisponibilidade de leitura do localStorage */
+      }
+      const escolhaValida = escolhaSalva === TEMAS.CLARO || escolhaSalva === TEMAS.ESCURO;
+      if (!escolhaValida) {
+        const temaSistema = resolverTema(null, e.matches);
         aplicarTema(temaSistema, { salvar: false, transicao: true });
         if (typeof aoMudarTema === 'function') {
           aoMudarTema(temaSistema);

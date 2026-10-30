@@ -14,13 +14,16 @@
         try {
           var salvo = localStorage.getItem('ranking_motos_tema');
           var prefereEscuro = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          var escuro = salvo === 'escuro' || (!salvo && prefereEscuro);
+          var valido = salvo === 'claro' || salvo === 'escuro';
+          var escuro = salvo === 'escuro' || (!valido && prefereEscuro);
           if (escuro) {
             document.documentElement.setAttribute('data-tema', 'escuro');
           } else {
             document.documentElement.removeAttribute('data-tema');
           }
-        } catch (e) {}
+        } catch {
+          /* Ignora indisponibilidade do localStorage no carregamento inicial */
+        }
       })();
     </script>
     <link rel="stylesheet" href="./css/style.css" />

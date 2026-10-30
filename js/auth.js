@@ -51,7 +51,7 @@ export function initAuth(handlers = {}) {
       inputLoginSenha.type = estaOculta ? 'text' : 'password';
       btnToggleSenha.setAttribute('aria-pressed', estaOculta ? 'true' : 'false');
       btnToggleSenha.setAttribute('aria-label', estaOculta ? 'Ocultar senha' : 'Mostrar senha');
-      btnToggleSenha.textContent = estaOculta ? '🙈 Ocultar' : '👁️ Mostrar';
+      btnToggleSenha.textContent = estaOculta ? 'Ocultar' : 'Mostrar';
       inputLoginSenha.focus();
     });
   }
@@ -107,7 +107,7 @@ export function abrirModalLogin() {
   if (btnToggleSenha) {
     btnToggleSenha.setAttribute('aria-pressed', 'false');
     btnToggleSenha.setAttribute('aria-label', 'Mostrar senha');
-    btnToggleSenha.textContent = '👁️ Mostrar';
+    btnToggleSenha.textContent = 'Mostrar';
   }
 
   limparTentativasVencidas();

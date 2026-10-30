@@ -570,15 +570,15 @@ function criarElementoPosicaoRanking(posicao, qtdVendas) {
   if (posicao === 1 && qtdVendas > 0) {
     badge.className = 'medal-badge medal-gold';
     badge.setAttribute('aria-label', '1º lugar - Medalha de Ouro');
-    badge.textContent = '🥇 1º · Ouro';
+    badge.textContent = '1º · Ouro';
   } else if (posicao === 2 && qtdVendas > 0) {
     badge.className = 'medal-badge medal-silver';
     badge.setAttribute('aria-label', '2º lugar - Medalha de Prata');
-    badge.textContent = '🥈 2º · Prata';
+    badge.textContent = '2º · Prata';
   } else if (posicao === 3 && qtdVendas > 0) {
     badge.className = 'medal-badge medal-bronze';
     badge.setAttribute('aria-label', '3º lugar - Medalha de Bronze');
-    badge.textContent = '🥉 3º · Bronze';
+    badge.textContent = '3º · Bronze';
   } else {
     badge.className = 'medal-badge medal-regular';
     badge.setAttribute('aria-label', `${posicao}º lugar`);

@@ -358,9 +358,9 @@ function renderListaVendasPainel(vendasPeriodo, podeExcluir) {
 
       const iconeLixeira = document.createElement('span');
       iconeLixeira.setAttribute('aria-hidden', 'true');
-      iconeLixeira.textContent = '🗑️';
+      iconeLixeira.textContent = '';
 
-      const textoExcluir = document.createTextNode(' Excluir');
+      const textoExcluir = document.createTextNode('Excluir');
       btnExcluir.appendChild(iconeLixeira);
       btnExcluir.appendChild(textoExcluir);
 

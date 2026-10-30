@@ -20,7 +20,7 @@ export function showToast(mensagem, tipo = 'success', duracaoMs = 3500) {
 
   const iconeSpan = document.createElement('span');
   iconeSpan.setAttribute('aria-hidden', 'true');
-  iconeSpan.textContent = tipo === 'error' ? '⚠️' : tipo === 'info' ? 'ℹ️' : '✅';
+  iconeSpan.textContent = '';
 
   const textoSpan = document.createElement('span');
   textoSpan.textContent = String(mensagem ?? '');

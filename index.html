@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MotoRanking | Ranking Geral, BI e Gestão de Vendas</title>
+    <title>Ranking de Vendas</title>
     <meta
       name="description"
-      content="Sistema de ranking geral, BI analítico, matriz e gestão de vendas para consultores de concessionária de motos."
+      content="Sistema de ranking, painel analítico e gestão de vendas para locadora de veículos."
     />
     <link rel="stylesheet" href="./css/style.css" />
   </head>
@@ -15,32 +15,26 @@
     <header class="app-header">
       <div class="header-container">
         <div class="brand-wrapper">
-          <div class="brand-icon" aria-hidden="true">🏍️</div>
           <div class="brand-text">
-            <h1>MotoRanking <span class="brand-badge">Etapa 2 · BI</span></h1>
-            <p class="brand-subtitle">Ranking Geral, BI &amp; Gestão de Vendas da Concessionária</p>
+            <h1>Ranking de Vendas</h1>
           </div>
         </div>
 
         <div class="header-actions">
           <div id="authDeslogadoBox" class="auth-status-box">
-            <span class="visitor-pill">👁️ Visitante</span>
-            <button type="button" id="btnAbrirLogin" class="btn-primary btn-sm">
-              <span aria-hidden="true">🔐</span> Entrar
-            </button>
+            <span class="visitor-pill">Visitante</span>
+            <button type="button" id="btnAbrirLogin" class="btn-primary btn-sm">Entrar</button>
           </div>
 
           <div id="authLogadoBox" class="auth-status-box hidden">
             <span id="saudacaoUsuario" class="user-greeting">Olá, João Vitor</span>
-            <button type="button" id="btnLogout" class="btn-secondary btn-sm">
-              <span aria-hidden="true">🚪</span> Sair
-            </button>
+            <button type="button" id="btnLogout" class="btn-secondary btn-sm">Sair</button>
           </div>
         </div>
       </div>
 
       <div class="tabs-bar">
-        <div class="tabs-container" role="tablist" aria-label="Seções do MotoRanking">
+        <div class="tabs-container" role="tablist" aria-label="Navegação principal">
           <button
             type="button"
             role="tab"
@@ -51,7 +45,7 @@
             aria-selected="true"
             tabindex="0"
           >
-            <span aria-hidden="true">🏆</span> Ranking geral
+            Ranking geral
           </button>
 
           <button
@@ -64,7 +58,7 @@
             aria-selected="false"
             tabindex="-1"
           >
-            <span aria-hidden="true">📊</span> Painel do consultor
+            Painel do consultor
           </button>
 
           <button
@@ -77,7 +71,7 @@
             aria-selected="false"
             tabindex="-1"
           >
-            <span aria-hidden="true">📝</span> Nova venda
+            Nova venda
           </button>
         </div>
       </div>
@@ -147,7 +141,7 @@
 
             <div class="filter-item filter-actions">
               <button type="button" id="btnLimparFiltrosRanking" class="btn-secondary">
-                <span aria-hidden="true">🧹</span> Limpar filtros
+                Limpar filtros
               </button>
             </div>
           </div>
@@ -158,7 +152,7 @@
           <div class="kpi-card highlight">
             <div class="kpi-header">
               <span class="kpi-title">Total de Vendas</span>
-              <span class="kpi-icon" aria-hidden="true">📈</span>
+              <span class="kpi-icon" aria-hidden="true"></span>
             </div>
             <div id="kpiRankingTotal" class="kpi-value">0</div>
             <div id="kpiRankingTotalDetalhe" class="kpi-detail">Neste mês</div>
@@ -167,7 +161,7 @@
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Consultor Líder</span>
-              <span class="kpi-icon" aria-hidden="true">👑</span>
+              <span class="kpi-icon" aria-hidden="true"></span>
             </div>
             <div id="kpiRankingLider" class="kpi-value">-</div>
             <div id="kpiRankingLiderDetalhe" class="kpi-detail">0 vendas</div>
@@ -176,7 +170,7 @@
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Modelo Mais Vendido</span>
-              <span class="kpi-icon" aria-hidden="true">🏍️</span>
+              <span class="kpi-icon" aria-hidden="true"></span>
             </div>
             <div id="kpiRankingModelo" class="kpi-value">-</div>
             <div id="kpiRankingModeloDetalhe" class="kpi-detail">0 unidades</div>
@@ -185,7 +179,7 @@
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Ano Mais Vendido</span>
-              <span class="kpi-icon" aria-hidden="true">📅</span>
+              <span class="kpi-icon" aria-hidden="true"></span>
             </div>
             <div id="kpiRankingAno" class="kpi-value">-</div>
             <div id="kpiRankingAnoDetalhe" class="kpi-detail">0 unidades</div>
@@ -196,10 +190,8 @@
         <details id="detailsSecaoBI" class="card collapsible-section" open>
           <summary class="collapsible-summary">
             <div class="card-title-group">
-              <h2 class="card-title"><span aria-hidden="true">📊</span> BI · Análise visual</h2>
-              <p class="card-subtitle">
-                Exploração gráfica sincronizada com os filtros de período, modelo e ano
-              </p>
+              <h2 class="card-title">Análise visual</h2>
+              <p class="card-subtitle">Visualização gráfica com filtros de período, modelo e ano</p>
             </div>
             <span class="summary-chevron" aria-hidden="true">▾</span>
           </summary>
@@ -235,7 +227,7 @@
 
               <div class="filter-item filter-actions">
                 <button type="button" id="btnBaixarPNGBI" class="btn-secondary">
-                  <span aria-hidden="true">📥</span> Baixar PNG
+                  Exportar PNG
                 </button>
               </div>
             </div>
@@ -278,12 +270,8 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title-group">
-              <h2 class="card-title">
-                <span aria-hidden="true">🏆</span> Classificação de Consultores
-              </h2>
-              <p class="card-subtitle">
-                Ranking de competição (1, 1, 3) considerando todos os consultores no recorte
-              </p>
+              <h2 class="card-title">Classificação de consultores</h2>
+              <p class="card-subtitle">Desempenho dos consultores no período selecionado</p>
             </div>
             <span class="form-helper">Clique em Consultor ou Vendas para ordenar</span>
           </div>
@@ -328,7 +316,7 @@
           </div>
 
           <div id="emptyStateRankingConsultores" class="empty-state hidden">
-            <div class="empty-state-icon" aria-hidden="true">👥</div>
+            <div class="empty-state-icon" aria-hidden="true"></div>
             <h4>Nenhum consultor cadastrado</h4>
             <p>Não há consultores disponíveis para exibição no momento.</p>
           </div>
@@ -338,12 +326,8 @@
         <details id="detailsSecaoMatriz" class="card collapsible-section" open>
           <summary class="collapsible-summary">
             <div class="card-title-group">
-              <h2 class="card-title">
-                <span aria-hidden="true">🧮</span> Matriz de Desempenho Cruzada
-              </h2>
-              <p class="card-subtitle">
-                Distribuição de vendas por consultor com totais por linha e coluna
-              </p>
+              <h2 class="card-title">Matriz de desempenho</h2>
+              <p class="card-subtitle">Distribuição cruzada com totais consolidados</p>
             </div>
             <span class="summary-chevron" aria-hidden="true">▾</span>
           </summary>
@@ -388,10 +372,8 @@
         <details id="detailsSecaoVendasGerais" class="card collapsible-section" open>
           <summary class="collapsible-summary">
             <div class="card-title-group">
-              <h2 class="card-title">
-                <span aria-hidden="true">🗂️</span> Vendas Gerais do Recorte
-              </h2>
-              <p class="card-subtitle">Listagem consolidada de vendas (mais recentes primeiro)</p>
+              <h2 class="card-title">Vendas do período</h2>
+              <p class="card-subtitle">Histórico de vendas registradas no recorte</p>
             </div>
             <span class="summary-chevron" aria-hidden="true">▾</span>
           </summary>
@@ -427,7 +409,7 @@
             </div>
 
             <div id="emptyStateVendasGerais" class="empty-state hidden">
-              <div class="empty-state-icon" aria-hidden="true">🛵</div>
+              <div class="empty-state-icon" aria-hidden="true"></div>
               <h4>Nenhuma venda encontrada</h4>
               <p>Não há vendas registradas que correspondam aos filtros selecionados.</p>
             </div>
@@ -513,7 +495,7 @@
             <div class="kpi-card highlight">
               <div class="kpi-header">
                 <span class="kpi-title">Total de Vendas</span>
-                <span class="kpi-icon" aria-hidden="true">📊</span>
+                <span class="kpi-icon" aria-hidden="true"></span>
               </div>
               <div id="kpiTotalVendas" class="kpi-value">0</div>
               <div id="kpiPeriodoTexto" class="kpi-detail">Neste mês</div>
@@ -522,7 +504,7 @@
             <div class="kpi-card">
               <div class="kpi-header">
                 <span class="kpi-title">Modelo Mais Vendido</span>
-                <span class="kpi-icon" aria-hidden="true">🏍️</span>
+                <span class="kpi-icon" aria-hidden="true"></span>
               </div>
               <div id="kpiModeloMaisVendido" class="kpi-value">-</div>
               <div id="kpiModeloDetalhe" class="kpi-detail">0 unidades</div>
@@ -531,7 +513,7 @@
             <div class="kpi-card">
               <div class="kpi-header">
                 <span class="kpi-title">Ano Mais Vendido</span>
-                <span class="kpi-icon" aria-hidden="true">📅</span>
+                <span class="kpi-icon" aria-hidden="true"></span>
               </div>
               <div id="kpiAnoMaisVendido" class="kpi-value">-</div>
               <div id="kpiAnoDetalhe" class="kpi-detail">0 unidades</div>
@@ -542,10 +524,8 @@
           <div class="card">
             <div class="card-header">
               <div class="card-title-group">
-                <h3 class="card-title"><span aria-hidden="true">📈</span> Gráfico do consultor</h3>
-                <p class="card-subtitle">
-                  Análise visual das vendas do consultor selecionado no período
-                </p>
+                <h3 class="card-title">Evolução do consultor</h3>
+                <p class="card-subtitle">Visualização do desempenho individual no período</p>
               </div>
             </div>
 
@@ -577,7 +557,7 @@
 
                 <div class="filter-item filter-actions">
                   <button type="button" id="btnBaixarPNGPainel" class="btn-secondary">
-                    <span aria-hidden="true">📥</span> Baixar PNG
+                    Exportar PNG
                   </button>
                 </div>
               </div>
@@ -705,7 +685,7 @@
             </div>
 
             <div id="emptyStateVendas" class="empty-state hidden">
-              <div class="empty-state-icon" aria-hidden="true">🛵</div>
+              <div class="empty-state-icon" aria-hidden="true"></div>
               <h4>Nenhuma venda no período</h4>
               <p id="emptyStateTextoPainel">
                 Não há vendas registradas para este consultor no período selecionado.
@@ -727,7 +707,7 @@
       >
         <div id="cardLoginNecessario" class="card auth-guard-card">
           <div class="empty-state">
-            <div class="empty-state-icon" aria-hidden="true">🔒</div>
+            <div class="empty-state-icon" aria-hidden="true"></div>
             <h2>Faça login para cadastrar vendas</h2>
             <p>
               O registro de novas vendas é exclusivo para consultores autenticados. Visitantes
@@ -742,11 +722,9 @@
         <div id="cardFormularioVenda" class="card form-venda-card hidden" inert>
           <div class="card-header">
             <div class="card-title-group">
-              <h2 id="tituloCadastroVenda" class="card-title">
-                <span aria-hidden="true">📝</span> Cadastrar Nova Venda
-              </h2>
+              <h2 id="tituloCadastroVenda" class="card-title">Cadastrar venda</h2>
               <p class="card-subtitle">
-                Venda vinculada automaticamente ao consultor logado:
+                Registro vinculado ao consultor logado:
                 <strong id="labelConsultorLogadoForm">-</strong>
               </p>
             </div>
@@ -850,9 +828,7 @@
               </div>
 
               <div class="form-submit-row">
-                <button type="submit" id="btnSalvarVenda" class="btn-primary">
-                  <span aria-hidden="true">💾</span> Salvar Venda
-                </button>
+                <button type="submit" id="btnSalvarVenda" class="btn-primary">Salvar venda</button>
               </div>
             </form>
           </div>
@@ -864,7 +840,7 @@
     <dialog id="modalLogin" aria-labelledby="tituloModalLogin">
       <form id="formLogin" novalidate>
         <div class="modal-header">
-          <h3 id="tituloModalLogin">Entrar no MotoRanking</h3>
+          <h3 id="tituloModalLogin">Entrar</h3>
         </div>
 
         <div class="modal-body">
@@ -918,7 +894,7 @@
                 aria-pressed="false"
                 aria-label="Mostrar senha"
               >
-                👁️ Mostrar
+                Mostrar
               </button>
             </div>
             <div id="erroLoginSenha" class="error-message" role="alert"></div>
@@ -987,12 +963,9 @@
 
     <footer class="app-footer">
       <div class="footer-container">
-        <p>
-          MotoRanking &copy; 2026 — Sistema de Gestão, BI e Ranking de Vendas de Motocicletas. Etapa
-          2.
-        </p>
+        <p>Ranking de Vendas &copy; 2026 — Sistema de gestão de locações e contratos.</p>
         <button type="button" id="btnRestaurarDemo" class="btn-secondary btn-sm hidden">
-          <span aria-hidden="true">🔄</span> Restaurar dados de demonstração
+          Restaurar dados de demonstração
         </button>
       </div>
     </footer>

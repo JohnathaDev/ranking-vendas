@@ -690,6 +690,7 @@ export function renderGraficoConsultorPainel(params) {
     });
 
     ariaLabelResumo = `Gráfico de linha de evolução de ${nomeConsultor}: ${totalConsultor} vendas no período.`;
+    const corConsultor = getCorConsistente('consultor', nomeConsultor) || '#2563eb';
 
     configChart = {
       type: 'line',
@@ -699,8 +700,8 @@ export function renderGraficoConsultorPainel(params) {
           {
             label: `Vendas de ${nomeConsultor}`,
             data: temporal.valores,
-            borderColor: '#d90429',
-            backgroundColor: 'rgba(217, 4, 41, 0.15)',
+            borderColor: corConsultor,
+            backgroundColor: 'rgba(225, 29, 72, 0.15)',
             fill: true,
             borderWidth: 3,
             tension: 0.25,

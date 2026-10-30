@@ -32,7 +32,7 @@ export const MOTOS_CATALOG = [
 export const CORES_MODELO = {
   'Factor 150': '#2563eb', // Azul Royal
   'Start 160': '#f59e0b', // Âmbar
-  'Fan 160': '#d90429', // Vermelho Automotivo (Primária)
+  'Fan 160': '#e11d48', // Carmim / Rose Comercial
   'Bros 160': '#10b981', // Esmeralda
   'Pop 110i': '#7c3aed', // Violeta
   Outros: '#64748b' // Cinza Ardósia
@@ -44,7 +44,7 @@ export const CORES_MODELO = {
 export const CORES_ANO = {
   2024: '#0284c7', // Azul Céu Escuro
   2025: '#0d9488', // Verde-azulado (Teal)
-  2026: '#d90429', // Vermelho Automotivo
+  2026: '#e11d48', // Carmim / Rose Comercial
   Outros: '#64748b'
 };
 
@@ -52,7 +52,7 @@ export const CORES_ANO = {
  * Paleta consistente para consultores e séries adicionais (Item 2.5).
  */
 export const PALETA_CONSULTORES = [
-  '#d90429', // Vermelho
+  '#e11d48', // Carmim
   '#2563eb', // Azul
   '#059669', // Verde
   '#d97706', // Laranja

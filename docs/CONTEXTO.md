@@ -157,8 +157,8 @@ Severidade: **A** = bug ou risco funcional, **M** = qualidade ou manutenção, *
 | 4 | ✓ Feito (branch `chore/lint-prettier`): ESLint e Prettier, lint com 0 problemas | Padronização | 1 |
 | 5 | ✓ Feito (branch `fix/correcoes-pequenas`, 42 testes). Pequenas correções: expiração de sessão refletida na UI, fundo branco no PNG, remover `addConsultor` e `isPlacaExistente`, unificar o handler de exclusão, tornar `combinarDataComHoraAtual` e `formatarPlaca` defensivas, gravar o contrato normalizado | P3–P6, P12–P14 | 2 |
 | 6 | ✓ Feito (branch `chore/ci`): `.github/workflows/ci.yml` (lint, format:check, test) e badge no README. Só roda depois do push | Garantia contínua | 0, 1, 4 |
-| 6b | Atualizar a seção "Estrutura" do README (`tests/`, `docs/`, `package.json`, configs), junto com a tarefa 7 | Documentação | 6 | Garantia contínua | 0, 1, 4 |
-| 7 | Refatoração gradual de `app.js` (painel, formulário e modais em módulos) | P7, P8 | 2, 6 |
+| 6b | ✓ Feito na tarefa 7: seção "Estrutura" do README atualizada | Documentação | 6 |
+| 7 | ✓ Feito (branch `refactor/app-modulos`, 43 testes): `app.js` dividido em `state.js`, `sessao.js`, `formVenda.js`, `modais.js` e `painel.js`; leituras de sessão e bloqueio sem escrita | P7, P8 | 2, 6 |
 | 8 | Melhorias: SRI e fallback do Chart.js, eixo da dispersão no filtro "dia" | P9, P10 | — |
 
 ## Fluxo de trabalho

@@ -2,9 +2,11 @@ import { describe, it, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { instalarLocalStorageMock } from './helpers/localStorage.mock.js';
 import {
+  SCHEMA_VERSION,
   STORAGE_KEYS,
   gerarHashSHA256,
   inicializarSeedSeNecessario,
+  resetarDadosDemonstracao,
   getUsuarios,
   getConsultores,
   getConsultorAtivoId,
@@ -17,8 +19,9 @@ import {
   addVenda,
   deleteVenda
 } from '../js/storage.js';
+import { validarPlaca, filtrarPorPeriodo } from '../js/utils.js';
 
-const DATA_REF_FIXA = new Date(2026, 4, 15, 14, 30, 0, 0); // 15/05/2026 14:30 local
+const DATA_REF_FIXA = new Date(2026, 4, 15, 14, 30, 0, 0); // Sexta, 15/05/2026 14:30 local
 
 describe('Hash SHA-256, login, bloqueio de tentativas e sessão', () => {
   beforeEach(() => {
@@ -298,5 +301,143 @@ describe('Operações e permissões de addVenda e deleteVenda', () => {
       getVendas().some((v) => v.id === vendaPropria.id),
       false
     );
+  });
+});
+
+describe('Seed inicial, migração para schema v2 e reset de demonstração', () => {
+  beforeEach(() => {
+    instalarLocalStorageMock();
+    mock.timers.enable({ apis: ['Date'], now: DATA_REF_FIXA });
+  });
+
+  afterEach(() => {
+    mock.timers.reset();
+  });
+
+  it('inicializarSeedSeNecessario cria 5 consultores, 1 usuário JoaoVitor, 40 vendas válidas e é idempotente', () => {
+    inicializarSeedSeNecessario(DATA_REF_FIXA);
+
+    const consultores = getConsultores();
+    const usuarios = getUsuarios();
+    const vendas = getVendas();
+    const schema = JSON.parse(localStorage.getItem(STORAGE_KEYS.SCHEMA));
+
+    assert.equal(consultores.length, 5);
+    assert.equal(usuarios.length, 1);
+    assert.equal(usuarios[0].usuario, 'JoaoVitor');
+    assert.equal(vendas.length, 40);
+    assert.equal(schema, SCHEMA_VERSION);
+
+    const contratos = new Set(vendas.map((v) => v.numeroContrato));
+    assert.equal(contratos.size, 40);
+
+    vendas.forEach((v) => {
+      assert.equal(validarPlaca(v.placa), true);
+    });
+
+    consultores.forEach((c) => {
+      const vendasConsultor = getVendasPorConsultor(c.id);
+      assert.equal(vendasConsultor.length, 8);
+
+      const vendasHoje = filtrarPorPeriodo(vendasConsultor, 'dia', DATA_REF_FIXA);
+      const vendasSemana = filtrarPorPeriodo(vendasConsultor, 'semana', DATA_REF_FIXA);
+      assert.ok(vendasHoje.length >= 1);
+      assert.ok(vendasSemana.length >= 3);
+    });
+
+    // Segunda chamada não duplica registros
+    inicializarSeedSeNecessario(DATA_REF_FIXA);
+    assert.equal(getConsultores().length, 5);
+    assert.equal(getUsuarios().length, 1);
+    assert.equal(getVendas().length, 40);
+  });
+
+  it('migra storage legado sem usuário/schema criando João Vitor, preservando vendas existentes e sem colidir contratos', () => {
+    const consultorLegado = { id: 'c-legado', nome: 'Carlos Silva' };
+    const vendasLegadas = [
+      {
+        id: 'v-leg-1',
+        consultorId: 'c-legado',
+        placa: 'ABC1D23',
+        numeroContrato: 'CT1500',
+        modelo: 'Fan 160',
+        anoModelo: 2025,
+        dataVenda: new Date(2026, 4, 10, 10, 0, 0).toISOString()
+      },
+      {
+        id: 'v-leg-2',
+        consultorId: 'c-legado',
+        placa: 'DEF1G23',
+        numeroContrato: 'CT1501',
+        modelo: 'Bros 160',
+        anoModelo: 2026,
+        dataVenda: new Date(2026, 4, 11, 11, 0, 0).toISOString()
+      }
+    ];
+
+    localStorage.setItem(STORAGE_KEYS.CONSULTORES, JSON.stringify([consultorLegado]));
+    localStorage.setItem(STORAGE_KEYS.VENDAS, JSON.stringify(vendasLegadas));
+
+    inicializarSeedSeNecessario(DATA_REF_FIXA);
+
+    const consultores = getConsultores();
+    const usuarios = getUsuarios();
+    const vendas = getVendas();
+    const schema = JSON.parse(localStorage.getItem(STORAGE_KEYS.SCHEMA));
+
+    assert.equal(schema, SCHEMA_VERSION);
+    assert.equal(consultores.length, 2);
+    assert.equal(usuarios.length, 1);
+    assert.equal(usuarios[0].usuario, 'JoaoVitor');
+
+    const consultorJoao = consultores.find((c) => c.nome === 'João Vitor');
+    assert.ok(consultorJoao);
+    assert.equal(usuarios[0].consultorId, consultorJoao.id);
+
+    // Preserva as 2 vendas legadas e adiciona 8 para João Vitor
+    assert.equal(vendas.length, 10);
+    assert.ok(vendas.some((v) => v.id === 'v-leg-1'));
+    assert.ok(vendas.some((v) => v.id === 'v-leg-2'));
+
+    const contratosUnicos = new Set(vendas.map((v) => v.numeroContrato));
+    assert.equal(contratosUnicos.size, 10);
+
+    const vendasJoao = vendas.filter((v) => v.consultorId === consultorJoao.id);
+    assert.equal(vendasJoao.length, 8);
+    vendasJoao.forEach((v) => {
+      const num = Number(v.numeroContrato.replace('CT', ''));
+      assert.ok(num > 1501);
+    });
+  });
+
+  it('resetarDadosDemonstracao exige login e recria o seed mantendo a sessão ativa do JoaoVitor', async () => {
+    inicializarSeedSeNecessario(DATA_REF_FIXA);
+
+    assert.throws(() => resetarDadosDemonstracao(DATA_REF_FIXA), /Acesso negado/);
+
+    const sessaoAntes = await login('JoaoVitor', '123456');
+    addVenda({
+      placa: 'ZZZ9Z99',
+      numeroContrato: 'CT9999',
+      modelo: 'Fan 160',
+      anoModelo: 2026,
+      dataVenda: DATA_REF_FIXA.toISOString()
+    });
+    assert.equal(getVendas().length, 41);
+
+    resetarDadosDemonstracao(DATA_REF_FIXA);
+
+    assert.equal(getConsultores().length, 5);
+    assert.equal(getVendas().length, 40);
+    assert.equal(
+      getVendas().some((v) => v.numeroContrato === 'CT9999'),
+      false
+    );
+
+    const sessaoDepois = getSessaoAtiva();
+    assert.ok(sessaoDepois);
+    assert.equal(sessaoDepois.usuario, 'JoaoVitor');
+    assert.equal(getConsultorAtivoId(), sessaoDepois.consultorId);
+    assert.notEqual(sessaoDepois.id, sessaoAntes.id);
   });
 });

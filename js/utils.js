@@ -414,7 +414,7 @@ export function gerarMatriz(vendas, consultores, dimensao = 'modelo') {
 // ==========================================
 
 /**
- * Gera série de categorias para Colunas, Barras, Pizza e Rosca (Item 2.2).
+ * Gera série de categorias para Colunas e Pizza (Item 2.2).
  * Ordena por quantidade desc (desempate alfabético; anos em ordem crescente quando dimensao = 'anoModelo').
  */
 export function serieCategorias(vendas, dimensao = 'modelo', consultores = []) {
@@ -473,7 +473,7 @@ export function serieCategorias(vendas, dimensao = 'modelo', consultores = []) {
 }
 
 /**
- * Agrupa fatias menores em "Outros" quando houver mais de 6 fatias para Pizza/Rosca (Item 2.3).
+ * Agrupa fatias menores em "Outros" quando houver mais de 6 fatias para Pizza (Item 2.3).
  */
 export function agruparFatiasPizza(labels, valores, maxFatias = 6) {
   if (!Array.isArray(labels) || !Array.isArray(valores) || labels.length <= maxFatias) {

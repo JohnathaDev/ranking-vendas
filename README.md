@@ -8,7 +8,7 @@ Usuário `JoaoVitor` · senha `123456`
 ## Funcionalidades
 
 - **Ranking geral:** classificação dos consultores com filtros por período (dia, semana e mês), modelo e ano modelo.
-- **BI:** gráficos de colunas, barras, pizza, rosca, colunas empilhadas, linha e dispersão, que acompanham os filtros e podem ser baixados em PNG.
+- **BI:** gráficos de colunas, pizza, colunas empilhadas, linha e dispersão, que acompanham os filtros e podem ser baixados em PNG.
 - **Matriz de vendas:** consultor × modelo ou ano modelo, com totais.
 - **Painel do consultor:** vendas, indicadores e gráfico por modelo ou ano de cada consultor.
 - **Cadastro de vendas:** placa, contrato, modelo, ano modelo e data, disponível apenas com login.

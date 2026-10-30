@@ -62,7 +62,7 @@ const appState = {
   abaAtiva: 'ranking',
   consultorAtivoId: null,
   periodoPainel: 'mes',
-  tipoGraficoPainel: 'colunas', // 'colunas' | 'pizza' | 'rosca' | 'linha' (Item 2.4)
+  tipoGraficoPainel: 'colunas', // 'colunas' | 'pizza' | 'linha' (Item 2.4)
   dimensaoGraficoPainel: 'modelo', // 'modelo' | 'anoModelo' (Item 2.4)
   sortModeloOrdem: 'desc',
   sortAnoOrdem: 'desc',
@@ -886,7 +886,7 @@ function setupEventListeners() {
   if (DOM.selectPainelGraficoTipo) {
     DOM.selectPainelGraficoTipo.addEventListener('change', (e) => {
       const val = e.target.value;
-      appState.tipoGraficoPainel = ['colunas', 'pizza', 'rosca', 'linha'].includes(val)
+      appState.tipoGraficoPainel = ['colunas', 'pizza', 'linha'].includes(val)
         ? val
         : 'colunas';
       atualizarPainelConsultor();

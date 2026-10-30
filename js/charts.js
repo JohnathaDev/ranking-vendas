@@ -250,9 +250,9 @@ export function renderGraficoRankingBI(params) {
       ? 'Ano Modelo'
       : 'Modelo';
 
-  if (tipo === 'colunas' || tipo === 'barras' || tipo === 'pizza' || tipo === 'rosca') {
+  if (tipo === 'colunas' || tipo === 'pizza') {
     const base = serieCategorias(listaVendas, dimensao, consultores);
-    const ehCircular = tipo === 'pizza' || tipo === 'rosca';
+    const ehCircular = tipo === 'pizza';
     const serieFinal = ehCircular
       ? agruparFatiasPizza(base.labels, base.valores, 6)
       : base;
@@ -268,9 +268,7 @@ export function renderGraficoRankingBI(params) {
 
     const nomesTipo = {
       colunas: 'Gráfico de colunas',
-      barras: 'Gráfico de barras horizontais',
-      pizza: 'Gráfico de pizza',
-      rosca: 'Gráfico de rosca'
+      pizza: 'Gráfico de pizza'
     };
     ariaLabelResumo = gerarResumoAriaCategorias(
       nomesTipo[tipo] || 'Gráfico',
@@ -279,7 +277,7 @@ export function renderGraficoRankingBI(params) {
     );
 
     configChart = {
-      type: ehCircular ? (tipo === 'pizza' ? 'pie' : 'doughnut') : 'bar',
+      type: ehCircular ? 'pie' : 'bar',
       data: {
         labels: serieFinal.labels,
         datasets: [
@@ -296,7 +294,6 @@ export function renderGraficoRankingBI(params) {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        indexAxis: tipo === 'barras' ? 'y' : 'x',
         animation: { duration: duracaoAnimacao },
         plugins: {
           legend: {
@@ -756,7 +753,7 @@ export function renderGraficoConsultorPainel(params) {
     };
   } else {
     const base = serieCategorias(listaVendas, dimValida);
-    const ehCircular = tipo === 'pizza' || tipo === 'rosca';
+    const ehCircular = tipo === 'pizza';
     const serieFinal = ehCircular
       ? agruparFatiasPizza(base.labels, base.valores, 6)
       : base;
@@ -772,8 +769,7 @@ export function renderGraficoConsultorPainel(params) {
 
     const nomesTipo = {
       colunas: 'Gráfico de colunas',
-      pizza: 'Gráfico de pizza',
-      rosca: 'Gráfico de rosca'
+      pizza: 'Gráfico de pizza'
     };
     ariaLabelResumo = gerarResumoAriaCategorias(
       `${nomesTipo[tipo] || 'Gráfico'} (${nomeConsultor})`,
@@ -782,7 +778,7 @@ export function renderGraficoConsultorPainel(params) {
     );
 
     configChart = {
-      type: ehCircular ? (tipo === 'pizza' ? 'pie' : 'doughnut') : 'bar',
+      type: ehCircular ? 'pie' : 'bar',
       data: {
         labels: serieFinal.labels,
         datasets: [

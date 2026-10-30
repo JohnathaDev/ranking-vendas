@@ -32,9 +32,7 @@ import {
 const PERIODOS_VALIDOS = ['dia', 'semana', 'mes'];
 export const TIPOS_GRAFICO_BI = [
   'colunas',
-  'barras',
   'pizza',
-  'rosca',
   'empilhadas',
   'linha',
   'dispersao'

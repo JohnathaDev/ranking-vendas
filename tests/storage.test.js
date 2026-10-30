@@ -12,6 +12,7 @@ import {
   getConsultorAtivoId,
   getEstadoBloqueioLogin,
   getSessaoAtiva,
+  obterMsAteExpirarSessao,
   login,
   logout,
   getVendas,
@@ -144,6 +145,23 @@ describe('Hash SHA-256, login, bloqueio de tentativas e sessão', () => {
     logout();
     assert.equal(getSessaoAtiva(), null);
     assert.equal(localStorage.getItem(STORAGE_KEYS.SESSAO), null);
+  });
+
+  it('obterMsAteExpirarSessao retorna null sem sessão e os ms restantes sem chamar logout', async () => {
+    inicializarSeedSeNecessario(DATA_REF_FIXA);
+    assert.equal(obterMsAteExpirarSessao(), null);
+
+    await login('JoaoVitor', '123456');
+    assert.equal(obterMsAteExpirarSessao(), 8 * 60 * 60 * 1000);
+
+    // Avança 7 horas -> resta 1 hora (3600000 ms)
+    mock.timers.tick(7 * 60 * 60 * 1000);
+    assert.equal(obterMsAteExpirarSessao(), 3600000);
+
+    // Avança mais 2 horas -> expirada (0 ms), mas não remove a sessão do storage
+    mock.timers.tick(2 * 60 * 60 * 1000);
+    assert.equal(obterMsAteExpirarSessao(), 0);
+    assert.notEqual(localStorage.getItem(STORAGE_KEYS.SESSAO), null);
   });
 });
 

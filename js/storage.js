@@ -299,6 +299,24 @@ export function limparTentativasLogin() {
  * Descarta automaticamente sessões expiradas (8h) ou vinculadas a usuários/consultores inexistentes.
  * @returns {{ id: string, usuario: string, nome: string, consultorId: string } | null}
  */
+export function obterMsAteExpirarSessao(agora = Date.now()) {
+  const sessao = getItem(STORAGE_KEYS.SESSAO, null);
+  if (!sessao || typeof sessao !== 'object' || !sessao.usuarioId || !sessao.expiraEm) {
+    return null;
+  }
+
+  const expiraEmMs =
+    typeof sessao.expiraEm === 'number'
+      ? sessao.expiraEm
+      : new Date(sessao.expiraEm).getTime();
+
+  if (isNaN(expiraEmMs)) {
+    return null;
+  }
+
+  return Math.max(0, expiraEmMs - agora);
+}
+
 export function getSessaoAtiva() {
   const sessao = getItem(STORAGE_KEYS.SESSAO, null);
   if (!sessao || typeof sessao !== 'object' || !sessao.usuarioId || !sessao.expiraEm) {

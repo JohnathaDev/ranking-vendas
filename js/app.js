@@ -30,6 +30,7 @@ import {
   deleteVenda,
   isContratoExistente,
   getSessaoAtiva,
+  obterMsAteExpirarSessao,
   resetarDadosDemonstracao
 } from './storage.js';
 import {
@@ -138,6 +139,50 @@ const DOM = {
   btnCancelarReset: document.getElementById('btnCancelarReset')
 };
 
+let timerExpiracaoSessao = null;
+
+function limparTimerExpiracaoSessao() {
+  if (timerExpiracaoSessao !== null) {
+    clearTimeout(timerExpiracaoSessao);
+    timerExpiracaoSessao = null;
+  }
+}
+
+function handleSessaoExpiradaUI() {
+  limparTimerExpiracaoSessao();
+  atualizarUIEstadoAutenticacao();
+  resetarFormularioVenda();
+  carregarListaConsultores(appState.consultorAtivoId);
+
+  if (appState.abaAtiva === 'nova-venda' || window.location.hash === '#nova-venda') {
+    selecionarAba('ranking', { atualizarHash: true });
+  }
+
+  renderRankingGeral();
+  atualizarPainelConsultor();
+  showToast('Sua sessão expirou. Faça login novamente.', 'info');
+}
+
+function agendarVerificacaoExpiracaoSessao() {
+  limparTimerExpiracaoSessao();
+  const msRestantes = obterMsAteExpirarSessao();
+  if (msRestantes === null) return;
+
+  if (msRestantes <= 0) {
+    handleSessaoExpiradaUI();
+    return;
+  }
+
+  timerExpiracaoSessao = setTimeout(() => {
+    const sessao = getSessaoAtiva();
+    if (!sessao) {
+      handleSessaoExpiradaUI();
+    } else {
+      agendarVerificacaoExpiracaoSessao();
+    }
+  }, msRestantes + 50);
+}
+
 function initApp() {
   inicializarSeedSeNecessario();
   inicializarCampoDataVenda();
@@ -148,6 +193,7 @@ function initApp() {
 
   initAuth({
     onLoginSuccess: (usuarioLogado) => {
+      agendarVerificacaoExpiracaoSessao();
       appState.consultorAtivoId = usuarioLogado.consultorId;
       setConsultorAtivoId(usuarioLogado.consultorId);
       carregarListaConsultores(usuarioLogado.consultorId);
@@ -157,6 +203,7 @@ function initApp() {
       selecionarAba('nova-venda', { atualizarHash: true });
     },
     onLogoutSuccess: () => {
+      limparTimerExpiracaoSessao();
       resetarFormularioVenda();
       atualizarUIEstadoAutenticacao();
       renderRankingGeral();
@@ -166,6 +213,7 @@ function initApp() {
   });
 
   const sessaoInicial = getSessaoAtiva();
+  agendarVerificacaoExpiracaoSessao();
   carregarListaConsultores(sessaoInicial ? sessaoInicial.consultorId : null);
 
   initRanking();
@@ -820,6 +868,7 @@ function handleConfirmarResetDemo(e) {
   try {
     resetarDadosDemonstracao();
     fecharModalResetDemo();
+    agendarVerificacaoExpiracaoSessao();
 
     const sessaoNova = getSessaoAtiva();
     atualizarUIEstadoAutenticacao();
@@ -998,6 +1047,7 @@ function setupEventListeners() {
     // Item 1.2: Sessão compartilhada entre abas (login/logout em uma aba reflete nas outras)
     if (event.key === STORAGE_KEYS.SESSAO) {
       const sessaoAtual = getSessaoAtiva();
+      agendarVerificacaoExpiracaoSessao();
       atualizarUIEstadoAutenticacao();
 
       if (sessaoAtual) {
@@ -1029,6 +1079,18 @@ function setupEventListeners() {
       carregarListaConsultores(appState.consultorAtivoId);
       renderRankingGeral();
       atualizarPainelConsultor();
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const msRestantes = obterMsAteExpirarSessao();
+      if (msRestantes !== null && msRestantes <= 0) {
+        getSessaoAtiva();
+        handleSessaoExpiradaUI();
+      } else {
+        agendarVerificacaoExpiracaoSessao();
+      }
     }
   });
 }

@@ -31,7 +31,6 @@ import {
   isContratoExistente,
   getSessaoAtiva,
   limparSessaoInvalida,
-  obterMsAteExpirarSessao,
   resetarDadosDemonstracao
 } from './storage.js';
 import {
@@ -53,16 +52,11 @@ import {
 import { initRanking, renderRankingGeral, sincronizarRankingComURL } from './ranking.js';
 import { renderGraficoConsultorPainel, exportarGraficoPNG } from './charts.js';
 import { appState, DOM } from './state.js';
-
-const MAX_TIMEOUT_DELAY_MS = 2147483647;
-let timerExpiracaoSessao = null;
-
-function limparTimerExpiracaoSessao() {
-  if (timerExpiracaoSessao !== null) {
-    clearTimeout(timerExpiracaoSessao);
-    timerExpiracaoSessao = null;
-  }
-}
+import {
+  initMonitorSessao,
+  agendarVerificacaoExpiracaoSessao,
+  limparTimerExpiracaoSessao
+} from './sessao.js';
 
 function handleSessaoExpiradaUI() {
   limparTimerExpiracaoSessao();
@@ -80,30 +74,10 @@ function handleSessaoExpiradaUI() {
   showToast('Sua sessão expirou. Faça login novamente.', 'info');
 }
 
-function agendarVerificacaoExpiracaoSessao() {
-  limparTimerExpiracaoSessao();
-  const msRestantes = obterMsAteExpirarSessao();
-  if (msRestantes === null) return;
-
-  if (msRestantes <= 0) {
-    handleSessaoExpiradaUI();
-    return;
-  }
-
-  const delayMs = Math.min(msRestantes + 50, MAX_TIMEOUT_DELAY_MS);
-  timerExpiracaoSessao = setTimeout(() => {
-    const sessao = getSessaoAtiva();
-    if (!sessao) {
-      handleSessaoExpiradaUI();
-    } else {
-      agendarVerificacaoExpiracaoSessao();
-    }
-  }, delayMs);
-}
-
 function initApp() {
   inicializarSeedSeNecessario();
   limparSessaoInvalida();
+  initMonitorSessao({ onSessaoExpirada: handleSessaoExpiradaUI });
   inicializarCampoDataVenda();
   popularSelectModelosVenda();
 
@@ -983,17 +957,6 @@ function setupEventListeners() {
       carregarListaConsultores(appState.consultorAtivoId);
       renderRankingGeral();
       atualizarPainelConsultor();
-    }
-  });
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      const msRestantes = obterMsAteExpirarSessao();
-      if (msRestantes !== null && msRestantes <= 0) {
-        handleSessaoExpiradaUI();
-      } else {
-        agendarVerificacaoExpiracaoSessao();
-      }
     }
   });
 }

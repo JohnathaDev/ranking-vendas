@@ -30,6 +30,7 @@ import {
 export const SCHEMA_VERSION = 2;
 
 export const STORAGE_KEYS = {
+  TEMA: 'ranking_motos_tema',
   SCHEMA: 'ranking_motos_schema',
   CONSULTORES: 'ranking_motos_consultores',
   VENDAS: 'ranking_motos_vendas',

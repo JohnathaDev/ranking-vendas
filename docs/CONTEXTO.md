@@ -129,8 +129,8 @@ Severidade: **A** = bug ou risco funcional, **M** = qualidade ou manutenção, *
 | 1 | ✓ Feito (branch `feat/testes-utils`, 27 testes): base de testes e cobertura de `utils.js` | P2 | 0 |
 | 2 | ✓ Feito (branch `feat/testes-storage`, 41 testes no total): login, bloqueio, sessão, permissões, seed, migração e reset | P2 | 1 |
 | 3 | ✓ Feito dentro da tarefa 2: teste da placa repetida aceita e do contrato duplicado rejeitado | P1 | 2 |
-| 4 | Lint e formatação: ESLint e Prettier (**explicar ao dono antes de executar**) | Padronização | 1 |
-| 5 | Pequenas correções: expiração de sessão refletida na UI, fundo branco no PNG, remover `addConsultor` e `isPlacaExistente`, unificar o handler de exclusão, tornar `combinarDataComHoraAtual` e `formatarPlaca` defensivas, gravar o contrato normalizado | P3–P6, P12–P14 | 2 |
+| 4 | Lint e formatação: ESLint e Prettier (explicado e aprovado pelo dono em 29/10/2026) | Padronização | 1 |
+| 5 | ✓ Feito (branch `fix/correcoes-pequenas`, 42 testes). Pequenas correções: expiração de sessão refletida na UI, fundo branco no PNG, remover `addConsultor` e `isPlacaExistente`, unificar o handler de exclusão, tornar `combinarDataComHoraAtual` e `formatarPlaca` defensivas, gravar o contrato normalizado | P3–P6, P12–P14 | 2 |
 | 6 | CI no GitHub Actions rodando `test` e `lint` em cada PR | Garantia contínua | 0, 1, 4 |
 | 7 | Refatoração gradual de `app.js` (painel, formulário e modais em módulos) | P7, P8 | 2, 6 |
 | 8 | Melhorias: SRI e fallback do Chart.js, eixo da dispersão no filtro "dia" | P9, P10 | — |

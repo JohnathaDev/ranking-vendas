@@ -30,15 +30,19 @@
   </head>
   <body>
     <!-- CABEÇALHO PRINCIPAL & NAVEGAÇÃO POR ABAS (ITEM D1) -->
-    <header class="app-header">
-      <div class="header-container">
-        <div class="brand-wrapper">
-          <div class="brand-text">
-            <h1>Ranking de Vendas</h1>
+    <header class="app-header border-borda bg-card sticky top-0 z-50 w-full border-b shadow-sm">
+      <div
+        class="header-container mx-auto flex w-full max-w-[1320px] items-center justify-between gap-3 px-4 py-3"
+      >
+        <div class="brand-wrapper flex items-center gap-3">
+          <div class="brand-text flex flex-col">
+            <h1 class="text-texto text-base font-bold tracking-tight sm:text-lg">
+              Ranking de Vendas
+            </h1>
           </div>
         </div>
 
-        <div class="header-actions">
+        <div class="header-actions flex flex-nowrap items-center gap-2">
           <button
             type="button"
             id="btnAlternarTema"
@@ -84,20 +88,28 @@
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
           </button>
-          <div id="authDeslogadoBox" class="auth-status-box">
+          <div id="authDeslogadoBox" class="auth-status-box flex items-center gap-2">
             <span class="visitor-pill">Visitante</span>
             <button type="button" id="btnAbrirLogin" class="btn-primary btn-sm">Entrar</button>
           </div>
 
-          <div id="authLogadoBox" class="auth-status-box hidden">
-            <span id="saudacaoUsuario" class="user-greeting">Olá, João Vitor</span>
+          <div id="authLogadoBox" class="auth-status-box flex hidden items-center gap-2">
+            <span
+              id="saudacaoUsuario"
+              class="user-greeting text-texto max-w-[120px] truncate text-xs font-medium sm:max-w-[200px] sm:text-sm"
+              >Olá, João Vitor</span
+            >
             <button type="button" id="btnLogout" class="btn-secondary btn-sm">Sair</button>
           </div>
         </div>
       </div>
 
-      <div class="tabs-bar">
-        <div class="tabs-container" role="tablist" aria-label="Navegação principal">
+      <div class="tabs-bar border-borda bg-card w-full border-b">
+        <div
+          class="tabs-container mx-auto flex w-full max-w-[1320px] gap-1 overflow-x-auto px-2 sm:gap-2 sm:px-4"
+          role="tablist"
+          aria-label="Navegação principal"
+        >
           <button
             type="button"
             role="tab"
@@ -140,7 +152,9 @@
       </div>
     </header>
 
-    <main class="main-layout">
+    <main
+      class="main-layout mx-auto w-full max-w-[1320px] flex-1 space-y-6 px-3 py-4 sm:px-4 sm:py-6"
+    >
       <!-- ==========================================================
          ABA 1: RANKING GERAL (#ranking — Parte E, Item 1.3 e BI 2.3)
          ========================================================== -->
@@ -152,8 +166,12 @@
         aria-labelledby="tabRanking"
       >
         <!-- E1. Barra de Filtros Globais da Aba Ranking -->
-        <div class="card filter-toolbar-card">
-          <div class="ranking-filters-bar">
+        <div
+          class="card filter-toolbar-card bg-card rounded-card border-borda shadow-card border p-4"
+        >
+          <div
+            class="ranking-filters-bar grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          >
             <div class="filter-item">
               <span class="filter-label">Período</span>
               <div
@@ -211,7 +229,9 @@
         </div>
 
         <!-- E2. KPIs do Recorte (4 Indicadores) -->
-        <div class="kpi-cards-grid kpi-cards-4">
+        <div
+          class="kpi-cards-grid kpi-cards-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4"
+        >
           <div class="kpi-card highlight">
             <div class="kpi-header">
               <span class="kpi-title">Total de Vendas</span>
@@ -252,15 +272,21 @@
         <!-- 2.3 Seção "BI · Análise visual" (logo abaixo dos KPIs, recolhível com <details>/<summary> — Item 1.3) -->
         <details id="detailsSecaoBI" class="card collapsible-section" open>
           <summary class="collapsible-summary">
-            <div class="card-title-group">
-              <h2 class="card-title">Análise visual</h2>
-              <p class="card-subtitle">Visualização gráfica com filtros de período, modelo e ano</p>
+            <div class="card-title-group flex flex-col gap-0.5">
+              <h2 class="card-title text-texto text-base font-semibold sm:text-lg">
+                Análise visual
+              </h2>
+              <p class="card-subtitle text-texto-2 text-xs sm:text-sm">
+                Visualização gráfica com filtros de período, modelo e ano
+              </p>
             </div>
             <span class="summary-chevron" aria-hidden="true">▾</span>
           </summary>
 
           <div class="collapsible-content">
-            <div class="chart-controls-bar">
+            <div
+              class="chart-controls-bar bg-muted/40 border-borda grid grid-cols-1 items-end gap-3 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-4"
+            >
               <div class="filter-item">
                 <label for="selectBITipoGrafico" class="filter-label">Tipo de gráfico</label>
                 <select id="selectBITipoGrafico" class="form-select filter-select">
@@ -332,9 +358,13 @@
         <!-- E3. Tabela de Ranking de Consultores -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title-group">
-              <h2 class="card-title">Classificação de consultores</h2>
-              <p class="card-subtitle">Desempenho dos consultores no período selecionado</p>
+            <div class="card-title-group flex flex-col gap-0.5">
+              <h2 class="card-title text-texto text-base font-semibold sm:text-lg">
+                Classificação de consultores
+              </h2>
+              <p class="card-subtitle text-texto-2 text-xs sm:text-sm">
+                Desempenho dos consultores no período selecionado
+              </p>
             </div>
             <span class="form-helper">Clique em Consultor ou Vendas para ordenar</span>
           </div>
@@ -388,9 +418,13 @@
         <!-- E4. Matriz Consultor x (Modelo | Ano Modelo) — Recolhível e com rolagem horizontal + Consultor fixo (Item 1.3) -->
         <details id="detailsSecaoMatriz" class="card collapsible-section" open>
           <summary class="collapsible-summary">
-            <div class="card-title-group">
-              <h2 class="card-title">Matriz de desempenho</h2>
-              <p class="card-subtitle">Distribuição cruzada com totais consolidados</p>
+            <div class="card-title-group flex flex-col gap-0.5">
+              <h2 class="card-title text-texto text-base font-semibold sm:text-lg">
+                Matriz de desempenho
+              </h2>
+              <p class="card-subtitle text-texto-2 text-xs sm:text-sm">
+                Distribuição cruzada com totais consolidados
+              </p>
             </div>
             <span class="summary-chevron" aria-hidden="true">▾</span>
           </summary>
@@ -434,16 +468,20 @@
         <!-- E5. Vendas Gerais do Recorte — Recolhível e paginada 10 no celular / 20 no desktop (Item 1.3) -->
         <details id="detailsSecaoVendasGerais" class="card collapsible-section" open>
           <summary class="collapsible-summary">
-            <div class="card-title-group">
-              <h2 class="card-title">Vendas do período</h2>
-              <p class="card-subtitle">Histórico de vendas registradas no recorte</p>
+            <div class="card-title-group flex flex-col gap-0.5">
+              <h2 class="card-title text-texto text-base font-semibold sm:text-lg">
+                Vendas do período
+              </h2>
+              <p class="card-subtitle text-texto-2 text-xs sm:text-sm">
+                Histórico de vendas registradas no recorte
+              </p>
             </div>
             <span class="summary-chevron" aria-hidden="true">▾</span>
           </summary>
 
           <div class="collapsible-content">
             <div class="section-subtoolbar">
-              <div class="consultor-selector-box">
+              <div class="consultor-selector-box flex items-center gap-2">
                 <label for="filtroVendasGeraisConsultor">Filtrar consultor:</label>
                 <select
                   id="filtroVendasGeraisConsultor"
@@ -501,7 +539,7 @@
       >
         <div class="panel-container">
           <div class="period-filter-wrapper">
-            <div class="panel-header-left">
+            <div class="panel-header-left flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
               <div class="period-title">
                 <h2 id="labelNomeConsultor" class="panel-main-title">Painel do Consultor</h2>
                 <span id="badgeModoPainel" class="panel-mode-badge mode-readonly"
@@ -510,8 +548,8 @@
               </div>
             </div>
 
-            <div class="panel-header-controls">
-              <div class="consultor-selector-box">
+            <div class="panel-header-controls flex flex-wrap items-center gap-3">
+              <div class="consultor-selector-box flex items-center gap-2">
                 <label for="selectConsultor">Ver consultor:</label>
                 <select
                   id="selectConsultor"
@@ -554,7 +592,7 @@
           </div>
 
           <!-- KPIs Individuais -->
-          <div class="kpi-cards-grid">
+          <div class="kpi-cards-grid grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div class="kpi-card highlight">
               <div class="kpi-header">
                 <span class="kpi-title">Total de Vendas</span>
@@ -586,14 +624,20 @@
           <!-- 2.4 Card "Gráfico do consultor" -->
           <div class="card">
             <div class="card-header">
-              <div class="card-title-group">
-                <h3 class="card-title">Evolução do consultor</h3>
-                <p class="card-subtitle">Visualização do desempenho individual no período</p>
+              <div class="card-title-group flex flex-col gap-0.5">
+                <h3 class="card-title text-texto text-base font-semibold sm:text-lg">
+                  Evolução do consultor
+                </h3>
+                <p class="card-subtitle text-texto-2 text-xs sm:text-sm">
+                  Visualização do desempenho individual no período
+                </p>
               </div>
             </div>
 
             <div class="card-body">
-              <div class="chart-controls-bar">
+              <div
+                class="chart-controls-bar bg-muted/40 border-borda grid grid-cols-1 items-end gap-3 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-4"
+              >
                 <div class="filter-item">
                   <label for="selectPainelGraficoDimensao" class="filter-label">Ver por</label>
                   <select
@@ -658,10 +702,12 @@
           </div>
 
           <!-- Tabelas de Agrupamento (Vendas por Modelo e por Ano) -->
-          <div class="breakdown-grid">
+          <div class="breakdown-grid grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Vendas por Modelo</h3>
+                <h3 class="card-title text-texto text-base font-semibold sm:text-lg">
+                  Vendas por Modelo
+                </h3>
                 <span class="form-helper">Clique p/ ordenar</span>
               </div>
               <div class="table-wrapper">
@@ -691,7 +737,9 @@
 
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Vendas por Ano Modelo</h3>
+                <h3 class="card-title text-texto text-base font-semibold sm:text-lg">
+                  Vendas por Ano Modelo
+                </h3>
                 <span class="form-helper">Clique p/ ordenar</span>
               </div>
               <div class="table-wrapper">
@@ -723,9 +771,11 @@
           <!-- Tabela Detalhada de Vendas do Consultor -->
           <div class="card">
             <div class="card-header">
-              <div class="card-title-group">
-                <h3 class="card-title">Vendas Registradas no Período</h3>
-                <p class="card-subtitle">
+              <div class="card-title-group flex flex-col gap-0.5">
+                <h3 class="card-title text-texto text-base font-semibold sm:text-lg">
+                  Vendas Registradas no Período
+                </h3>
+                <p class="card-subtitle text-texto-2 text-xs sm:text-sm">
                   Listagem de veículos vendidos pelo consultor selecionado
                 </p>
               </div>
@@ -768,7 +818,10 @@
         data-tabpanel="nova-venda"
         aria-labelledby="tabNovaVenda"
       >
-        <div id="cardLoginNecessario" class="card auth-guard-card">
+        <div
+          id="cardLoginNecessario"
+          class="card auth-guard-card bg-card rounded-card border-borda shadow-card mx-auto my-12 max-w-md space-y-4 border p-8 text-center"
+        >
           <div class="empty-state">
             <div class="empty-state-icon" aria-hidden="true"></div>
             <h2>Faça login para cadastrar vendas</h2>
@@ -784,9 +837,9 @@
 
         <div id="cardFormularioVenda" class="card form-venda-card hidden" inert>
           <div class="card-header">
-            <div class="card-title-group">
+            <div class="card-title-group flex flex-col gap-0.5">
               <h2 id="tituloCadastroVenda" class="card-title">Cadastrar venda</h2>
-              <p class="card-subtitle">
+              <p class="card-subtitle text-texto-2 text-xs sm:text-sm">
                 Registro vinculado ao consultor logado:
                 <strong id="labelConsultorLogadoForm">-</strong>
               </p>
@@ -794,8 +847,8 @@
           </div>
 
           <div class="card-body">
-            <form id="formCadastroVenda" class="form-venda" novalidate>
-              <div class="form-venda-grid">
+            <form id="formCadastroVenda" class="form-venda space-y-6 p-4 sm:p-6" novalidate>
+              <div class="form-venda-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div class="form-group">
                   <label for="inputDataVenda" class="form-label">
                     Data da Venda <span class="required">*</span>
@@ -890,7 +943,9 @@
                 </div>
               </div>
 
-              <div class="form-submit-row">
+              <div
+                class="form-submit-row border-borda flex flex-col items-center justify-end gap-3 border-t pt-4 sm:flex-row"
+              >
                 <button type="submit" id="btnSalvarVenda" class="btn-primary">Salvar venda</button>
               </div>
             </form>
@@ -900,13 +955,17 @@
     </main>
 
     <!-- MODAL 1: LOGIN DO CONSULTOR -->
-    <dialog id="modalLogin" aria-labelledby="tituloModalLogin">
+    <dialog
+      id="modalLogin"
+      class="modal-dialog rounded-card border-borda bg-card text-texto fixed m-auto w-[calc(100vw-2rem)] max-w-md border p-0 shadow-lg"
+      aria-labelledby="tituloModalLogin"
+    >
       <form id="formLogin" novalidate>
-        <div class="modal-header">
+        <div class="modal-header border-borda flex items-center justify-between border-b px-5 py-4">
           <h3 id="tituloModalLogin">Entrar</h3>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-body text-texto-2 space-y-4 p-5 text-sm">
           <div class="demo-credentials-box">
             <strong>Conta de demonstração:</strong>
             <span>Usuário: <code>JoaoVitor</code> · Senha: <code>123456</code></span>
@@ -964,7 +1023,9 @@
           </div>
         </div>
 
-        <div class="modal-footer">
+        <div
+          class="modal-footer border-borda flex items-center justify-end gap-3 border-t px-5 py-4"
+        >
           <button type="button" id="btnCancelarLogin" class="btn-secondary">Cancelar</button>
           <button type="submit" id="btnSubmeterLogin" class="btn-primary btn-modal-submit">
             Entrar
@@ -974,12 +1035,16 @@
     </dialog>
 
     <!-- MODAL 2: CONFIRMAÇÃO DE EXCLUSÃO DE VENDA -->
-    <dialog id="modalConfirmarExclusao" aria-labelledby="tituloModalExclusao">
+    <dialog
+      id="modalConfirmarExclusao"
+      class="modal-dialog rounded-card border-borda bg-card text-texto fixed m-auto w-[calc(100vw-2rem)] max-w-md border p-0 shadow-lg"
+      aria-labelledby="tituloModalExclusao"
+    >
       <form id="formConfirmarExclusao" method="dialog" novalidate>
-        <div class="modal-header">
+        <div class="modal-header border-borda flex items-center justify-between border-b px-5 py-4">
           <h3 id="tituloModalExclusao">Confirmar Exclusão</h3>
         </div>
-        <div class="modal-body">
+        <div class="modal-body text-texto-2 space-y-4 p-5 text-sm">
           <p>
             Tem certeza de que deseja excluir a venda do veículo placa
             <strong id="excluirPlacaModal">-</strong> (Contrato
@@ -987,7 +1052,9 @@
           </p>
           <p class="modal-warning-text">Esta ação não poderá ser desfeita.</p>
         </div>
-        <div class="modal-footer">
+        <div
+          class="modal-footer border-borda flex items-center justify-end gap-3 border-t px-5 py-4"
+        >
           <button type="button" id="btnCancelarExclusao" class="btn-secondary" autofocus>
             Cancelar
           </button>
@@ -999,19 +1066,25 @@
     </dialog>
 
     <!-- MODAL 3: CONFIRMAÇÃO DE RESTAURAÇÃO DE DADOS DEMO -->
-    <dialog id="modalConfirmarReset" aria-labelledby="tituloModalReset">
+    <dialog
+      id="modalConfirmarReset"
+      class="modal-dialog rounded-card border-borda bg-card text-texto fixed m-auto w-[calc(100vw-2rem)] max-w-md border p-0 shadow-lg"
+      aria-labelledby="tituloModalReset"
+    >
       <form id="formConfirmarReset" method="dialog" novalidate>
-        <div class="modal-header">
+        <div class="modal-header border-borda flex items-center justify-between border-b px-5 py-4">
           <h3 id="tituloModalReset">Restaurar Dados de Demonstração</h3>
         </div>
-        <div class="modal-body">
+        <div class="modal-body text-texto-2 space-y-4 p-5 text-sm">
           <p>
             Deseja apagar todas as alterações e recriar o conjunto original de dados de demonstração
             (consultores, vendas fictícias e usuário <strong>João Vitor</strong>)?
           </p>
           <p class="modal-warning-text">Todas as vendas cadastradas manualmente serão removidas.</p>
         </div>
-        <div class="modal-footer">
+        <div
+          class="modal-footer border-borda flex items-center justify-end gap-3 border-t px-5 py-4"
+        >
           <button type="button" id="btnCancelarReset" class="btn-secondary" autofocus>
             Cancelar
           </button>
@@ -1024,8 +1097,12 @@
 
     <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
-    <footer class="app-footer">
-      <div class="footer-container">
+    <footer
+      class="app-footer border-borda bg-card text-texto-3 mt-auto w-full border-t py-4 text-center text-xs"
+    >
+      <div
+        class="footer-container mx-auto flex w-full max-w-[1320px] flex-col items-center justify-between gap-2 px-4 sm:flex-row"
+      >
         <p>Ranking de Vendas &copy; 2026 — Sistema de gestão de locações e contratos.</p>
         <button type="button" id="btnRestaurarDemo" class="btn-secondary btn-sm hidden">
           Restaurar dados de demonstração

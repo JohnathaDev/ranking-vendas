@@ -26,6 +26,7 @@ import {
   verificarEIniciarContagemBloqueio
 } from './auth.js';
 import { initRanking, renderRankingGeral, sincronizarRankingComURL } from './ranking.js';
+import { initTema } from './tema.js';
 import { appState } from './state.js';
 import {
   initMonitorSessao,
@@ -53,6 +54,12 @@ function handleSessaoExpiradaUI() {
 }
 
 function initApp() {
+  initTema({
+    aoMudarTema: () => {
+      renderRankingGeral();
+      atualizarPainelConsultor();
+    }
+  });
   inicializarSeedSeNecessario();
   limparSessaoInvalida();
   initMonitorSessao({ onSessaoExpirada: handleSessaoExpiradaUI });

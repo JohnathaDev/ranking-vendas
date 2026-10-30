@@ -8,6 +8,21 @@
       name="description"
       content="Sistema de ranking, painel analítico e gestão de vendas para locadora de veículos."
     />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      (function () {
+        try {
+          var salvo = localStorage.getItem('ranking_motos_tema');
+          var prefereEscuro = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var escuro = salvo === 'escuro' || (!salvo && prefereEscuro);
+          if (escuro) {
+            document.documentElement.setAttribute('data-tema', 'escuro');
+          } else {
+            document.documentElement.removeAttribute('data-tema');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
@@ -21,6 +36,51 @@
         </div>
 
         <div class="header-actions">
+          <button
+            type="button"
+            id="btnAlternarTema"
+            class="btn-theme-toggle"
+            aria-label="Ativar modo escuro"
+            aria-pressed="false"
+            title="Alternar modo escuro"
+          >
+            <svg
+              class="icon-theme-sun hidden"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg
+              class="icon-theme-moon"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
           <div id="authDeslogadoBox" class="auth-status-box">
             <span class="visitor-pill">Visitante</span>
             <button type="button" id="btnAbrirLogin" class="btn-primary btn-sm">Entrar</button>

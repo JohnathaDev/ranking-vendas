@@ -237,7 +237,7 @@ async function handleSubmitLogin(e) {
     if (typeof callbacks.onLoginSuccess === 'function') {
       callbacks.onLoginSuccess(usuarioLogado);
     }
-  } catch (error) {
+  } catch {
     const novoBloqueio = getEstadoBloqueioLogin();
     if (novoBloqueio.bloqueado) {
       verificarEIniciarContagemBloqueio();

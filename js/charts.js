@@ -93,15 +93,6 @@ function formatarPerc(qtd, total) {
   return `${p.toFixed(1).replace('.', ',')}%`;
 }
 
-function formatarHoraDecimal(horaDec) {
-  const val = Number(horaDec) || 0;
-  const h = Math.floor(val);
-  const m = Math.round((val - h) * 60);
-  const hAjustada = m === 60 ? h + 1 : h;
-  const mAjustado = m === 60 ? 0 : m;
-  return `${String(hAjustada).padStart(2, '0')}:${String(mAjustado).padStart(2, '0')}`;
-}
-
 /**
  * Popula a tabela de dados acessível dentro de <details> usando apenas createElement e textContent (Item 2.5).
  * @param {HTMLElement|null} theadEl

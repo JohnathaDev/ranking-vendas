@@ -18,7 +18,7 @@ Usuário `JoaoVitor` · senha `123456`
 
 ## Tecnologias
 
-- HTML5, CSS3 e JavaScript (ES Modules)
+- HTML5, CSS3, Tailwind CSS v4 e JavaScript (ES Modules)
 - [Chart.js 4.4.1](https://www.chartjs.org/) (servido localmente em `vendor/`)
 - localStorage para guardar os dados no navegador
 - GitHub Pages para a hospedagem
@@ -32,7 +32,8 @@ Usuário `JoaoVitor` · senha `123456`
 ├── eslint.config.js          # Configuração do ESLint (flat config)
 ├── .prettierrc.json          # Configuração do Prettier
 ├── css/
-│   └── style.css             # Estilos e responsividade
+│   ├── tailwind.css          # Estilos-fonte em Tailwind CSS v4 (@theme, @layer components)
+│   └── style.css             # CSS compilado e minificado para produção
 ├── docs/
 │   └── CONTEXTO.md           # Documentação de arquitetura, módulos e convenções
 ├── js/
@@ -61,6 +62,8 @@ Usuário `JoaoVitor` · senha `123456`
 
 ```bash
 npm ci                 # Instala dependências de desenvolvimento
+npm run build:css      # Compila e minifica css/tailwind.css para css/style.css
+npm run dev:css        # Observa alterações em css/tailwind.css e recompila
 npm test               # Executa a suíte de testes (node --test)
 npm run lint           # Verifica regras do ESLint
 npm run format         # Formata o código com Prettier

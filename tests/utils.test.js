@@ -15,7 +15,17 @@ import {
   validarDataVenda,
   formatarDataHora,
   filtrarPorPeriodo,
-  filtrarVendas
+  filtrarVendas,
+  agruparPor,
+  calcularLiderComEmpate,
+  gerarRanking,
+  gerarMatriz,
+  serieCategorias,
+  agruparFatiasPizza,
+  serieEmpilhada,
+  serieTemporal,
+  gerarSeriesLinhaPorDimensao,
+  pontosDispersao
 } from '../js/utils.js';
 
 describe('Validação e formatação de placa', () => {
@@ -284,5 +294,219 @@ describe('Filtros por período e filtros combinados de vendas', () => {
       refDomingo
     );
     assert.equal(todosMes.length, 3);
+  });
+});
+
+describe('Agrupamento, líder com empate, ranking e matriz', () => {
+  const consultores = [
+    { id: 'c1', nome: 'Carlos' },
+    { id: 'c2', nome: 'Ana' },
+    { id: 'c3', nome: 'Bruno' },
+    { id: 'c4', nome: 'Daniel' }
+  ];
+
+  const vendas = [
+    { id: '1', consultorId: 'c1', modelo: 'Fan 160', anoModelo: 2026 },
+    { id: '2', consultorId: 'c1', modelo: 'Fan 160', anoModelo: 2025 },
+    { id: '3', consultorId: 'c2', modelo: 'Bros 160', anoModelo: 2026 },
+    { id: '4', consultorId: 'c2', modelo: 'Start 160', anoModelo: 2024 },
+    { id: '5', consultorId: 'c3', modelo: 'Pop 110i', anoModelo: 2026 }
+  ];
+
+  it('agruparPor conta ocorrências por campo e converte anoModelo para número', () => {
+    const porAno = agruparPor(vendas, 'anoModelo');
+    assert.deepEqual(porAno, [
+      { chave: 2024, quantidade: 1 },
+      { chave: 2025, quantidade: 1 },
+      { chave: 2026, quantidade: 3 }
+    ]);
+    assert.deepEqual(agruparPor(null, 'modelo'), []);
+  });
+
+  it('calcularLiderComEmpate identifica líder único, empate ordenado e lista vazia', () => {
+    const semEmpate = calcularLiderComEmpate(vendas, 'modelo');
+    assert.equal(semEmpate.valorPrincipal, 'Fan 160');
+    assert.equal(semEmpate.detalhe, '2 unidades');
+    assert.equal(semEmpate.quantidadeMax, 2);
+    assert.deepEqual(semEmpate.empatados, ['Fan 160']);
+
+    const mapaConsultores = new Map(consultores.map((c) => [c.id, c.nome]));
+    const comEmpate = calcularLiderComEmpate(vendas, 'consultorId', mapaConsultores);
+    assert.equal(comEmpate.valorPrincipal, 'Ana / Carlos · empate');
+    assert.equal(comEmpate.detalhe, 'empate · 2 unidades cada');
+    assert.equal(comEmpate.quantidadeMax, 2);
+    assert.deepEqual(comEmpate.empatados, ['Ana', 'Carlos']);
+
+    const vazio = calcularLiderComEmpate([], 'modelo');
+    assert.equal(vazio.valorPrincipal, '-');
+    assert.equal(vazio.quantidadeMax, 0);
+    assert.deepEqual(vazio.empatados, []);
+  });
+
+  it('gerarRanking atribui posições de competição (1, 1, 3, 4), percentuais e desempata por nome', () => {
+    const ranking = gerarRanking(vendas, consultores);
+    assert.equal(ranking.length, 4);
+
+    assert.deepEqual(
+      ranking.map((r) => ({
+        posicao: r.posicao,
+        nome: r.nome,
+        vendas: r.vendas,
+        percentual: r.percentual
+      })),
+      [
+        { posicao: 1, nome: 'Ana', vendas: 2, percentual: 40 },
+        { posicao: 1, nome: 'Carlos', vendas: 2, percentual: 40 },
+        { posicao: 3, nome: 'Bruno', vendas: 1, percentual: 20 },
+        { posicao: 4, nome: 'Daniel', vendas: 0, percentual: 0 }
+      ]
+    );
+
+    assert.equal(ranking[0].modeloTop, 'Bros 160 / Start 160 · empate');
+    assert.equal(ranking[1].modeloTop, 'Fan 160');
+    assert.equal(ranking[3].modeloTop, '-');
+  });
+
+  it('gerarMatriz calcula totais por linha, coluna e geral para modelo e anoModelo', () => {
+    const matrizModelo = gerarMatriz(vendas, consultores, 'modelo');
+    assert.equal(matrizModelo.totalGeral, 5);
+    assert.equal(matrizModelo.totaisColuna['Fan 160'], 2);
+    assert.equal(matrizModelo.totaisColuna['Bros 160'], 1);
+    assert.equal(matrizModelo.totaisColuna['Start 160'], 1);
+    assert.equal(matrizModelo.totaisColuna['Pop 110i'], 1);
+    assert.equal(matrizModelo.totaisColuna['Factor 150'], 0);
+
+    const somaLinhasModelo = matrizModelo.linhas.reduce((acc, l) => acc + l.total, 0);
+    assert.equal(somaLinhasModelo, matrizModelo.totalGeral);
+    assert.equal(matrizModelo.linhas[0].nome, 'Ana');
+    assert.equal(matrizModelo.linhas[0].total, 2);
+
+    const matrizAno = gerarMatriz(vendas, consultores, 'anoModelo');
+    assert.deepEqual(matrizAno.colunas, [2024, 2025, 2026]);
+    assert.equal(matrizAno.totalGeral, 5);
+    assert.deepEqual(matrizAno.totaisColuna, { 2024: 1, 2025: 1, 2026: 3 });
+
+    const somaLinhasAno = matrizAno.linhas.reduce((acc, l) => acc + l.total, 0);
+    assert.equal(somaLinhasAno, matrizAno.totalGeral);
+  });
+});
+
+describe('Séries de BI: pizza, temporal, linha por dimensão e dispersão', () => {
+  it('agruparFatiasPizza mantém até 6 fatias e agrupa excedentes em "Outros"', () => {
+    const labels6 = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6'];
+    const valores6 = [10, 9, 8, 7, 6, 5];
+    const semAgrupar = agruparFatiasPizza(labels6, valores6, 6);
+    assert.deepEqual(semAgrupar.labels, labels6);
+    assert.deepEqual(semAgrupar.valores, valores6);
+
+    const labels8 = ['G', 'A', 'B', 'C', 'D', 'E', 'F', 'H'];
+    const valores8 = [1, 10, 9, 8, 7, 6, 2, 3];
+    const agrupado = agruparFatiasPizza(labels8, valores8, 6);
+    assert.deepEqual(agrupado.labels, ['A', 'B', 'C', 'D', 'E', 'Outros']);
+    assert.deepEqual(agrupado.valores, [10, 9, 8, 7, 6, 6]); // 1 + 2 + 3 = 6
+  });
+
+  it('serieCategorias e serieEmpilhada geram estruturas consistentes para gráficos', () => {
+    const consultores = [{ id: 'c1', nome: 'Ana' }];
+    const vendas = [
+      { consultorId: 'c1', modelo: 'Fan 160', anoModelo: 2026 },
+      { consultorId: 'c1', modelo: 'Fan 160', anoModelo: 2024 }
+    ];
+
+    const catAno = serieCategorias(vendas, 'anoModelo', consultores);
+    assert.deepEqual(catAno.labels, ['2024', '2026']);
+    assert.deepEqual(catAno.valores, [1, 1]);
+
+    const emp = serieEmpilhada(vendas, consultores, 'anoModelo');
+    assert.deepEqual(emp.labels, ['Ana']);
+    assert.equal(emp.datasets.length, 3);
+  });
+
+  it('serieTemporal gera 24 horas no dia, 7 dias na semana e N dias no mês', () => {
+    const refFevBissexto = new Date(2024, 1, 15, 12, 0, 0); // Fevereiro de 2024 (29 dias)
+    const refMaio = new Date(2026, 4, 13, 12, 0, 0); // Maio de 2026 (31 dias)
+
+    const vendas = [
+      { dataVenda: new Date(2026, 4, 11, 0, 15, 0).toISOString() }, // Seg, dia 11, 00h
+      { dataVenda: new Date(2026, 4, 13, 14, 45, 0).toISOString() }, // Qua, dia 13, 14h
+      { dataVenda: new Date(2026, 4, 17, 23, 10, 0).toISOString() } // Dom, dia 17, 23h
+    ];
+
+    const sDia = serieTemporal(vendas, 'dia', refMaio);
+    assert.equal(sDia.labels.length, 24);
+    assert.equal(sDia.labels[0], '00h');
+    assert.equal(sDia.labels[23], '23h');
+    assert.equal(sDia.valores[0], 1);
+    assert.equal(sDia.valores[14], 1);
+    assert.equal(sDia.valores[23], 1);
+
+    const sSemana = serieTemporal(vendas, 'semana', refMaio);
+    assert.equal(sSemana.labels.length, 7);
+    assert.deepEqual(sSemana.valores, [1, 0, 1, 0, 0, 0, 1]); // Seg, Qua, Dom
+
+    const sMesMaio = serieTemporal(vendas, 'mes', refMaio);
+    assert.equal(sMesMaio.labels.length, 31);
+    assert.equal(sMesMaio.valores[10], 1); // dia 11 (índice 10)
+    assert.equal(sMesMaio.valores[12], 1); // dia 13 (índice 12)
+    assert.equal(sMesMaio.valores[16], 1); // dia 17 (índice 16)
+
+    const sMesFev = serieTemporal([], 'mes', refFevBissexto);
+    assert.equal(sMesFev.labels.length, 29);
+  });
+
+  it('gerarSeriesLinhaPorDimensao gera série Total + top 5 itens + Outros quando há mais de 5 categorias', () => {
+    const ref = new Date(2026, 4, 15, 10, 0, 0);
+    const dataIso = new Date(2026, 4, 10, 10, 0, 0).toISOString();
+    const modelos = [
+      { nome: 'M1', qtd: 6 },
+      { nome: 'M2', qtd: 5 },
+      { nome: 'M3', qtd: 4 },
+      { nome: 'M4', qtd: 3 },
+      { nome: 'M5', qtd: 2 },
+      { nome: 'M6', qtd: 1 },
+      { nome: 'M7', qtd: 1 }
+    ];
+
+    const vendas = [];
+    modelos.forEach((m) => {
+      for (let i = 0; i < m.qtd; i += 1) {
+        vendas.push({ modelo: m.nome, dataVenda: dataIso });
+      }
+    });
+
+    const resultado = gerarSeriesLinhaPorDimensao(vendas, 'modelo', 'mes', [], ref);
+    assert.equal(resultado.labels.length, 31);
+    assert.deepEqual(
+      resultado.datasets.map((d) => d.label),
+      ['Total', 'M1', 'M2', 'M3', 'M4', 'M5', 'Outros']
+    );
+    assert.equal(resultado.datasets[0].isTotal, true);
+    assert.equal(resultado.datasets[0].valores[9], 22); // dia 10 (índice 9) soma todas as 22 vendas
+    assert.equal(resultado.datasets[6].valores[9], 2); // Outros = M6 (1) + M7 (1)
+  });
+
+  it('pontosDispersao calcula coordenadas x (dia do mês ou dia da semana) e y (hora decimal)', () => {
+    const consultores = [{ id: 'c1', nome: 'João Vitor' }];
+    const vendas = [
+      {
+        consultorId: 'c1',
+        modelo: 'Fan 160',
+        anoModelo: 2026,
+        placa: 'ABC1D23',
+        dataVenda: new Date(2026, 4, 17, 14, 30, 0).toISOString() // Dom 17/05/2026 às 14:30
+      }
+    ];
+
+    const pontosMes = pontosDispersao(vendas, consultores, 'mes');
+    assert.equal(pontosMes.length, 1);
+    assert.equal(pontosMes[0].x, 17);
+    assert.equal(pontosMes[0].y, 14.5);
+    assert.equal(pontosMes[0].consultor, 'João Vitor');
+    assert.equal(pontosMes[0].placa, 'ABC-1D23');
+
+    const pontosSemana = pontosDispersao(vendas, consultores, 'semana');
+    assert.equal(pontosSemana.length, 1);
+    assert.equal(pontosSemana[0].x, 7); // Domingo = 7
+    assert.equal(pontosSemana[0].y, 14.5);
   });
 });

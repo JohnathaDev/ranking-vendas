@@ -509,7 +509,7 @@ export function addVenda(dadosVenda) {
     id: gerarUUID(),
     consultorId,
     placa: placaNormalizada,
-    numeroContrato: contratoLimpo,
+    numeroContrato: normalizarContrato(numeroContrato),
     modelo: modeloLimpo,
     anoModelo: anoNumero,
     dataVenda: dataFinal

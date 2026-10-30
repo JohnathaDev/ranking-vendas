@@ -179,7 +179,7 @@ describe('Operações e permissões de addVenda e deleteVenda', () => {
     const novaVenda = addVenda({
       consultorId: outroConsultor.id, // deve ser ignorado
       placa: 'abc-1d23',
-      numeroContrato: '  CT9001  ',
+      numeroContrato: '  ct9300  ',
       modelo: 'Fan 160',
       anoModelo: '2026',
       dataVenda: new Date(2026, 4, 10, 10, 0, 0).toISOString()
@@ -188,7 +188,7 @@ describe('Operações e permissões de addVenda e deleteVenda', () => {
     assert.equal(novaVenda.consultorId, usuario.consultorId);
     assert.notEqual(novaVenda.consultorId, outroConsultor.id);
     assert.equal(novaVenda.placa, 'ABC1D23');
-    assert.equal(novaVenda.numeroContrato, 'CT9001');
+    assert.equal(novaVenda.numeroContrato, 'CT9300');
     assert.equal(novaVenda.modelo, 'Fan 160');
     assert.equal(novaVenda.anoModelo, 2026);
 

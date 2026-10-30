@@ -24,8 +24,7 @@ import {
   validarDataInput,
   obterDataHojeISO,
   DATA_MINIMA_VENDA,
-  normalizarNomeConsultor,
-  validarNomeConsultor
+  normalizarNomeConsultor
 } from './utils.js';
 
 export const SCHEMA_VERSION = 2;
@@ -186,34 +185,6 @@ export function getConsultores() {
   return getItem(STORAGE_KEYS.CONSULTORES, []);
 }
 
-export function addConsultor(nome) {
-  if (!nome || typeof nome !== 'string') {
-    throw new Error('O nome do consultor é obrigatório.');
-  }
-  const nomeLimpo = nome.trim();
-  if (!validarNomeConsultor(nomeLimpo)) {
-    throw new Error('O nome do consultor deve conter entre 3 e 60 caracteres.');
-  }
-
-  const consultores = getConsultores();
-  const nomeNormalizado = normalizarNomeConsultor(nomeLimpo);
-  const jaExiste = consultores.some(
-    (c) => c && normalizarNomeConsultor(c.nome) === nomeNormalizado
-  );
-
-  if (jaExiste) {
-    throw new Error(`Já existe um consultor cadastrado com o nome "${nomeLimpo}".`);
-  }
-
-  const novoConsultor = {
-    id: gerarUUID(),
-    nome: nomeLimpo
-  };
-
-  consultores.push(novoConsultor);
-  setItem(STORAGE_KEYS.CONSULTORES, consultores);
-  return novoConsultor;
-}
 
 export function getConsultorAtivoId() {
   try {
@@ -455,14 +426,6 @@ export function getVendasPorConsultor(consultorId) {
   return todas.filter((venda) => venda && venda.consultorId === consultorId);
 }
 
-export function isPlacaExistente(placaRaw, ignoreVendaId = null) {
-  if (!placaRaw) return false;
-  const placa = normalizarPlaca(placaRaw);
-  const vendas = getVendas();
-  return vendas.some(
-    (venda) => venda && normalizarPlaca(venda.placa) === placa && venda.id !== ignoreVendaId
-  );
-}
 
 export function isContratoExistente(contrato, ignoreVendaId = null) {
   if (!contrato || typeof contrato !== 'string') return false;

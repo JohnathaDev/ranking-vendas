@@ -45,6 +45,7 @@ function isMobileViewport() {
 function lerCoresTemaCSS() {
   if (typeof window === 'undefined' || typeof getComputedStyle !== 'function') {
     return {
+      bgCard: '#ffffff',
       textMain: '#0f172a',
       textSecondary: '#475569',
       borderColor: '#e2e8f0',
@@ -53,12 +54,27 @@ function lerCoresTemaCSS() {
   }
   const styles = getComputedStyle(document.documentElement);
   return {
+    bgCard: styles.getPropertyValue('--bg-card').trim() || '#ffffff',
     textMain: styles.getPropertyValue('--text-main').trim() || '#0f172a',
     textSecondary: styles.getPropertyValue('--text-secondary').trim() || '#475569',
     borderColor: styles.getPropertyValue('--border-color').trim() || '#e2e8f0',
     fontFamily: styles.getPropertyValue('--font-family').trim() || 'system-ui, sans-serif'
   };
 }
+
+const pluginFundoCanvas = {
+  id: 'fundoCanvas',
+  beforeDraw(chart) {
+    const { ctx, width, height } = chart;
+    if (!ctx) return;
+    const { bgCard } = lerCoresTemaCSS();
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = bgCard || '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+  }
+};
 
 /**
  * Destrói a instância anterior de um gráfico pelo seu identificador (Item 2.1).
@@ -646,6 +662,7 @@ export function renderGraficoRankingBI(params) {
   alternarVisibilidadeElementos(elementos, 'grafico');
 
   if (canvas && configChart) {
+    configChart.plugins = [pluginFundoCanvas, ...(configChart.plugins || [])];
     const ctx = canvas.getContext('2d');
     const novaInstancia = new window.Chart(ctx, configChart);
     instanciasGraficos.set(idInstancia, novaInstancia);
@@ -846,6 +863,7 @@ export function renderGraficoConsultorPainel(params) {
   alternarVisibilidadeElementos(elementos, 'grafico');
 
   if (canvas && configChart) {
+    configChart.plugins = [pluginFundoCanvas, ...(configChart.plugins || [])];
     const ctx = canvas.getContext('2d');
     const novaInstancia = new window.Chart(ctx, configChart);
     instanciasGraficos.set(idInstancia, novaInstancia);

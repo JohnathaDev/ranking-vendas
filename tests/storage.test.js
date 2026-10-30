@@ -11,7 +11,11 @@ import {
   getEstadoBloqueioLogin,
   getSessaoAtiva,
   login,
-  logout
+  logout,
+  getVendas,
+  getVendasPorConsultor,
+  addVenda,
+  deleteVenda
 } from '../js/storage.js';
 
 const DATA_REF_FIXA = new Date(2026, 4, 15, 14, 30, 0, 0); // 15/05/2026 14:30 local
@@ -137,5 +141,162 @@ describe('Hash SHA-256, login, bloqueio de tentativas e sessão', () => {
     logout();
     assert.equal(getSessaoAtiva(), null);
     assert.equal(localStorage.getItem(STORAGE_KEYS.SESSAO), null);
+  });
+});
+
+describe('Operações e permissões de addVenda e deleteVenda', () => {
+  beforeEach(() => {
+    instalarLocalStorageMock();
+    mock.timers.enable({ apis: ['Date'], now: DATA_REF_FIXA });
+    inicializarSeedSeNecessario(DATA_REF_FIXA);
+  });
+
+  afterEach(() => {
+    mock.timers.reset();
+  });
+
+  it('addVenda exige login ativo', () => {
+    assert.throws(
+      () =>
+        addVenda({
+          placa: 'ABC1D23',
+          numeroContrato: 'CT9001',
+          modelo: 'Fan 160',
+          anoModelo: 2026,
+          dataVenda: DATA_REF_FIXA.toISOString()
+        }),
+      /Acesso negado/
+    );
+  });
+
+  it('addVenda grava venda válida com placa normalizada e ignora consultorId do payload', async () => {
+    const usuario = await login('JoaoVitor', '123456');
+    const outroConsultor = getConsultores().find((c) => c.id !== usuario.consultorId);
+
+    const novaVenda = addVenda({
+      consultorId: outroConsultor.id, // deve ser ignorado
+      placa: 'abc-1d23',
+      numeroContrato: '  CT9001  ',
+      modelo: 'Fan 160',
+      anoModelo: '2026',
+      dataVenda: new Date(2026, 4, 10, 10, 0, 0).toISOString()
+    });
+
+    assert.equal(novaVenda.consultorId, usuario.consultorId);
+    assert.notEqual(novaVenda.consultorId, outroConsultor.id);
+    assert.equal(novaVenda.placa, 'ABC1D23');
+    assert.equal(novaVenda.numeroContrato, 'CT9001');
+    assert.equal(novaVenda.modelo, 'Fan 160');
+    assert.equal(novaVenda.anoModelo, 2026);
+
+    const vendasDoJoao = getVendasPorConsultor(usuario.consultorId);
+    assert.ok(vendasDoJoao.some((v) => v.id === novaVenda.id));
+  });
+
+  it('addVenda aceita a MESMA placa em contratos diferentes e rejeita contrato duplicado (case-insensitive)', async () => {
+    await login('JoaoVitor', '123456');
+
+    const venda1 = addVenda({
+      placa: 'XYZ-9A88',
+      numeroContrato: 'CT9100',
+      modelo: 'Bros 160',
+      anoModelo: 2026,
+      dataVenda: DATA_REF_FIXA.toISOString()
+    });
+
+    const venda2MesmaPlaca = addVenda({
+      placa: 'xyz9a88',
+      numeroContrato: 'CT9101',
+      modelo: 'Bros 160',
+      anoModelo: 2025,
+      dataVenda: DATA_REF_FIXA.toISOString()
+    });
+
+    assert.equal(venda1.placa, 'XYZ9A88');
+    assert.equal(venda2MesmaPlaca.placa, 'XYZ9A88');
+    assert.notEqual(venda1.id, venda2MesmaPlaca.id);
+
+    assert.throws(
+      () =>
+        addVenda({
+          placa: 'DEF1G23',
+          numeroContrato: 'ct9100', // duplicado em minúsculas
+          modelo: 'Fan 160',
+          anoModelo: 2026,
+          dataVenda: DATA_REF_FIXA.toISOString()
+        }),
+      /já está cadastrado/
+    );
+  });
+
+  it('addVenda rejeita modelo fora do catálogo, ano inválido para o modelo, datas inválidas, placa e contrato inválidos', async () => {
+    await login('JoaoVitor', '123456');
+
+    const baseValida = {
+      placa: 'ABC1D23',
+      numeroContrato: 'CT9200',
+      modelo: 'Pop 110i',
+      anoModelo: 2026,
+      dataVenda: DATA_REF_FIXA.toISOString()
+    };
+
+    assert.throws(() => addVenda({ ...baseValida, placa: 'INVALIDA' }), /Placa inválida/);
+    assert.throws(
+      () => addVenda({ ...baseValida, numeroContrato: 'CT 9200' }),
+      /Número de contrato inválido/
+    );
+    assert.throws(
+      () => addVenda({ ...baseValida, modelo: 'CB 300F' }),
+      /não pertence ao catálogo oficial/
+    );
+    assert.throws(
+      () => addVenda({ ...baseValida, modelo: 'Pop 110i', anoModelo: 2024 }),
+      /não é válido para o modelo/
+    );
+    assert.throws(
+      () =>
+        addVenda({
+          ...baseValida,
+          dataVenda: new Date(2022, 11, 31, 12, 0, 0).toISOString()
+        }),
+      /não pode ser anterior a 01\/01\/2023/
+    );
+    assert.throws(
+      () =>
+        addVenda({
+          ...baseValida,
+          dataVenda: new Date(2026, 4, 16, 12, 0, 0).toISOString()
+        }),
+      /inválida ou posterior à data de hoje/
+    );
+  });
+
+  it('deleteVenda exige login, bloqueia exclusão de outro consultor, retorna false para inexistente e remove venda própria', async () => {
+    const vendasIniciais = getVendas();
+    assert.throws(() => deleteVenda(vendasIniciais[0].id), /Acesso negado/);
+
+    const usuario = await login('JoaoVitor', '123456');
+    const vendaOutroConsultor = vendasIniciais.find(
+      (v) => v.consultorId !== usuario.consultorId
+    );
+    const vendaPropria = vendasIniciais.find(
+      (v) => v.consultorId === usuario.consultorId
+    );
+
+    assert.throws(
+      () => deleteVenda(vendaOutroConsultor.id),
+      /Permissão negada/
+    );
+
+    assert.equal(deleteVenda('id-que-nao-existe'), false);
+
+    const totalAntes = getVendas().length;
+    const removida = deleteVenda(vendaPropria.id);
+    assert.equal(removida, true);
+    assert.equal(getVendas().length, totalAntes - 1);
+    assert.equal(
+      getVendas().some((v) => v.id === vendaPropria.id),
+      false
+    );
   });
 });

@@ -185,7 +185,6 @@ export function getConsultores() {
   return getItem(STORAGE_KEYS.CONSULTORES, []);
 }
 
-
 export function getConsultorAtivoId() {
   try {
     return localStorage.getItem(STORAGE_KEYS.CONSULTOR_ATIVO) || null;
@@ -295,9 +294,10 @@ export function limparTentativasLogin() {
 }
 
 /**
- * Retorna o usuário autenticado na sessão ativa (localStorage — Item 1.2) ou null.
- * Descarta automaticamente sessões expiradas (8h) ou vinculadas a usuários/consultores inexistentes.
- * @returns {{ id: string, usuario: string, nome: string, consultorId: string } | null}
+ * Calcula quantos milissegundos faltam para a sessão atual expirar, sem efeitos colaterais no storage.
+ * Retorna null se não houver sessão salva ou se o formato for inválido, e 0 se já estiver expirada.
+ * @param {number} [agora=Date.now()] Timestamp de referência em milissegundos
+ * @returns {number|null}
  */
 export function obterMsAteExpirarSessao(agora = Date.now()) {
   const sessao = getItem(STORAGE_KEYS.SESSAO, null);
@@ -317,6 +317,11 @@ export function obterMsAteExpirarSessao(agora = Date.now()) {
   return Math.max(0, expiraEmMs - agora);
 }
 
+/**
+ * Retorna o usuário autenticado na sessão ativa (localStorage — Item 1.2) ou null.
+ * Descarta automaticamente sessões expiradas (8h) ou vinculadas a usuários/consultores inexistentes.
+ * @returns {{ id: string, usuario: string, nome: string, consultorId: string } | null}
+ */
 export function getSessaoAtiva() {
   const sessao = getItem(STORAGE_KEYS.SESSAO, null);
   if (!sessao || typeof sessao !== 'object' || !sessao.usuarioId || !sessao.expiraEm) {
@@ -443,7 +448,6 @@ export function getVendasPorConsultor(consultorId) {
   const todas = getVendas();
   return todas.filter((venda) => venda && venda.consultorId === consultorId);
 }
-
 
 export function isContratoExistente(contrato, ignoreVendaId = null) {
   if (!contrato || typeof contrato !== 'string') return false;

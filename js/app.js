@@ -139,6 +139,7 @@ const DOM = {
   btnCancelarReset: document.getElementById('btnCancelarReset')
 };
 
+const MAX_TIMEOUT_DELAY_MS = 2147483647;
 let timerExpiracaoSessao = null;
 
 function limparTimerExpiracaoSessao() {
@@ -173,6 +174,7 @@ function agendarVerificacaoExpiracaoSessao() {
     return;
   }
 
+  const delayMs = Math.min(msRestantes + 50, MAX_TIMEOUT_DELAY_MS);
   timerExpiracaoSessao = setTimeout(() => {
     const sessao = getSessaoAtiva();
     if (!sessao) {
@@ -180,7 +182,7 @@ function agendarVerificacaoExpiracaoSessao() {
     } else {
       agendarVerificacaoExpiracaoSessao();
     }
-  }, msRestantes + 50);
+  }, delayMs);
 }
 
 function initApp() {
@@ -1086,7 +1088,6 @@ function setupEventListeners() {
     if (document.visibilityState === 'visible') {
       const msRestantes = obterMsAteExpirarSessao();
       if (msRestantes !== null && msRestantes <= 0) {
-        getSessaoAtiva();
         handleSessaoExpiradaUI();
       } else {
         agendarVerificacaoExpiracaoSessao();

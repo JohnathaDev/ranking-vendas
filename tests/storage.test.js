@@ -11,7 +11,9 @@ import {
   getConsultores,
   getConsultorAtivoId,
   getEstadoBloqueioLogin,
+  limparTentativasVencidas,
   getSessaoAtiva,
+  limparSessaoInvalida,
   obterMsAteExpirarSessao,
   login,
   logout,
@@ -71,7 +73,7 @@ describe('Hash SHA-256, login, bloqueio de tentativas e sessão', () => {
     assert.equal(estadoAposSucesso.falhas, 0);
   });
 
-  it('bloqueia após 5 falhas com code AUTH_LOCKED e desbloqueia após 60 segundos', async () => {
+  it('bloqueia após 5 falhas com code AUTH_LOCKED, desbloqueia após 60 segundos sem escrita na leitura e reinicia falhas após expirar', async () => {
     inicializarSeedSeNecessario(DATA_REF_FIXA);
 
     for (let i = 1; i <= 5; i += 1) {
@@ -95,35 +97,84 @@ describe('Hash SHA-256, login, bloqueio de tentativas e sessão', () => {
     mock.timers.tick(59 * 1000);
     assert.equal(getEstadoBloqueioLogin().bloqueado, true);
 
-    mock.timers.tick(1000); // Total 60s
+    mock.timers.tick(1000); // Total 60s: bloqueio vencido
+
+    const spyRemove = mock.method(localStorage, 'removeItem');
+    const spySet = mock.method(localStorage, 'setItem');
     const estadoApos60s = getEstadoBloqueioLogin();
     assert.equal(estadoApos60s.bloqueado, false);
     assert.equal(estadoApos60s.falhas, 0);
+    assert.equal(spyRemove.mock.callCount(), 0);
+    assert.equal(spySet.mock.callCount(), 0);
+    spyRemove.mock.restore();
+    spySet.mock.restore();
+
+    // Nova falha após 60s reinicia o contador em 1 em vez de bloquear imediatamente
+    await assert.rejects(() => login('JoaoVitor', 'errada'), /Usuário ou senha inválidos/);
+    const estadoNovaFalha = getEstadoBloqueioLogin();
+    assert.equal(estadoNovaFalha.bloqueado, false);
+    assert.equal(estadoNovaFalha.falhas, 1);
 
     const logado = await login('JoaoVitor', '123456');
     assert.equal(logado.usuario, 'JoaoVitor');
   });
 
-  it('getSessaoAtiva retorna sessão válida, remove sessão após 8h e retorna null se usuário ou consultor não existir', async () => {
+  it('limparTentativasVencidas remove registro vencido ou inválido, preserva bloqueio ativo e retorna false sem chave', async () => {
     inicializarSeedSeNecessario(DATA_REF_FIXA);
-    await login('JoaoVitor', '123456');
 
+    assert.equal(limparTentativasVencidas(), false);
+
+    for (let i = 1; i <= 5; i += 1) {
+      await assert.rejects(() => login('JoaoVitor', 'errada'));
+    }
+
+    // Bloqueio ainda ativo: não remove
+    assert.equal(limparTentativasVencidas(), false);
+    assert.notEqual(localStorage.getItem(STORAGE_KEYS.TENTATIVAS_LOGIN), null);
+
+    // Após 60s: remove registro vencido
+    mock.timers.tick(60 * 1000);
+    assert.equal(limparTentativasVencidas(), true);
+    assert.equal(localStorage.getItem(STORAGE_KEYS.TENTATIVAS_LOGIN), null);
+    assert.equal(limparTentativasVencidas(), false);
+  });
+
+  it('getSessaoAtiva é leitura pura sem efeitos colaterais no storage e limparSessaoInvalida remove sessão expirada ou órfã', async () => {
+    inicializarSeedSeNecessario(DATA_REF_FIXA);
+    assert.equal(limparSessaoInvalida(), false);
+
+    await login('JoaoVitor', '123456');
     assert.ok(getSessaoAtiva());
+    assert.equal(limparSessaoInvalida(), false);
+    assert.notEqual(localStorage.getItem(STORAGE_KEYS.SESSAO), null);
 
     // 8 horas menos 1 segundo: ainda válida
     mock.timers.tick(8 * 60 * 60 * 1000 - 1000);
     assert.ok(getSessaoAtiva());
 
-    // Mais 1 segundo (exatamente 8h): expirada
+    // Mais 1 segundo (exatamente 8h): expirada, mas getSessaoAtiva não escreve no storage
     mock.timers.tick(1000);
+    const spyRemove = mock.method(localStorage, 'removeItem');
+    const spySet = mock.method(localStorage, 'setItem');
     assert.equal(getSessaoAtiva(), null);
+    assert.equal(spyRemove.mock.callCount(), 0);
+    assert.equal(spySet.mock.callCount(), 0);
+    spyRemove.mock.restore();
+    spySet.mock.restore();
+    assert.notEqual(localStorage.getItem(STORAGE_KEYS.SESSAO), null);
+
+    // limparSessaoInvalida remove a sessão expirada explicitamente
+    assert.equal(limparSessaoInvalida(), true);
     assert.equal(localStorage.getItem(STORAGE_KEYS.SESSAO), null);
+    assert.equal(limparSessaoInvalida(), false);
 
     // Nova sessão com usuário removido do storage
     await login('JoaoVitor', '123456');
     assert.ok(getSessaoAtiva());
     localStorage.setItem(STORAGE_KEYS.USUARIOS, JSON.stringify([]));
     assert.equal(getSessaoAtiva(), null);
+    assert.notEqual(localStorage.getItem(STORAGE_KEYS.SESSAO), null);
+    assert.equal(limparSessaoInvalida(), true);
     assert.equal(localStorage.getItem(STORAGE_KEYS.SESSAO), null);
 
     // Nova sessão com consultor removido do storage
@@ -131,6 +182,8 @@ describe('Hash SHA-256, login, bloqueio de tentativas e sessão', () => {
     await login('JoaoVitor', '123456');
     localStorage.setItem(STORAGE_KEYS.CONSULTORES, JSON.stringify([]));
     assert.equal(getSessaoAtiva(), null);
+    assert.notEqual(localStorage.getItem(STORAGE_KEYS.SESSAO), null);
+    assert.equal(limparSessaoInvalida(), true);
     assert.equal(localStorage.getItem(STORAGE_KEYS.SESSAO), null);
   });
 

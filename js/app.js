@@ -30,6 +30,7 @@ import {
   deleteVenda,
   isContratoExistente,
   getSessaoAtiva,
+  limparSessaoInvalida,
   obterMsAteExpirarSessao,
   resetarDadosDemonstracao
 } from './storage.js';
@@ -144,6 +145,7 @@ function limparTimerExpiracaoSessao() {
 
 function handleSessaoExpiradaUI() {
   limparTimerExpiracaoSessao();
+  limparSessaoInvalida();
   atualizarUIEstadoAutenticacao();
   resetarFormularioVenda();
   carregarListaConsultores(appState.consultorAtivoId);
@@ -180,6 +182,7 @@ function agendarVerificacaoExpiracaoSessao() {
 
 function initApp() {
   inicializarSeedSeNecessario();
+  limparSessaoInvalida();
   inicializarCampoDataVenda();
   popularSelectModelosVenda();
 
@@ -320,6 +323,7 @@ function handleSalvarVenda(e) {
 
   const usuarioLogado = getSessaoAtiva();
   if (!usuarioLogado) {
+    limparSessaoInvalida();
     atualizarUIEstadoAutenticacao();
     showToast('Sessão expirada ou inexistente. Faça login para registrar vendas.', 'error');
     return;
@@ -819,6 +823,8 @@ function handleConfirmarExclusao(e) {
       showToast('Não foi possível encontrar a venda selecionada.', 'error');
     }
   } catch (error) {
+    limparSessaoInvalida();
+    atualizarUIEstadoAutenticacao();
     fecharModalExclusao();
     showToast(error.message, 'error');
   }
@@ -826,6 +832,8 @@ function handleConfirmarExclusao(e) {
 
 function abrirModalResetDemo() {
   if (!getSessaoAtiva()) {
+    limparSessaoInvalida();
+    atualizarUIEstadoAutenticacao();
     showToast('Faça login para restaurar os dados de demonstração.', 'error');
     return;
   }

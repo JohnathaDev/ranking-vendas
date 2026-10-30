@@ -5,7 +5,13 @@
  * cabeçalho logado/deslogado (Item D1) e callbacks de transição após login/logout (Item D4 / 1.2).
  */
 
-import { login, logout, getSessaoAtiva, getEstadoBloqueioLogin } from './storage.js';
+import {
+  login,
+  logout,
+  getSessaoAtiva,
+  getEstadoBloqueioLogin,
+  limparTentativasVencidas
+} from './storage.js';
 import { showToast, exibirErroCampo, limparErroCampo } from './ui.js';
 
 let intervaloContagemBloqueio = null;
@@ -104,6 +110,7 @@ export function abrirModalLogin() {
     btnToggleSenha.textContent = '👁️ Mostrar';
   }
 
+  limparTentativasVencidas();
   verificarEIniciarContagemBloqueio();
 
   if (!modalLogin.open) {
@@ -176,6 +183,7 @@ export function verificarEIniciarContagemBloqueio() {
       return true;
     }
 
+    limparTentativasVencidas();
     pararContagemRegressiva();
     if (inputLoginUsuario) inputLoginUsuario.disabled = false;
     if (inputLoginSenha) inputLoginSenha.disabled = false;
@@ -202,6 +210,7 @@ async function handleSubmitLogin(e) {
 
   const estadoBloqueio = getEstadoBloqueioLogin();
   if (estadoBloqueio.bloqueado) {
+    limparTentativasVencidas();
     verificarEIniciarContagemBloqueio();
     return;
   }
@@ -240,6 +249,7 @@ async function handleSubmitLogin(e) {
   } catch {
     const novoBloqueio = getEstadoBloqueioLogin();
     if (novoBloqueio.bloqueado) {
+      limparTentativasVencidas();
       verificarEIniciarContagemBloqueio();
     } else {
       if (inputLoginUsuario) inputLoginUsuario.classList.add('is-invalid');

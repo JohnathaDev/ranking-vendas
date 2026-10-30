@@ -218,7 +218,7 @@ export function getUsuarios() {
 }
 
 /**
- * Retorna o estado atual de bloqueio de tentativas de login no localStorage (Item 1.1).
+ * Retorna o estado atual de bloqueio de tentativas de login no localStorage (Item 1.1), sem efeitos colaterais de escrita.
  * @returns {{ bloqueado: boolean, segundosRestantes: number, falhas: number }}
  */
 export function getEstadoBloqueioLogin() {
@@ -239,7 +239,6 @@ export function getEstadoBloqueioLogin() {
   }
 
   if (dados && dados.bloqueadoAte && agora >= dados.bloqueadoAte) {
-    limparTentativasLogin();
     return { bloqueado: false, segundosRestantes: 0, falhas: 0 };
   }
 
@@ -248,6 +247,24 @@ export function getEstadoBloqueioLogin() {
     segundosRestantes: 0,
     falhas: Number(dados?.falhas) || 0
   };
+}
+
+/**
+ * Remove a chave de tentativas de login caso exista um bloqueio cujo tempo já venceu.
+ * @returns {boolean} true se removeu tentativas vencidas, false caso contrário
+ */
+export function limparTentativasVencidas() {
+  const dados = getItem(STORAGE_KEYS.TENTATIVAS_LOGIN, null);
+  if (!dados || typeof dados !== 'object' || !dados.bloqueadoAte) {
+    return false;
+  }
+
+  if (Date.now() >= dados.bloqueadoAte) {
+    limparTentativasLogin();
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -320,8 +337,7 @@ export function obterMsAteExpirarSessao(agora = Date.now()) {
 }
 
 /**
- * Retorna o usuário autenticado na sessão ativa (localStorage — Item 1.2) ou null.
- * Descarta automaticamente sessões expiradas (8h) ou vinculadas a usuários/consultores inexistentes.
+ * Retorna o usuário autenticado na sessão ativa (localStorage — Item 1.2) ou null, sem efeitos colaterais de escrita.
  * @returns {{ id: string, usuario: string, nome: string, consultorId: string } | null}
  */
 export function getSessaoAtiva() {
@@ -335,21 +351,18 @@ export function getSessaoAtiva() {
     typeof sessao.expiraEm === 'number' ? sessao.expiraEm : new Date(sessao.expiraEm).getTime();
 
   if (isNaN(expiraEmMs) || agora >= expiraEmMs) {
-    logout();
     return null;
   }
 
   const usuarios = getUsuarios();
   const usuarioEncontrado = usuarios.find((u) => u && u.id === sessao.usuarioId);
   if (!usuarioEncontrado) {
-    logout();
     return null;
   }
 
   const consultores = getConsultores();
   const consultorExiste = consultores.some((c) => c && c.id === usuarioEncontrado.consultorId);
   if (!consultorExiste) {
-    logout();
     return null;
   }
 
@@ -359,6 +372,30 @@ export function getSessaoAtiva() {
     nome: usuarioEncontrado.nome,
     consultorId: usuarioEncontrado.consultorId
   };
+}
+
+/**
+ * Remove a sessão do localStorage caso exista uma chave de sessão inválida ou expirada.
+ * @returns {boolean} true se havia uma sessão inválida e ela foi removida, false caso contrário
+ */
+export function limparSessaoInvalida() {
+  let possuiChaveSessao = false;
+  try {
+    possuiChaveSessao = localStorage.getItem(STORAGE_KEYS.SESSAO) !== null;
+  } catch {
+    return false;
+  }
+
+  if (!possuiChaveSessao) {
+    return false;
+  }
+
+  if (getSessaoAtiva() === null) {
+    logout();
+    return true;
+  }
+
+  return false;
 }
 
 /**

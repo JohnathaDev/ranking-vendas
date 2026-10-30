@@ -19,10 +19,8 @@ import {
   getConsultorAtivoId,
   setConsultorAtivoId,
   getVendasPorConsultor,
-  deleteVenda,
   getSessaoAtiva,
-  limparSessaoInvalida,
-  resetarDadosDemonstracao
+  limparSessaoInvalida
 } from './storage.js';
 import {
   showToast,
@@ -47,6 +45,7 @@ import {
   limparTimerExpiracaoSessao
 } from './sessao.js';
 import { initFormVenda, recalcularLimitesDataVenda, resetarFormularioVenda } from './formVenda.js';
+import { initModais, abrirModalExclusao } from './modais.js';
 
 function handleSessaoExpiradaUI() {
   limparTimerExpiracaoSessao();
@@ -70,6 +69,19 @@ function initApp() {
   initMonitorSessao({ onSessaoExpirada: handleSessaoExpiradaUI });
   initFormVenda({
     onVendaSalva: () => {
+      renderRankingGeral();
+      atualizarPainelConsultor();
+    }
+  });
+  initModais({
+    onVendaExcluida: () => {
+      renderRankingGeral();
+      atualizarPainelConsultor();
+    },
+    onDemoResetada: (sessaoNova) => {
+      agendarVerificacaoExpiracaoSessao();
+      carregarListaConsultores(sessaoNova ? sessaoNova.consultorId : null);
+      resetarFormularioVenda();
       renderRankingGeral();
       atualizarPainelConsultor();
     }
@@ -474,84 +486,6 @@ function renderListaVendasPainel(vendasPeriodo, podeExcluir) {
   });
 }
 
-function abrirModalExclusao(venda) {
-  appState.vendaParaExcluir = venda;
-  DOM.excluirPlacaModal.textContent = formatarPlaca(venda.placa);
-  DOM.excluirContratoModal.textContent = venda.numeroContrato;
-  DOM.modalConfirmarExclusao.showModal();
-}
-
-function fecharModalExclusao() {
-  if (DOM.modalConfirmarExclusao && DOM.modalConfirmarExclusao.open) {
-    DOM.modalConfirmarExclusao.close();
-  }
-  appState.vendaParaExcluir = null;
-}
-
-function handleConfirmarExclusao(e) {
-  if (e) e.preventDefault();
-  if (!appState.vendaParaExcluir) return;
-
-  const { id, numeroContrato } = appState.vendaParaExcluir;
-
-  try {
-    const sucesso = deleteVenda(id);
-    fecharModalExclusao();
-
-    if (sucesso) {
-      showToast(`Venda do contrato ${numeroContrato} excluída com sucesso.`);
-      renderRankingGeral();
-      atualizarPainelConsultor();
-    } else {
-      showToast('Não foi possível encontrar a venda selecionada.', 'error');
-    }
-  } catch (error) {
-    limparSessaoInvalida();
-    atualizarUIEstadoAutenticacao();
-    fecharModalExclusao();
-    showToast(error.message, 'error');
-  }
-}
-
-function abrirModalResetDemo() {
-  if (!getSessaoAtiva()) {
-    limparSessaoInvalida();
-    atualizarUIEstadoAutenticacao();
-    showToast('Faça login para restaurar os dados de demonstração.', 'error');
-    return;
-  }
-  if (DOM.modalConfirmarReset) {
-    DOM.modalConfirmarReset.showModal();
-  }
-}
-
-function fecharModalResetDemo() {
-  if (DOM.modalConfirmarReset && DOM.modalConfirmarReset.open) {
-    DOM.modalConfirmarReset.close();
-  }
-}
-
-function handleConfirmarResetDemo(e) {
-  if (e) e.preventDefault();
-  try {
-    resetarDadosDemonstracao();
-    fecharModalResetDemo();
-    agendarVerificacaoExpiracaoSessao();
-
-    const sessaoNova = getSessaoAtiva();
-    atualizarUIEstadoAutenticacao();
-    carregarListaConsultores(sessaoNova ? sessaoNova.consultorId : null);
-    resetarFormularioVenda();
-    renderRankingGeral();
-    atualizarPainelConsultor();
-
-    showToast('Dados de demonstração restaurados com sucesso!');
-  } catch (error) {
-    fecharModalResetDemo();
-    showToast(error.message, 'error');
-  }
-}
-
 function setupEventListeners() {
   inicializarNavegacaoAbas((abaEscolhida, opcoes) => {
     selecionarAba(abaEscolhida, opcoes);
@@ -643,29 +577,6 @@ function setupEventListeners() {
       DOM.sortIconAno.textContent = appState.sortAnoOrdem === 'desc' ? '▼' : '▲';
       renderTabelaAnosPainel();
     });
-  }
-
-  if (DOM.btnCancelarExclusao) {
-    DOM.btnCancelarExclusao.addEventListener('click', fecharModalExclusao);
-  }
-  if (DOM.modalConfirmarExclusao) {
-    DOM.modalConfirmarExclusao.addEventListener('cancel', fecharModalExclusao);
-  }
-  if (DOM.formConfirmarExclusao) {
-    DOM.formConfirmarExclusao.addEventListener('submit', handleConfirmarExclusao);
-  }
-
-  if (DOM.btnRestaurarDemo) {
-    DOM.btnRestaurarDemo.addEventListener('click', abrirModalResetDemo);
-  }
-  if (DOM.btnCancelarReset) {
-    DOM.btnCancelarReset.addEventListener('click', fecharModalResetDemo);
-  }
-  if (DOM.modalConfirmarReset) {
-    DOM.modalConfirmarReset.addEventListener('cancel', fecharModalResetDemo);
-  }
-  if (DOM.formConfirmarReset) {
-    DOM.formConfirmarReset.addEventListener('submit', handleConfirmarResetDemo);
   }
 
   // Sincronização entre abas (Itens 1.1, 1.2, 2.3 e F)

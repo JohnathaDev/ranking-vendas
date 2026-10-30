@@ -114,6 +114,8 @@ Severidade: **A** = bug ou risco funcional, **M** = qualidade ou manutenção, *
 | P8 | M | **Efeito colateral em leitura:** `getSessaoAtiva()` chama `logout()` (escreve no storage), o que pode disparar eventos `storage` em outras abas durante um render. | `storage.js:343-359` |
 | P9 | B | **Chart.js por CDN sem `integrity` (SRI)** e sem fallback local. Há uma mensagem de erro, mas sem gráfico. | `index.html:877` |
 | P10 | B | **Dispersão no filtro "dia"**: o eixo X usa o dia do mês, então todos os pontos caem numa única coluna. | `utils.js:686` |
+| P12 | B | `combinarDataComHoraAtual` lança `TypeError` se `dataYMD` não for string; as demais funções de `utils.js` tratam tipos inválidos sem lançar erro. Hoje só é chamada com valor já validado. | `utils.js:90` |
+| P13 | B | `formatarPlaca` formata qualquer texto de 7 caracteres alfanuméricos (por exemplo `1234567` → `123-4567`) sem verificar se é placa válida. As placas gravadas já são validadas, então o impacto é baixo. | `utils.js:27` |
 | P11 | B | **Login é só demonstrativo**: hash e bloqueio no cliente podem ser contornados. Já está documentado; só seria resolvido com um backend. | `storage.js` |
 
 ## Plano de próximos passos (priorizado)
@@ -121,11 +123,11 @@ Severidade: **A** = bug ou risco funcional, **M** = qualidade ou manutenção, *
 | Ordem | Tarefa | Resolve | Depende de |
 |---|---|---|---|
 | 0 | ✓ Feito: pasta ligada a `github.com/johnathadev/ranking-vendas` (`main` em `1a74d9a`) | Pré-requisito do fluxo | — |
-| 1 | Base de testes: `package.json` mínimo, `.gitignore` e `.gitattributes`, script `test` com `node --test` e testes de `utils.js` | P2 | 0 |
+| 1 | ✓ Feito (branch `feat/testes-utils`, 27 testes): base de testes e cobertura de `utils.js` | P2 | 0 |
 | 2 | Testes de `storage.js`: login, bloqueio, sessão, permissões de `addVenda`/`deleteVenda`, seed e migração | P2 | 1 |
 | 3 | Teste que garante a regra decidida: a placa pode se repetir, o contrato não | P1 | 2 |
 | 4 | Lint e formatação: ESLint e Prettier (**explicar ao dono antes de executar**) | Padronização | 1 |
-| 5 | Pequenas correções: expiração de sessão refletida na UI, fundo branco no PNG, remover `addConsultor` e `isPlacaExistente`, unificar o handler de exclusão | P3–P6 | 2 |
+| 5 | Pequenas correções: expiração de sessão refletida na UI, fundo branco no PNG, remover `addConsultor` e `isPlacaExistente`, unificar o handler de exclusão, tornar `combinarDataComHoraAtual` e `formatarPlaca` defensivas | P3–P6, P12, P13 | 2 |
 | 6 | CI no GitHub Actions rodando `test` e `lint` em cada PR | Garantia contínua | 0, 1, 4 |
 | 7 | Refatoração gradual de `app.js` (painel, formulário e modais em módulos) | P7, P8 | 2, 6 |
 | 8 | Melhorias: SRI e fallback do Chart.js, eixo da dispersão no filtro "dia" | P9, P10 | — |

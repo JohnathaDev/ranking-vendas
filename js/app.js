@@ -973,9 +973,6 @@ function setupEventListeners() {
   if (DOM.formConfirmarExclusao) {
     DOM.formConfirmarExclusao.addEventListener('submit', handleConfirmarExclusao);
   }
-  if (DOM.btnConfirmarExclusaoFinal) {
-    DOM.btnConfirmarExclusaoFinal.addEventListener('click', handleConfirmarExclusao);
-  }
 
   if (DOM.btnRestaurarDemo) {
     DOM.btnRestaurarDemo.addEventListener('click', abrirModalResetDemo);

@@ -99,7 +99,7 @@ body {
 }
 
 .header-container {
-  max-width: 1280px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 0.85rem 1rem;
   display: flex;
@@ -204,7 +204,7 @@ body {
 }
 
 .tabs-container {
-  max-width: 1280px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 0 1rem;
   display: flex;
@@ -251,7 +251,7 @@ body {
    LAYOUT PRINCIPAL E PAINÉIS DE ABAS
    ============================================================ */
 .main-layout {
-  max-width: 1280px;
+  max-width: 1320px;
   width: 100%;
   margin: 1.25rem auto;
   padding: 0 1rem;
@@ -1509,7 +1509,7 @@ dialog::backdrop {
 }
 
 .footer-container {
-  max-width: 1280px;
+  max-width: 1320px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -1621,7 +1621,8 @@ dialog::backdrop {
     flex: 1;
     justify-content: center;
     padding: 0.65rem 0.35rem;
-    font-size: 0.76rem;
+    font-size: 0.8rem;
+    min-height: 42px;
   }
 
   .period-filter-wrapper {
@@ -1639,6 +1640,7 @@ dialog::backdrop {
     text-align: center;
     padding: 0.5rem 0.25rem;
     font-size: 0.775rem;
+    min-height: 38px;
   }
 
   .collapsible-content {
@@ -1666,10 +1668,11 @@ dialog::backdrop {
 
   .table-responsive-cards tr {
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     margin-bottom: 0.85rem;
     background-color: var(--bg-card);
-    padding: 0.65rem 0.85rem;
+    padding: 0.75rem 0.95rem;
+    box-shadow: var(--shadow-sm);
   }
 
   .table-responsive-cards td {
@@ -1677,8 +1680,8 @@ dialog::backdrop {
     justify-content: space-between;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.45rem 0;
-    border-bottom: 1px dashed var(--border-color);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f2f4;
     font-size: 0.825rem;
     text-align: right;
   }

@@ -25,7 +25,8 @@ import {
   serieEmpilhada,
   serieTemporal,
   gerarSeriesLinhaPorDimensao,
-  pontosDispersao
+  pontosDispersao,
+  hexParaRgba
 } from '../js/utils.js';
 
 describe('Validação e formatação de placa', () => {
@@ -539,5 +540,26 @@ describe('Séries de BI: pizza, temporal, linha por dimensão e dispersão', () 
     assert.equal(pontosSemana.length, 1);
     assert.equal(pontosSemana[0].x, 7); // Domingo = 7
     assert.equal(pontosSemana[0].y, 14.5);
+  });
+});
+
+describe('Conversão de hex para RGBA (hexParaRgba)', () => {
+  it('converte hex de 6 dígitos com alfa para string rgba', () => {
+    assert.equal(hexParaRgba('#2563eb', 0.15), 'rgba(37, 99, 235, 0.15)');
+    assert.equal(hexParaRgba('#e11d48', 0.2), 'rgba(225, 29, 72, 0.2)');
+    assert.equal(hexParaRgba('#000000', 1), 'rgba(0, 0, 0, 1)');
+  });
+
+  it('converte hex de 3 dígitos expandindo para 6 dígitos', () => {
+    assert.equal(hexParaRgba('#fff', 0.5), 'rgba(255, 255, 255, 0.5)');
+    assert.equal(hexParaRgba('000', 0.8), 'rgba(0, 0, 0, 0.8)');
+  });
+
+  it('retorna fallback seguro para entradas inválidas, nulas ou vazias', () => {
+    assert.equal(hexParaRgba(null, 0.15), 'rgba(37, 99, 235, 0.15)');
+    assert.equal(hexParaRgba('', 0.15), 'rgba(37, 99, 235, 0.15)');
+    assert.equal(hexParaRgba('invalido', 0.15), 'rgba(37, 99, 235, 0.15)');
+    assert.equal(hexParaRgba('#12345', 0.15), 'rgba(37, 99, 235, 0.15)');
+    assert.equal(hexParaRgba('#2563eb', 'invalido'), 'rgba(37, 99, 235, 1)');
   });
 });

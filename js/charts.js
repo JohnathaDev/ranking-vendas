@@ -14,7 +14,8 @@ import {
   serieTemporal,
   gerarSeriesLinhaPorDimensao,
   pontosDispersao,
-  obterDataHojeISO
+  obterDataHojeISO,
+  hexParaRgba
 } from './utils.js';
 
 const instanciasGraficos = new Map();
@@ -701,7 +702,7 @@ export function renderGraficoConsultorPainel(params) {
             label: `Vendas de ${nomeConsultor}`,
             data: temporal.valores,
             borderColor: corConsultor,
-            backgroundColor: 'rgba(225, 29, 72, 0.15)',
+            backgroundColor: hexParaRgba(corConsultor, 0.15),
             fill: true,
             borderWidth: 3,
             tension: 0.25,

@@ -717,3 +717,38 @@ export function pontosDispersao(vendas, consultores = [], periodo = 'mes') {
 
   return pontos;
 }
+
+/**
+ * Converte uma cor em formato hexadecimal (#RGB ou #RRGGBB) para rgba(r, g, b, alfa).
+ * Caso o formato seja inválido, retorna um fallback seguro derivado de #2563eb.
+ * @param {string} hex - Código hexadecimal da cor (ex: '#2563eb' ou '#fff')
+ * @param {number} [alfa=1] - Nível de opacidade entre 0 e 1
+ * @returns {string} String no formato 'rgba(r, g, b, alfa)'
+ */
+export function hexParaRgba(hex, alfa = 1) {
+  const numAlfa =
+    typeof alfa === 'number' && !Number.isNaN(alfa) ? Math.min(Math.max(alfa, 0), 1) : 1;
+  const fallback = `rgba(37, 99, 235, ${numAlfa})`;
+
+  if (!hex || typeof hex !== 'string') {
+    return fallback;
+  }
+
+  let limpo = hex.trim().replace(/^#/, '');
+  if (limpo.length === 3) {
+    limpo = limpo
+      .split('')
+      .map((c) => c + c)
+      .join('');
+  }
+
+  if (limpo.length !== 6 || !/^[0-9a-fA-F]{6}$/.test(limpo)) {
+    return fallback;
+  }
+
+  const r = parseInt(limpo.substring(0, 2), 16);
+  const g = parseInt(limpo.substring(2, 4), 16);
+  const b = parseInt(limpo.substring(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${numAlfa})`;
+}

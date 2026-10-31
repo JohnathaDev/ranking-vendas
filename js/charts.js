@@ -28,24 +28,17 @@ function isChartDisponivel() {
   return typeof window !== 'undefined' && typeof window.Chart === 'function';
 }
 
-export const DURACAO_ENTRADA_MS = 1100;
-export const DURACAO_ATUALIZACAO_MS = 500;
-
 const ultimosTiposGraficos = new Map();
 
-function prefereMovimentoReduzido() {
-  return (
+function obterDuracaoAnimacao() {
+  if (
     typeof window !== 'undefined' &&
     typeof window.matchMedia === 'function' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
-}
-
-export function obterDuracaoAnimacao(ehEntrada = true) {
-  if (prefereMovimentoReduzido()) {
+  ) {
     return 0;
   }
-  return ehEntrada ? DURACAO_ENTRADA_MS : DURACAO_ATUALIZACAO_MS;
+  return 650;
 }
 
 function isMobileViewport() {
@@ -249,7 +242,11 @@ export function renderGraficoRankingBI(params) {
   const tipoAnteriorBI = ultimosTiposGraficos.get(idInstancia);
   const ehNovoOuTrocaTipoBI = tipoAnteriorBI !== tipo;
   ultimosTiposGraficos.set(idInstancia, tipo);
-  const duracaoAnimacao = obterDuracaoAnimacao(ehNovoOuTrocaTipoBI);
+  const duracaoAnimacao = ehNovoOuTrocaTipoBI
+    ? obterDuracaoAnimacao()
+    : obterDuracaoAnimacao() > 0
+      ? 250
+      : 0;
   const pluginDatalabels =
     typeof window !== 'undefined' && window.ChartDataLabels ? window.ChartDataLabels : null;
   const mobile = isMobileViewport();
@@ -308,34 +305,14 @@ export function renderGraficoRankingBI(params) {
         maintainAspectRatio: false,
         animation: {
           duration: duracaoAnimacao,
-          easing: 'easeOutCubic',
-          animateRotate: ehCircular && ehNovoOuTrocaTipoBI && duracaoAnimacao > 0,
-          animateScale: ehCircular && ehNovoOuTrocaTipoBI && duracaoAnimacao > 0
+          easing: 'easeOutQuart',
+          animateRotate: ehCircular && ehNovoOuTrocaTipoBI,
+          animateScale: ehCircular && ehNovoOuTrocaTipoBI
         },
-        animations:
-          !ehCircular && ehNovoOuTrocaTipoBI && duracaoAnimacao > 0
-            ? {
-                y: {
-                  type: 'number',
-                  easing: 'easeOutCubic',
-                  duration: duracaoAnimacao,
-                  from: (ctx) => {
-                    if (ctx.type !== 'data' || ctx.mode !== 'default') return undefined;
-                    const yAxis = ctx.chart.scales?.y;
-                    return yAxis ? yAxis.getPixelForValue(0) : (ctx.chart.chartArea?.bottom ?? 0);
-                  },
-                  delay: (ctx) => {
-                    if (ctx.type !== 'data' || ctx.mode !== 'default') return 0;
-                    return Math.min(400, ctx.dataIndex * 60);
-                  }
-                }
-              }
-            : {},
         plugins: {
           datalabels: ehCircular
             ? {
                 color: '#ffffff',
-                opacity: (ctx) => (ctx.chart && ctx.chart.animating && duracaoAnimacao > 0 ? 0 : 1),
                 font: {
                   weight: 'bold',
                   size: mobile ? 11 : 13,
@@ -434,27 +411,10 @@ export function renderGraficoRankingBI(params) {
         maintainAspectRatio: false,
         animation: {
           duration: duracaoAnimacao,
-          easing: 'easeOutCubic'
+          easing: 'easeOutQuart',
+          animateRotate: ehCircular && ehNovoOuTrocaTipoBI,
+          animateScale: ehCircular && ehNovoOuTrocaTipoBI
         },
-        animations:
-          ehNovoOuTrocaTipoBI && duracaoAnimacao > 0
-            ? {
-                y: {
-                  type: 'number',
-                  easing: 'easeOutCubic',
-                  duration: duracaoAnimacao,
-                  from: (ctx) => {
-                    if (ctx.type !== 'data' || ctx.mode !== 'default') return undefined;
-                    const yAxis = ctx.chart.scales?.y;
-                    return yAxis ? yAxis.getPixelForValue(0) : (ctx.chart.chartArea?.bottom ?? 0);
-                  },
-                  delay: (ctx) => {
-                    if (ctx.type !== 'data' || ctx.mode !== 'default') return 0;
-                    return Math.min(400, ctx.dataIndex * 60);
-                  }
-                }
-              }
-            : {},
         plugins: {
           legend: {
             display: true,
@@ -520,28 +480,7 @@ export function renderGraficoRankingBI(params) {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: {
-          duration: duracaoAnimacao,
-          easing: 'easeOutCubic'
-        },
-        animations:
-          ehNovoOuTrocaTipoBI && duracaoAnimacao > 0
-            ? {
-                y: {
-                  type: 'number',
-                  easing: 'easeOutCubic',
-                  duration: Math.max(
-                    250,
-                    Math.round(duracaoAnimacao / Math.max(1, seriesLinha.labels.length)) * 2
-                  ),
-                  delay: (ctx) => {
-                    if (ctx.type !== 'data' || ctx.mode !== 'default') return 0;
-                    const totalPts = Math.max(1, seriesLinha.labels.length);
-                    return ctx.dataIndex * Math.round(duracaoAnimacao / totalPts);
-                  }
-                }
-              }
-            : {},
+        animation: { duration: duracaoAnimacao },
         plugins: {
           legend: {
             display: true,
@@ -659,24 +598,7 @@ export function renderGraficoRankingBI(params) {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: {
-          duration: duracaoAnimacao,
-          easing: 'easeOutCubic'
-        },
-        animations:
-          ehNovoOuTrocaTipoBI && duracaoAnimacao > 0
-            ? {
-                y: {
-                  type: 'number',
-                  easing: 'easeOutCubic',
-                  duration: duracaoAnimacao,
-                  delay: (ctx) => {
-                    if (ctx.type !== 'data' || ctx.mode !== 'default') return 0;
-                    return Math.min(400, ctx.dataIndex * 30);
-                  }
-                }
-              }
-            : {},
+        animation: { duration: duracaoAnimacao },
         plugins: {
           legend: {
             display: true,
@@ -801,7 +723,11 @@ export function renderGraficoConsultorPainel(params) {
   const tipoAnteriorPainel = ultimosTiposGraficos.get(idInstancia);
   const ehNovoOuTrocaTipoPainel = tipoAnteriorPainel !== tipo;
   ultimosTiposGraficos.set(idInstancia, tipo);
-  const duracaoAnimacao = obterDuracaoAnimacao(ehNovoOuTrocaTipoPainel);
+  const duracaoAnimacao = ehNovoOuTrocaTipoPainel
+    ? obterDuracaoAnimacao()
+    : obterDuracaoAnimacao() > 0
+      ? 250
+      : 0;
   const pluginDatalabels =
     typeof window !== 'undefined' && window.ChartDataLabels ? window.ChartDataLabels : null;
   const mobile = isMobileViewport();
@@ -846,28 +772,7 @@ export function renderGraficoConsultorPainel(params) {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: {
-          duration: duracaoAnimacao,
-          easing: 'easeOutCubic'
-        },
-        animations:
-          ehNovoOuTrocaTipoPainel && duracaoAnimacao > 0
-            ? {
-                y: {
-                  type: 'number',
-                  easing: 'easeOutCubic',
-                  duration: Math.max(
-                    250,
-                    Math.round(duracaoAnimacao / Math.max(1, temporal.labels.length)) * 2
-                  ),
-                  delay: (ctx) => {
-                    if (ctx.type !== 'data' || ctx.mode !== 'default') return 0;
-                    const totalPts = Math.max(1, temporal.labels.length);
-                    return ctx.dataIndex * Math.round(duracaoAnimacao / totalPts);
-                  }
-                }
-              }
-            : {},
+        animation: { duration: duracaoAnimacao },
         plugins: {
           legend: {
             display: true,
@@ -943,36 +848,11 @@ export function renderGraficoConsultorPainel(params) {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: {
-          duration: duracaoAnimacao,
-          easing: 'easeOutCubic',
-          animateRotate: ehCircular && ehNovoOuTrocaTipoPainel && duracaoAnimacao > 0,
-          animateScale: ehCircular && ehNovoOuTrocaTipoPainel && duracaoAnimacao > 0
-        },
-        animations:
-          !ehCircular && ehNovoOuTrocaTipoPainel && duracaoAnimacao > 0
-            ? {
-                y: {
-                  type: 'number',
-                  easing: 'easeOutCubic',
-                  duration: duracaoAnimacao,
-                  from: (ctx) => {
-                    if (ctx.type !== 'data' || ctx.mode !== 'default') return undefined;
-                    const yAxis = ctx.chart.scales?.y;
-                    return yAxis ? yAxis.getPixelForValue(0) : (ctx.chart.chartArea?.bottom ?? 0);
-                  },
-                  delay: (ctx) => {
-                    if (ctx.type !== 'data' || ctx.mode !== 'default') return 0;
-                    return Math.min(400, ctx.dataIndex * 60);
-                  }
-                }
-              }
-            : {},
+        animation: { duration: duracaoAnimacao },
         plugins: {
           datalabels: ehCircular
             ? {
                 color: '#ffffff',
-                opacity: (ctx) => (ctx.chart && ctx.chart.animating && duracaoAnimacao > 0 ? 0 : 1),
                 font: {
                   weight: 'bold',
                   size: mobile ? 11 : 13,

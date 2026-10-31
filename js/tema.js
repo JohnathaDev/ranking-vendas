@@ -109,10 +109,10 @@ export function aplicarTema(tema, { salvar = false, transicao = true } = {}) {
         aplicarMutacao();
       });
       if (transition && typeof transition.updateCallbackDone?.then === 'function') {
-        return transition.updateCallbackDone.then(() => temaFinal);
+        return transition.updateCallbackDone.catch(() => {}).then(() => temaFinal);
       }
       if (transition && typeof transition.finished?.then === 'function') {
-        return transition.finished.then(() => temaFinal);
+        return transition.finished.catch(() => {}).then(() => temaFinal);
       }
     } catch {
       /* Segue para caminho síncrono */

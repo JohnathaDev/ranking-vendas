@@ -297,7 +297,7 @@ body::before {
 
   /* Formulários e Filtros */
   .ranking-filters-bar {
-    @apply grid items-end gap-4;
+    @apply grid items-start gap-4;
     grid-template-columns: auto minmax(160px, 1fr) minmax(150px, 1fr) auto;
   }
 

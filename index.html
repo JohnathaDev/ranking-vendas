@@ -185,7 +185,7 @@
           class="card filter-toolbar-card bg-card rounded-card border-borda shadow-card border p-4"
         >
           <div
-            class="ranking-filters-bar grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-4"
+            class="ranking-filters-bar grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-4"
           >
             <div class="filter-item flex min-w-0 flex-col gap-1.5">
               <span
@@ -247,6 +247,7 @@
             </div>
 
             <div class="filter-item flex min-w-0 flex-col gap-1.5">
+              <span class="filter-label invisible select-none" aria-hidden="true">&nbsp;</span>
               <button type="button" id="btnLimparFiltrosRanking" class="btn-secondary">
                 Limpar filtros
               </button>
@@ -329,47 +330,52 @@
 
           <div class="collapsible-content flex min-w-0 flex-col gap-4 p-5 sm:p-6">
             <div
-              class="chart-controls-bar bg-muted/40 border-borda grid grid-cols-1 items-end gap-3 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-4"
+              class="chart-controls-bar bg-muted/40 border-borda mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-start sm:justify-between"
             >
-              <div class="filter-item flex min-w-0 flex-col gap-1.5">
-                <label
-                  for="selectBITipoGrafico"
-                  class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
-                  >Tipo de gráfico</label
-                >
-                <select id="selectBITipoGrafico" class="form-select filter-select">
-                  <option value="colunas">Colunas</option>
-                  <option value="pizza">Pizza</option>
-                  <option value="empilhadas">Colunas empilhadas</option>
-                  <option value="linha">Linha (evolução)</option>
-                  <option value="dispersao">Dispersão (horário das vendas)</option>
-                </select>
+              <div class="controls-group flex flex-1 flex-col gap-4 sm:flex-row sm:items-start">
+                <div class="filter-item flex min-w-[200px] flex-1 flex-col gap-1.5">
+                  <label
+                    for="selectBITipoGrafico"
+                    class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
+                    >Tipo de gráfico</label
+                  >
+                  <select id="selectBITipoGrafico" class="form-select filter-select">
+                    <option value="colunas">Colunas</option>
+                    <option value="pizza">Pizza</option>
+                    <option value="empilhadas">Colunas empilhadas</option>
+                    <option value="linha">Linha (evolução)</option>
+                    <option value="dispersao">Dispersão (horário das vendas)</option>
+                  </select>
+                </div>
+
+                <div class="filter-item flex min-w-[200px] flex-1 flex-col gap-1.5">
+                  <label
+                    for="selectBIDimensao"
+                    class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
+                    >Agrupar por</label
+                  >
+                  <select
+                    id="selectBIDimensao"
+                    class="form-select filter-select"
+                    aria-describedby="helperBIDimensao"
+                  >
+                    <option value="consultor">Consultor</option>
+                    <option value="modelo" selected>Modelo</option>
+                    <option value="anoModelo">Ano modelo</option>
+                  </select>
+                  <span id="helperBIDimensao" class="form-helper text-texto-3 mt-0.5 text-xs"
+                    >Dimensão usada para agrupar as vendas no gráfico.</span
+                  >
+                </div>
               </div>
 
-              <div class="filter-item flex min-w-0 flex-col gap-1.5">
-                <label
-                  for="selectBIDimensao"
-                  class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
-                  >Agrupar por</label
-                >
-                <select
-                  id="selectBIDimensao"
-                  class="form-select filter-select"
-                  aria-describedby="helperBIDimensao"
-                >
-                  <option value="consultor">Consultor</option>
-                  <option value="modelo" selected>Modelo</option>
-                  <option value="anoModelo">Ano modelo</option>
-                </select>
-                <span id="helperBIDimensao" class="form-helper"
-                  >Dimensão usada para agrupar as vendas no gráfico.</span
-                >
-              </div>
-
-              <div class="filter-item flex min-w-0 flex-col gap-1.5">
-                <button type="button" id="btnBaixarPNGBI" class="btn-secondary">
-                  Exportar PNG
-                </button>
+              <div class="controls-actions flex items-start gap-3 sm:self-start">
+                <div class="filter-item flex flex-col gap-1.5">
+                  <span class="filter-label invisible select-none" aria-hidden="true">&nbsp;</span>
+                  <button type="button" id="btnBaixarPNGBI" class="btn-secondary whitespace-nowrap">
+                    Exportar PNG
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -711,44 +717,57 @@
 
             <div class="card-body p-5 sm:p-6">
               <div
-                class="chart-controls-bar bg-muted/40 border-borda grid grid-cols-1 items-end gap-3 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-4"
+                class="chart-controls-bar bg-muted/40 border-borda mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-start sm:justify-between"
               >
-                <div class="filter-item flex min-w-0 flex-col gap-1.5">
-                  <label
-                    for="selectPainelGraficoDimensao"
-                    class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
-                    >Ver por</label
-                  >
-                  <select
-                    id="selectPainelGraficoDimensao"
-                    class="form-select filter-select"
-                    aria-describedby="helperPainelGraficoDimensao"
-                  >
-                    <option value="modelo" selected>Modelo</option>
-                    <option value="anoModelo">Ano modelo</option>
-                  </select>
-                  <span id="helperPainelGraficoDimensao" class="form-helper"
-                    >Agrupamento das vendas do consultor.</span
-                  >
+                <div class="controls-group flex flex-1 flex-col gap-4 sm:flex-row sm:items-start">
+                  <div class="filter-item flex min-w-[180px] flex-1 flex-col gap-1.5">
+                    <label
+                      for="selectPainelGraficoDimensao"
+                      class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
+                      >Ver por</label
+                    >
+                    <select
+                      id="selectPainelGraficoDimensao"
+                      class="form-select filter-select"
+                      aria-describedby="helperPainelGraficoDimensao"
+                    >
+                      <option value="modelo" selected>Modelo</option>
+                      <option value="anoModelo">Ano modelo</option>
+                    </select>
+                    <span
+                      id="helperPainelGraficoDimensao"
+                      class="form-helper text-texto-3 mt-0.5 text-xs"
+                      >Agrupamento das vendas do consultor.</span
+                    >
+                  </div>
+
+                  <div class="filter-item flex min-w-[180px] flex-1 flex-col gap-1.5">
+                    <label
+                      for="selectPainelGraficoTipo"
+                      class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
+                      >Tipo</label
+                    >
+                    <select id="selectPainelGraficoTipo" class="form-select filter-select">
+                      <option value="colunas" selected>Colunas</option>
+                      <option value="pizza">Pizza</option>
+                      <option value="linha">Linha (evolução no período)</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div class="filter-item flex min-w-0 flex-col gap-1.5">
-                  <label
-                    for="selectPainelGraficoTipo"
-                    class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
-                    >Tipo</label
-                  >
-                  <select id="selectPainelGraficoTipo" class="form-select filter-select">
-                    <option value="colunas" selected>Colunas</option>
-                    <option value="pizza">Pizza</option>
-                    <option value="linha">Linha (evolução no período)</option>
-                  </select>
-                </div>
-
-                <div class="filter-item flex min-w-0 flex-col gap-1.5">
-                  <button type="button" id="btnBaixarPNGPainel" class="btn-secondary">
-                    Exportar PNG
-                  </button>
+                <div class="controls-actions flex items-start gap-3 sm:self-start">
+                  <div class="filter-item flex flex-col gap-1.5">
+                    <span class="filter-label invisible select-none" aria-hidden="true"
+                      >&nbsp;</span
+                    >
+                    <button
+                      type="button"
+                      id="btnBaixarPNGPainel"
+                      class="btn-secondary whitespace-nowrap"
+                    >
+                      Exportar PNG
+                    </button>
+                  </div>
                 </div>
               </div>
 

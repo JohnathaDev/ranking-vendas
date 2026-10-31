@@ -5,6 +5,7 @@
 
 /* Design System & Variáveis CSS */
 :root {
+  color-scheme: light;
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
   --primary-active: #1e40af;
@@ -54,6 +55,7 @@
 }
 
 :root[data-tema='escuro'] {
+  color-scheme: dark;
   --primary: #3b82f6;
   --primary-hover: #60a5fa;
   --primary-active: #2563eb;
@@ -315,6 +317,12 @@ body::before {
 
   .form-label {
     @apply text-texto-2 text-xs font-bold tracking-wider uppercase;
+  }
+
+  select,
+  option {
+    background-color: var(--bg-card);
+    color: var(--text-main);
   }
 
   .form-input,

@@ -197,11 +197,19 @@ body::before {
   }
 }
 
+/* Transição de visualização suave para troca de tema (View Transitions API) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 300ms;
+  animation-timing-function: ease-out;
+}
+
 /* Componentes Reutilizáveis */
 @layer components {
-  /* Layout de Painel com espaçamento vertical de 24px entre seções */
+  /* Layout de Painel com espaçamento vertical de 24px entre seções e fade suave */
   .tab-panel {
     @apply flex w-full min-w-0 flex-col gap-6;
+    animation: fadeIn 150ms ease-out;
   }
 
   .panel-container {
@@ -495,16 +503,52 @@ body::before {
     @apply flex min-w-0 flex-col gap-4 p-5 sm:p-6;
   }
 
-  /* Dialog / Modais */
+  /* Dialog / Modais com transições suaves (scale 0.96 -> 1 e fade) */
   .modal-dialog {
     @apply rounded-card border-borda bg-card text-texto fixed m-auto border p-0 shadow-lg;
     max-width: 28rem;
     width: calc(100vw - 2rem);
+    opacity: 0;
+    transform: scale(0.96);
+    transition:
+      opacity 200ms ease-out,
+      transform 200ms ease-out,
+      overlay 200ms ease-out allow-discrete,
+      display 200ms ease-out allow-discrete;
+  }
+
+  .modal-dialog[open] {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  @starting-style {
+    .modal-dialog[open] {
+      opacity: 0;
+      transform: scale(0.96);
+    }
   }
 
   .modal-dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    transition:
+      background-color 200ms ease-out,
+      backdrop-filter 200ms ease-out,
+      overlay 200ms ease-out allow-discrete,
+      display 200ms ease-out allow-discrete;
+  }
+
+  .modal-dialog[open]::backdrop {
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(2px);
+  }
+
+  @starting-style {
+    .modal-dialog[open]::backdrop {
+      background-color: rgba(0, 0, 0, 0);
+      backdrop-filter: blur(0px);
+    }
   }
 
   .modal-close-btn {

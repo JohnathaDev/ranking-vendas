@@ -76,33 +76,53 @@ export function atualizarBotaoTema(tema) {
 export function aplicarTema(tema, { salvar = false, transicao = true } = {}) {
   const temaFinal = tema === TEMAS.ESCURO ? TEMAS.ESCURO : TEMAS.CLARO;
 
-  if (typeof document !== 'undefined' && document.documentElement) {
-    const html = document.documentElement;
-
-    const prefereReduzido =
-      typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (transicao && !prefereReduzido && !html.classList.contains('tema-transicao')) {
-      html.classList.add('tema-transicao');
-      setTimeout(() => {
-        html.classList.remove('tema-transicao');
-      }, 250);
+  const aplicarMutacao = () => {
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.setAttribute('data-tema', temaFinal);
     }
+    if (salvar && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEYS.TEMA, temaFinal);
+      } catch {
+        /* Ignora indisponibilidade ou restrição de gravação no localStorage */
+      }
+    }
+    atualizarBotaoTema(temaFinal);
+  };
 
-    html.setAttribute('data-tema', temaFinal);
+  const prefereReduzido =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Crossfade suave nativo via View Transitions API (~300ms) quando disponível e permitido
+  if (
+    transicao &&
+    !prefereReduzido &&
+    typeof document !== 'undefined' &&
+    typeof document.startViewTransition === 'function'
+  ) {
+    document.startViewTransition(() => {
+      aplicarMutacao();
+    });
+    return;
   }
 
-  if (salvar && typeof localStorage !== 'undefined') {
-    try {
-      localStorage.setItem(STORAGE_KEYS.TEMA, temaFinal);
-    } catch {
-      /* Ignora indisponibilidade ou restrição de gravação no localStorage */
-    }
+  // Fallback suave via classe tema-transicao
+  if (
+    transicao &&
+    !prefereReduzido &&
+    typeof document !== 'undefined' &&
+    document.documentElement &&
+    !document.documentElement.classList.contains('tema-transicao')
+  ) {
+    document.documentElement.classList.add('tema-transicao');
+    setTimeout(() => {
+      document.documentElement.classList.remove('tema-transicao');
+    }, 250);
   }
 
-  atualizarBotaoTema(temaFinal);
+  aplicarMutacao();
 }
 
 /**

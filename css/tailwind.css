@@ -134,6 +134,13 @@ body {
   overflow-x: hidden;
 }
 
+h1,
+h2,
+h3,
+.card-title {
+  text-wrap: balance;
+}
+
 body {
   position: relative;
   font-family: var(--font-family);
@@ -296,10 +303,10 @@ body::before {
     @apply text-texto-3 text-xs font-semibold tracking-wider uppercase;
   }
   .kpi-icon {
-    @apply hidden;
+    @apply text-texto-3 inline-flex items-center justify-center;
   }
   .kpi-value {
-    @apply text-texto mt-1 text-2xl leading-tight font-bold tracking-tight sm:text-[1.75rem];
+    @apply text-texto mt-1 text-2xl leading-tight font-bold tracking-tight tabular-nums sm:text-[1.75rem];
   }
   .kpi-detail {
     @apply text-texto-3 mt-1.5 text-xs;
@@ -413,7 +420,13 @@ body::before {
   }
 
   .data-table thead th {
-    @apply text-texto-2 border-borda bg-muted/50 border-b px-4 py-3 text-xs font-semibold tracking-wider uppercase select-none;
+    @apply text-texto-2 border-borda bg-muted border-b px-4 py-3 text-xs font-semibold tracking-wider uppercase select-none;
+  }
+
+  .data-table th.text-right,
+  .data-table td.text-right,
+  .matrix-table td.text-right {
+    font-variant-numeric: tabular-nums;
   }
 
   .data-table tbody td {

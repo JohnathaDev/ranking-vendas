@@ -6,8 +6,8 @@ Resumo de arquitetura e padrões, para orientar quem for mexer no código.
 
 SPA estática para registrar vendas de motos por consultor, com ranking geral, painel individual e gráficos de BI. Hospedada no GitHub Pages e sem backend: todos os dados ficam no `localStorage` do navegador.
 
-- **Stack:** HTML5, CSS3 e JavaScript puro em ES Modules. Não há bundler. O `package.json` serve só para as ferramentas de desenvolvimento (`npm test`, `npm run lint`, `npm run format`, `npm run format:check`); o site não tem dependência npm em tempo de execução.
-- **Dependência externa:** Chart.js 4.4.1, servido localmente de `vendor/chart.js/chart.umd.js` (cópia fixa do pacote npm) e usado como global `Chart`. O `index.html` carrega esse arquivo antes de `js/app.js`.
+- **Stack:** HTML5, Tailwind CSS v4 (só em build, saída minificada commitada em `css/style.css`) e JavaScript puro em ES Modules. O `package.json` serve só para as ferramentas de desenvolvimento (`npm test`, `npm run lint`, `npm run format`, `npm run build:css`); o site não tem dependência npm em tempo de execução.
+- **Dependências externas:** Chart.js 4.4.1 e chartjs-plugin-datalabels 2.2.0, servidos localmente de `vendor/` (cópias fixas do npm, com hashes no README de cada pasta) e usados como globais `Chart` e `ChartDataLabels`.
 - **Execução local:** como usa ES Modules, precisa de um servidor HTTP, por exemplo `npx serve .` ou `python -m http.server`. Abrir pelo `file://` não funciona.
 - **Tamanho:** cerca de 7,5 mil linhas (JS ≈ 5,1k, CSS ≈ 1,6k, HTML ≈ 0,9k).
 
@@ -81,6 +81,8 @@ graph TD
 | `_sessao` | `{ usuarioId, expiraEm }`, válida por 8 h |
 | `_login_tentativas` | `{ falhas, bloqueadoAte }`: bloqueio de 60 s após 5 falhas |
 | `_consultor_ativo_id` | ID do consultor selecionado no painel |
+| `_tema` | Tema escolhido (`claro`/`escuro`); sem valor, segue o sistema. Não é apagado pelo reset da demo |
+| `_bi_alternar` | Modo do gráfico do BI (`fixo`/`alternar`). Não é apagado pelo reset da demo |
 
 - O seed (`inicializarSeedSeNecessario`) cria 5 consultores, o usuário demo `JoaoVitor`/`123456` e 8 vendas por consultor, das quais 3 caem obrigatoriamente em hoje ou na semana atual.
 - A migração para a v2 garante que o consultor e o usuário demo existam sem apagar os dados atuais.
@@ -106,7 +108,7 @@ graph TD
 - **Erros:** `storage.js` lança `Error` com mensagem pronta para o usuário, e a UI captura e mostra com `showToast(msg, 'error')` ou `exibirErroCampo`.
 - **Acessibilidade:** `role="tablist/tab/tabpanel"`, `aria-pressed`, `aria-invalid`, `<dialog>` nativo, uma tabela de dados alternativa para cada gráfico e respeito a `prefers-reduced-motion`.
 - **Estilo:** imposto pelo Prettier (`.prettierrc.json`: 2 espaços, aspas simples, ponto e vírgula, sem vírgula no final, 100 colunas) e pelo ESLint (`eslint.config.js`: recommended, `eqeqeq`, `no-var`, `no-unused-vars`). Rode `npm run format` e `npm run lint` antes de commitar. Funções com data aceitam um parâmetro `dataReferencia`/`dataRef = new Date()` para facilitar testes.
-- **CSS:** design tokens em `:root` (`--primary`, `--bg-*`, `--text-*`, `--radius-*`), responsivo com breakpoint principal em 600 px e tabelas que viram cards no celular (`table-responsive-cards`).
+- **CSS:** o estilo é escrito em `css/tailwind.css` (`@theme` com tokens semânticos ligados às variáveis de `:root` e `:root[data-tema="escuro"]`, componentes em `@layer components` com `@apply`) e em classes utilitárias no `index.html`. **Nunca edite `css/style.css` à mão**: rode `npm run build:css` (o CI falha se o arquivo estiver desatualizado). As variáveis `--bg-card`, `--text-main`, `--text-secondary`, `--border-color` e `--font-family` são lidas pelo `charts.js` e não podem ser renomeadas.
 - Comentários citam itens de especificação ("Item 1.1", "Item C5" etc.), herdados de rodadas anteriores de requisitos.
 
 ## Estado atual (29/10/2026)
@@ -160,6 +162,10 @@ Severidade: **A** = bug ou risco funcional, **M** = qualidade ou manutenção, *
 | 6b | ✓ Feito na tarefa 7: seção "Estrutura" do README atualizada | Documentação | 6 |
 | 7 | ✓ Feito (branch `refactor/app-modulos`, 43 testes): `app.js` dividido em `state.js`, `sessao.js`, `formVenda.js`, `modais.js` e `painel.js`; leituras de sessão e bloqueio sem escrita | P7, P8 | 2, 6 |
 | 8 | ✓ Feito (branch `chore/chartjs-local`): Chart.js 4.4.1 servido de `vendor/chart.js/`, idêntico ao pacote npm (SHA-256 conferido), sem CDN | P9 | — |
+| 9 | ✓ Feito: redesign comercial (paleta neutra com acento azul, textos curtos, sem emojis), modo escuro com anti-flash e fade de fundo | Pedido do dono | — |
+| 10 | ✓ Feito: estilização migrada para Tailwind CSS v4 (utilitários, `@theme`, `@apply`) | Pedido do dono | 9 |
+| 11 | ✓ Feito: % na pizza, destaque no hover, animações de entrada, alternância automática do BI (Fixo/Alternar, 20 s), View Transitions no tema, modais com `@starting-style` e refino visual | Pedido do dono | 10 |
+| 12 | ✓ Feito: contraste de textos e gráficos nos dois temas (redesenho após a troca de tema, sem cores fixas, grade suave, curva monotone) | Pedido do dono | 11 |
 
 ## Fluxo de trabalho
 

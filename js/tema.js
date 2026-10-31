@@ -108,11 +108,19 @@ export function aplicarTema(tema, { salvar = false, transicao = true } = {}) {
       const transition = document.startViewTransition(() => {
         aplicarMutacao();
       });
-      if (transition && typeof transition.updateCallbackDone?.then === 'function') {
-        return transition.updateCallbackDone.catch(() => {}).then(() => temaFinal);
-      }
-      if (transition && typeof transition.finished?.then === 'function') {
-        return transition.finished.catch(() => {}).then(() => temaFinal);
+      if (transition) {
+        if (typeof transition.ready?.catch === 'function') {
+          transition.ready.catch(() => {});
+        }
+        if (typeof transition.finished?.catch === 'function') {
+          transition.finished.catch(() => {});
+        }
+        if (typeof transition.updateCallbackDone?.then === 'function') {
+          return transition.updateCallbackDone.catch(() => {}).then(() => temaFinal);
+        }
+        if (typeof transition.finished?.then === 'function') {
+          return transition.finished.catch(() => {}).then(() => temaFinal);
+        }
       }
     } catch {
       /* Segue para caminho síncrono */

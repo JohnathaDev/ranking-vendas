@@ -631,6 +631,7 @@ function renderTabelaRankingConsultores(vendasRecorte, consultores) {
     }
 
     const tdPosicao = document.createElement('td');
+    tdPosicao.className = 'whitespace-nowrap';
     tdPosicao.setAttribute('data-label', 'Posição');
     tdPosicao.appendChild(criarElementoPosicaoRanking(item.posicao, item.vendas));
 

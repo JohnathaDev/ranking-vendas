@@ -786,6 +786,36 @@ export function escurecerHex(hex, fator = 0.18) {
  * @param {string[]} lista
  * @returns {string}
  */
+/**
+ * Aplica opacidade a uma cor em formato hexadecimal (#rgb ou #rrggbb) ou rgb/rgba.
+ * Garante retorno de string rgba válida para grades e preenchimentos.
+ * @param {string} cor
+ * @param {number} [opacidade=1]
+ * @returns {string} String rgba correspondente (ex: 'rgba(229, 231, 235, 0.6)')
+ */
+export function aplicarOpacidadeCor(cor, opacidade = 1) {
+  const alfa =
+    typeof opacidade === 'number' && !Number.isNaN(opacidade)
+      ? Math.min(Math.max(opacidade, 0), 1)
+      : 1;
+
+  if (!cor || typeof cor !== 'string') {
+    return `rgba(148, 163, 184, ${alfa})`;
+  }
+
+  const limpo = cor.trim();
+  if (limpo.startsWith('#')) {
+    return hexParaRgba(limpo, alfa);
+  }
+
+  const rgbMatch = limpo.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (rgbMatch) {
+    return `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${alfa})`;
+  }
+
+  return hexParaRgba(limpo, alfa);
+}
+
 export function proximoTipoGrafico(atual, lista = []) {
   if (!Array.isArray(lista) || lista.length === 0) return '';
   const idx = lista.indexOf(atual);

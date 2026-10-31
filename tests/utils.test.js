@@ -28,6 +28,7 @@ import {
   pontosDispersao,
   hexParaRgba,
   escurecerHex,
+  aplicarOpacidadeCor,
   proximoTipoGrafico
 } from '../js/utils.js';
 
@@ -614,5 +615,31 @@ describe('Alternância de tipo de gráfico (proximoTipoGrafico)', () => {
   it('retorna string vazia para lista vazia ou inválida', () => {
     assert.equal(proximoTipoGrafico('colunas', []), '');
     assert.equal(proximoTipoGrafico('colunas', null), '');
+  });
+});
+
+describe('Aplicação de opacidade em cores (aplicarOpacidadeCor)', () => {
+  it('converte hex de 6 dígitos aplicando opacidade', () => {
+    assert.equal(aplicarOpacidadeCor('#e5e7eb', 0.6), 'rgba(229, 231, 235, 0.6)');
+    assert.equal(aplicarOpacidadeCor('#1f2937', 0.5), 'rgba(31, 41, 55, 0.5)');
+  });
+
+  it('converte hex de 3 dígitos expandindo e aplicando opacidade', () => {
+    assert.equal(aplicarOpacidadeCor('#fff', 0.4), 'rgba(255, 255, 255, 0.4)');
+  });
+
+  it('suporta formatos rgb existentes reescrevendo o canal alfa', () => {
+    assert.equal(aplicarOpacidadeCor('rgb(10, 20, 30)', 0.7), 'rgba(10, 20, 30, 0.7)');
+    assert.equal(aplicarOpacidadeCor('rgba(10, 20, 30, 1)', 0.3), 'rgba(10, 20, 30, 0.3)');
+  });
+
+  it('aplica clamping nos limites de opacidade entre 0 e 1', () => {
+    assert.equal(aplicarOpacidadeCor('#000000', -0.5), 'rgba(0, 0, 0, 0)');
+    assert.equal(aplicarOpacidadeCor('#000000', 1.5), 'rgba(0, 0, 0, 1)');
+  });
+
+  it('retorna fallback seguro para entradas nulas, vazias ou inválidas', () => {
+    assert.equal(aplicarOpacidadeCor(null, 0.6), 'rgba(148, 163, 184, 0.6)');
+    assert.equal(aplicarOpacidadeCor('', 0.8), 'rgba(148, 163, 184, 0.8)');
   });
 });

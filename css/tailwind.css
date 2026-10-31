@@ -3,34 +3,26 @@
 @source '../index.html';
 @source '../js/**/*.js';
 
-/* ============================================================
-   DESIGN SYSTEM & VARIÁVEIS CSS — Ranking de Vendas
-   Compatibilidade com getComputedStyle do charts.js mantida
-   Variáveis sem colisão de namespace com o Tailwind v4
-   ============================================================ */
+/* Design System & Variáveis CSS */
 :root {
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
   --primary-active: #1e40af;
   --primary-light: #eff6ff;
   --primary-border: #bfdbfe;
-
   --bg-page: #f7f8fa;
   --bg-card: #ffffff;
   --bg-muted: #f3f4f6;
   --bg-input: #ffffff;
-
   --font-family:
     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --text-main: #111827;
   --text-secondary: #4b5563;
   --text-muted: #6b7280;
   --text-inverse: #ffffff;
-
   --border-color: #e5e7eb;
   --border-focus: #2563eb;
   --focus-ring: rgba(37, 99, 235, 0.2);
-
   --estado-sucesso: #16a34a;
   --estado-sucesso-bg: #f0fdf4;
   --estado-sucesso-borda: #bbf7d0;
@@ -40,22 +32,18 @@
   --estado-aviso: #d97706;
   --estado-aviso-bg: #fffbeb;
   --estado-aviso-borda: #fde68a;
-
   --sombra-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
   --sombra-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
   --sombra-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
   --sombra-toast: 0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 4px 8px -2px rgba(0, 0, 0, 0.04);
   --sombra-card: var(--sombra-md);
-
   --raio-sm: 6px;
   --raio-md: 10px;
   --raio-lg: 12px;
   --raio-full: 9999px;
   --raio-card: 12px;
-
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-
   --bg-gradiente-acento: rgba(37, 99, 235, 0.05);
   --bg-gradiente-fim: rgba(247, 248, 250, 0);
   --bg-gradiente: radial-gradient(
@@ -71,21 +59,17 @@
   --primary-active: #2563eb;
   --primary-light: #172554;
   --primary-border: #1e40af;
-
   --bg-page: #0b0f17;
   --bg-card: #121826;
   --bg-muted: #1e293b;
   --bg-input: #0f172a;
-
   --text-main: #f3f4f6;
   --text-secondary: #9ca3af;
   --text-muted: #6b7280;
   --text-inverse: #0b0f17;
-
   --border-color: #1f2937;
   --border-focus: #3b82f6;
   --focus-ring: rgba(59, 130, 246, 0.35);
-
   --estado-sucesso: #22c55e;
   --estado-sucesso-bg: #052e16;
   --estado-sucesso-borda: #14532d;
@@ -95,13 +79,11 @@
   --estado-aviso: #f59e0b;
   --estado-aviso-bg: #451a03;
   --estado-aviso-borda: #78350f;
-
   --sombra-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
   --sombra-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
   --sombra-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
   --sombra-toast: 0 12px 24px -4px rgba(0, 0, 0, 0.7), 0 4px 8px -2px rgba(0, 0, 0, 0.5);
   --sombra-card: var(--sombra-md);
-
   --bg-gradiente-acento: rgba(59, 130, 246, 0.07);
   --bg-gradiente-fim: rgba(11, 15, 23, 0);
   --bg-gradiente: radial-gradient(
@@ -128,27 +110,22 @@
   --color-aviso: var(--estado-aviso);
   --color-input: var(--bg-input);
   --color-muted: var(--bg-muted);
-
   --radius-card: var(--raio-card);
   --radius-sm: var(--raio-sm);
   --radius-md: var(--raio-md);
   --radius-lg: var(--raio-lg);
   --radius-full: var(--raio-full);
-
   --shadow-card: var(--sombra-card);
   --shadow-sm: var(--sombra-sm);
   --shadow-md: var(--sombra-md);
   --shadow-lg: var(--sombra-lg);
   --shadow-toast: var(--sombra-toast);
-
   --font-sans: var(--font-family);
 }
 
 @custom-variant dark (&:where([data-tema="escuro"], [data-tema="escuro"] *));
 
-/* ============================================================
-   ESTILOS DE BASE E RESET ESSENCIAL (CSS Cru)
-   ============================================================ */
+/* Estilos de Base e Reset Essencial */
 html,
 body {
   max-width: 100%;
@@ -167,7 +144,6 @@ body {
   flex-direction: column;
 }
 
-/* Pseudo-elemento de fade de fundo sutil fixo */
 body::before {
   content: '';
   position: fixed;
@@ -181,12 +157,10 @@ body::before {
   z-index: -1;
 }
 
-/* Classe hidden usada pelo JS */
 .hidden {
   display: none !important;
 }
 
-/* Transição de tema com respeito a prefers-reduced-motion */
 @media (prefers-reduced-motion: no-preference) {
   html.tema-transicao,
   html.tema-transicao *,
@@ -221,11 +195,17 @@ body::before {
   }
 }
 
-/* ============================================================
-   COMPONENTES REUTILIZÁVEIS (@layer components)
-   Compostos via @apply e utilitários semânticos do tema
-   ============================================================ */
+/* Componentes Reutilizáveis */
 @layer components {
+  /* Layout de Painel com espaçamento vertical de 24px entre seções */
+  .tab-panel {
+    @apply flex w-full min-w-0 flex-col gap-6;
+  }
+
+  .panel-container {
+    @apply flex w-full min-w-0 flex-col gap-6;
+  }
+
   /* Botões */
   .btn-primary {
     @apply bg-acento hover:bg-acento-hover active:bg-acento-active focus-visible:ring-acento/40 inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50;
@@ -244,16 +224,16 @@ body::before {
   }
 
   .btn-sm {
-    @apply rounded-md px-3 py-1.5 text-xs;
+    @apply min-h-[38px] rounded-lg px-4 py-2 text-sm font-semibold;
   }
 
   .btn-theme-toggle {
-    @apply border-borda bg-card text-texto-2 hover:text-texto hover:bg-muted focus-visible:ring-acento/40 inline-flex h-10 w-10 items-center justify-center rounded-lg border transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none;
+    @apply border-borda bg-card text-texto-2 hover:text-texto hover:bg-muted focus-visible:ring-acento/40 inline-flex h-10 min-h-10 w-10 min-w-10 items-center justify-center rounded-lg border transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none;
   }
 
   /* Abas de Navegação */
   .tab-btn {
-    @apply text-texto-2 hover:text-texto inline-flex items-center justify-center border-b-2 border-transparent px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors duration-150 focus-visible:outline-none;
+    @apply text-texto-2 hover:text-texto inline-flex min-h-[42px] items-center justify-center border-b-2 border-transparent px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors duration-150 focus-visible:outline-none;
   }
 
   .tab-btn.active {
@@ -266,58 +246,89 @@ body::before {
   }
 
   .btn-period {
-    @apply text-texto-2 hover:text-texto rounded-md px-3 py-1.5 text-xs font-medium transition-colors duration-150 focus-visible:outline-none;
+    @apply text-texto-2 hover:text-texto rounded-md px-3 py-1.5 text-xs font-semibold transition-colors duration-150 focus-visible:outline-none;
   }
 
   .btn-period.active {
-    @apply bg-card text-texto font-semibold shadow-sm;
+    @apply bg-card text-texto font-bold shadow-sm;
   }
 
   /* Cartões */
   .card {
-    @apply bg-card rounded-card border-borda shadow-card border;
+    @apply bg-card rounded-card border-borda shadow-card overflow-hidden border;
   }
 
-  /* Cartões de KPI */
+  .card-header {
+    @apply border-borda flex items-center justify-between gap-3 border-b px-5 py-4;
+  }
+
+  .card-body {
+    @apply p-5 sm:p-6;
+  }
+
+  /* Cartões de KPI compactos com altura natural */
   .kpi-card {
-    @apply bg-card rounded-card border-borda shadow-card flex flex-col justify-between border p-4 transition-all duration-150;
+    @apply bg-card rounded-card border-borda shadow-card relative flex min-w-0 flex-col overflow-hidden border p-5 transition-all duration-150;
   }
 
   .kpi-card.highlight {
     @apply border-acento/40 shadow-md;
   }
 
-  .kpi-card .kpi-value {
-    @apply text-texto mt-1 text-2xl font-bold tracking-tight sm:text-3xl;
+  .kpi-header {
+    @apply mb-2 flex items-center justify-between gap-2;
   }
 
-  .kpi-card .kpi-detail {
-    @apply text-texto-3 mt-1 text-xs;
+  .kpi-title {
+    @apply text-texto-3 text-xs font-semibold tracking-wider uppercase;
   }
 
-  /* Formulários */
+  .kpi-icon {
+    @apply bg-muted text-texto-2 flex h-7 w-7 items-center justify-center rounded-md text-sm;
+  }
+
+  .kpi-value {
+    @apply text-texto mt-1 text-2xl leading-tight font-bold tracking-tight sm:text-[1.75rem];
+  }
+
+  .kpi-detail {
+    @apply text-texto-3 mt-1.5 text-xs;
+  }
+
+  /* Formulários e Filtros */
+  .ranking-filters-bar {
+    @apply grid items-end gap-4;
+    grid-template-columns: auto minmax(160px, 1fr) minmax(150px, 1fr) auto;
+  }
+
+  .filter-item {
+    @apply flex min-w-0 flex-col gap-1.5;
+  }
+
+  .filter-label {
+    @apply text-texto-2 block text-xs font-bold tracking-wider uppercase;
+  }
+
   .form-group {
     @apply flex flex-col gap-1.5;
   }
 
   .form-label {
-    @apply text-texto-2 text-xs font-medium;
+    @apply text-texto-2 text-xs font-bold tracking-wider uppercase;
   }
 
   .form-input,
   .form-select {
-    @apply border-borda bg-input text-texto focus:border-acento focus:ring-acento/20 w-full rounded-lg border px-3 py-2 text-sm transition-colors duration-150 focus:ring-2 focus:outline-none;
+    @apply border-borda bg-input text-texto focus:border-acento focus:ring-acento/20 w-full rounded-lg border px-3.5 py-2 text-sm transition-colors duration-150 focus:ring-2 focus:outline-none;
   }
 
   .form-input.is-invalid,
   .form-select.is-invalid {
     @apply border-erro focus:border-erro focus:ring-erro/20;
   }
-
   .form-helper {
     @apply text-texto-3 text-xs;
   }
-
   .form-error {
     @apply text-erro text-xs;
   }
@@ -334,17 +345,15 @@ body::before {
   .badge-voce {
     @apply bg-acento-suave text-acento border-acento-borda ml-1.5 inline-block rounded-full border px-2 py-0.5 text-[0.7rem] font-semibold;
   }
-
   .plate-tag {
     @apply border-borda bg-muted text-texto inline-block rounded border px-2 py-0.5 font-mono text-xs font-semibold tracking-wider;
   }
-
   .contract-tag {
     @apply border-borda bg-muted text-texto-2 inline-block rounded border px-2 py-0.5 font-mono text-xs;
   }
 
   .panel-mode-badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium;
   }
 
   .panel-mode-badge.mode-owner {
@@ -356,25 +365,24 @@ body::before {
   }
 
   .visitor-pill {
-    @apply bg-muted text-texto-2 border-borda inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium;
+    @apply bg-muted text-texto-2 border-borda inline-flex min-h-[38px] items-center rounded-full border px-3 py-1.5 text-xs font-semibold;
   }
 
+  .user-greeting {
+    @apply text-texto bg-acento-suave border-acento-borda inline-flex min-h-[38px] max-w-[140px] items-center truncate rounded-full border px-3 py-1.5 text-xs font-bold sm:max-w-[220px] sm:text-sm;
+  }
   .medal-badge {
     @apply inline-flex h-6 w-6 items-center justify-center rounded-full border text-xs font-bold;
   }
-
   .medal-gold {
     @apply border-amber-300 bg-amber-100 text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200;
   }
-
   .medal-silver {
     @apply border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200;
   }
-
   .medal-bronze {
     @apply border-orange-300 bg-orange-100 text-orange-800 dark:border-orange-700 dark:bg-orange-950 dark:text-orange-200;
   }
-
   .medal-regular {
     @apply bg-muted text-texto-3 border-borda;
   }
@@ -455,30 +463,28 @@ body::before {
   /* Seções Recolhíveis (<details>) */
   .collapsible-section > summary.collapsible-summary {
     list-style: none;
-    position: relative;
-    padding-right: 2.75rem;
+    @apply bg-card hover:bg-muted/50 flex cursor-pointer items-center justify-between gap-3 px-5 py-4 transition-colors select-none;
   }
 
-  .collapsible-section > summary.collapsible-summary::-webkit-details-marker {
+  .collapsible-section > summary.collapsible-summary::-webkit-details-marker,
+  .collapsible-section > summary.collapsible-summary::marker {
     display: none;
   }
 
-  .collapsible-section > summary.collapsible-summary::after {
-    content: '';
-    position: absolute;
-    right: 1.25rem;
-    top: 50%;
-    width: 8px;
-    height: 8px;
-    border-right: 2px solid var(--text-secondary);
-    border-bottom: 2px solid var(--text-secondary);
-    transform: translateY(-65%) rotate(45deg);
-    transition: transform var(--transition-fast);
-    pointer-events: none;
+  .collapsible-section[open] > summary.collapsible-summary {
+    @apply border-borda border-b;
   }
 
-  .collapsible-section[open] > summary.collapsible-summary::after {
-    transform: translateY(-35%) rotate(-135deg);
+  .summary-chevron {
+    @apply text-texto-2 shrink-0 text-base transition-transform duration-150;
+  }
+
+  .collapsible-section:not([open]) .summary-chevron {
+    transform: rotate(-90deg);
+  }
+
+  .collapsible-content {
+    @apply flex min-w-0 flex-col gap-4 p-5 sm:p-6;
   }
 
   /* Dialog / Modais */
@@ -508,22 +514,22 @@ body::before {
     @apply bg-card text-texto border-borda shadow-toast pointer-events-auto flex items-center justify-between gap-3 rounded-lg border p-4 text-sm;
     animation: fadeIn 200ms ease-out;
   }
-
   .toast.toast-error {
     @apply border-erro/40 bg-erro/5 text-erro;
   }
-
   .toast-close {
     @apply text-texto-3 hover:text-texto hover:bg-muted inline-flex items-center justify-center rounded p-1 transition-colors;
   }
 
   /* Gráficos e Feedback */
   .chart-canvas-container {
-    @apply relative h-[280px] w-full sm:h-[340px];
+    @apply relative h-[300px] w-full min-w-0 sm:h-[340px];
   }
-
   .chart-feedback-box {
     @apply text-texto-3 p-8 text-center text-sm;
+  }
+  .chart-dynamic-title {
+    @apply text-texto mt-2 text-sm font-bold sm:text-base;
   }
 
   /* Demonstração e Alertas */
@@ -534,7 +540,6 @@ body::before {
   .demo-credentials-box code {
     @apply bg-card border-borda text-texto rounded border px-1.5 py-0.5 font-mono font-medium;
   }
-
   .login-alert-error {
     @apply bg-erro/10 border-erro/30 text-erro rounded-lg border p-3 text-xs;
   }
@@ -545,9 +550,7 @@ body::before {
   }
 }
 
-/* ============================================================
-   REGRAS RESPONSIVAS ESPECÍFICAS DE TABELA MOBILE (CSS Cru)
-   ============================================================ */
+/* Regras Responsivas Específicas de Tabela Mobile (CSS Cru) */
 @media (max-width: 600px) {
   .table-responsive-cards thead {
     display: none;

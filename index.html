@@ -89,8 +89,17 @@
             </svg>
           </button>
           <div id="authDeslogadoBox" class="auth-status-box flex items-center gap-2">
-            <span class="visitor-pill">Visitante</span>
-            <button type="button" id="btnAbrirLogin" class="btn-primary btn-sm">Entrar</button>
+            <span
+              class="visitor-pill bg-muted text-texto-2 border-borda inline-flex min-h-[38px] items-center rounded-full border px-3 py-1.5 text-xs font-semibold"
+              >Visitante</span
+            >
+            <button
+              type="button"
+              id="btnAbrirLogin"
+              class="btn-primary btn-sm min-h-[38px] rounded-lg px-4 py-2 text-sm font-semibold"
+            >
+              Entrar
+            </button>
           </div>
 
           <div id="authLogadoBox" class="auth-status-box flex hidden items-center gap-2">
@@ -99,7 +108,13 @@
               class="user-greeting text-texto max-w-[120px] truncate text-xs font-medium sm:max-w-[200px] sm:text-sm"
               >Olá, João Vitor</span
             >
-            <button type="button" id="btnLogout" class="btn-secondary btn-sm">Sair</button>
+            <button
+              type="button"
+              id="btnLogout"
+              class="btn-secondary btn-sm min-h-[38px] rounded-lg px-4 py-2 text-sm font-semibold"
+            >
+              Sair
+            </button>
           </div>
         </div>
       </div>
@@ -160,7 +175,7 @@
          ========================================================== -->
       <section
         id="panelRanking"
-        class="tab-panel"
+        class="tab-panel flex flex-col gap-6"
         role="tabpanel"
         data-tabpanel="ranking"
         aria-labelledby="tabRanking"
@@ -172,8 +187,11 @@
           <div
             class="ranking-filters-bar grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-4"
           >
-            <div class="filter-item">
-              <span class="filter-label">Período</span>
+            <div class="filter-item flex min-w-0 flex-col gap-1.5">
+              <span
+                class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
+                >Período</span
+              >
               <div
                 class="period-segmented-control"
                 role="group"
@@ -206,21 +224,29 @@
               </div>
             </div>
 
-            <div class="filter-item">
-              <label for="filtroRankingModelo" class="filter-label">Modelo</label>
+            <div class="filter-item flex min-w-0 flex-col gap-1.5">
+              <label
+                for="filtroRankingModelo"
+                class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
+                >Modelo</label
+              >
               <select id="filtroRankingModelo" class="form-select filter-select">
                 <option value="">Todos os modelos</option>
               </select>
             </div>
 
-            <div class="filter-item">
-              <label for="filtroRankingAno" class="filter-label">Ano modelo</label>
+            <div class="filter-item flex min-w-0 flex-col gap-1.5">
+              <label
+                for="filtroRankingAno"
+                class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
+                >Ano modelo</label
+              >
               <select id="filtroRankingAno" class="form-select filter-select">
                 <option value="">Todos os anos</option>
               </select>
             </div>
 
-            <div class="filter-item filter-actions">
+            <div class="filter-item flex min-w-0 flex-col gap-1.5">
               <button type="button" id="btnLimparFiltrosRanking" class="btn-secondary">
                 Limpar filtros
               </button>
@@ -230,38 +256,54 @@
 
         <!-- E2. KPIs do Recorte (4 Indicadores) -->
         <div
-          class="kpi-cards-grid kpi-cards-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4"
+          class="kpi-card bg-card rounded-card border-borda shadow-card relative flex min-w-0 flex-col overflow-hidden border p-5"
         >
-          <div class="kpi-card highlight">
+          <div
+            class="kpi-card highlight bg-card rounded-card border-borda shadow-card relative flex min-w-0 flex-col overflow-hidden border p-5"
+          >
             <div class="kpi-header">
-              <span class="kpi-title">Total de Vendas</span>
+              <span class="kpi-title text-texto-3 text-xs font-semibold tracking-wider uppercase"
+                >Total de Vendas</span
+              >
               <span class="kpi-icon" aria-hidden="true"></span>
             </div>
             <div id="kpiRankingTotal" class="kpi-value">0</div>
             <div id="kpiRankingTotalDetalhe" class="kpi-detail">Neste mês</div>
           </div>
 
-          <div class="kpi-card">
+          <div
+            class="kpi-card bg-card rounded-card border-borda shadow-card relative flex min-w-0 flex-col overflow-hidden border p-5"
+          >
             <div class="kpi-header">
-              <span class="kpi-title">Consultor Líder</span>
+              <span class="kpi-title text-texto-3 text-xs font-semibold tracking-wider uppercase"
+                >Consultor Líder</span
+              >
               <span class="kpi-icon" aria-hidden="true"></span>
             </div>
             <div id="kpiRankingLider" class="kpi-value">-</div>
             <div id="kpiRankingLiderDetalhe" class="kpi-detail">0 vendas</div>
           </div>
 
-          <div class="kpi-card">
+          <div
+            class="kpi-card bg-card rounded-card border-borda shadow-card relative flex min-w-0 flex-col overflow-hidden border p-5"
+          >
             <div class="kpi-header">
-              <span class="kpi-title">Modelo Mais Vendido</span>
+              <span class="kpi-title text-texto-3 text-xs font-semibold tracking-wider uppercase"
+                >Modelo Mais Vendido</span
+              >
               <span class="kpi-icon" aria-hidden="true"></span>
             </div>
             <div id="kpiRankingModelo" class="kpi-value">-</div>
             <div id="kpiRankingModeloDetalhe" class="kpi-detail">0 unidades</div>
           </div>
 
-          <div class="kpi-card">
+          <div
+            class="kpi-card bg-card rounded-card border-borda shadow-card relative flex min-w-0 flex-col overflow-hidden border p-5"
+          >
             <div class="kpi-header">
-              <span class="kpi-title">Ano Mais Vendido</span>
+              <span class="kpi-title text-texto-3 text-xs font-semibold tracking-wider uppercase"
+                >Ano Mais Vendido</span
+              >
               <span class="kpi-icon" aria-hidden="true"></span>
             </div>
             <div id="kpiRankingAno" class="kpi-value">-</div>
@@ -271,7 +313,9 @@
 
         <!-- 2.3 Seção "BI · Análise visual" (logo abaixo dos KPIs, recolhível com <details>/<summary> — Item 1.3) -->
         <details id="detailsSecaoBI" class="card collapsible-section" open>
-          <summary class="collapsible-summary">
+          <summary
+            class="collapsible-summary bg-card hover:bg-muted/50 flex cursor-pointer items-center justify-between gap-3 px-5 py-4 transition-colors select-none"
+          >
             <div class="card-title-group flex flex-col gap-0.5">
               <h2 class="card-title text-texto text-base font-semibold sm:text-lg">
                 Análise visual
@@ -283,12 +327,16 @@
             <span class="summary-chevron" aria-hidden="true">▾</span>
           </summary>
 
-          <div class="collapsible-content">
+          <div class="collapsible-content flex min-w-0 flex-col gap-4 p-5 sm:p-6">
             <div
               class="chart-controls-bar bg-muted/40 border-borda grid grid-cols-1 items-end gap-3 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-4"
             >
-              <div class="filter-item">
-                <label for="selectBITipoGrafico" class="filter-label">Tipo de gráfico</label>
+              <div class="filter-item flex min-w-0 flex-col gap-1.5">
+                <label
+                  for="selectBITipoGrafico"
+                  class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
+                  >Tipo de gráfico</label
+                >
                 <select id="selectBITipoGrafico" class="form-select filter-select">
                   <option value="colunas">Colunas</option>
                   <option value="pizza">Pizza</option>
@@ -298,8 +346,12 @@
                 </select>
               </div>
 
-              <div class="filter-item">
-                <label for="selectBIDimensao" class="filter-label">Agrupar por</label>
+              <div class="filter-item flex min-w-0 flex-col gap-1.5">
+                <label
+                  for="selectBIDimensao"
+                  class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
+                  >Agrupar por</label
+                >
                 <select
                   id="selectBIDimensao"
                   class="form-select filter-select"
@@ -314,14 +366,19 @@
                 >
               </div>
 
-              <div class="filter-item filter-actions">
+              <div class="filter-item flex min-w-0 flex-col gap-1.5">
                 <button type="button" id="btnBaixarPNGBI" class="btn-secondary">
                   Exportar PNG
                 </button>
               </div>
             </div>
 
-            <h3 id="tituloDinamicoBI" class="chart-dynamic-title">Vendas por modelo · Mês atual</h3>
+            <h3
+              id="tituloDinamicoBI"
+              class="chart-dynamic-title text-texto mt-2 text-sm font-bold sm:text-base"
+            >
+              Vendas por modelo · Mês atual
+            </h3>
 
             <div id="containerCanvasBI" class="chart-canvas-container">
               <canvas
@@ -417,7 +474,9 @@
 
         <!-- E4. Matriz Consultor x (Modelo | Ano Modelo) — Recolhível e com rolagem horizontal + Consultor fixo (Item 1.3) -->
         <details id="detailsSecaoMatriz" class="card collapsible-section" open>
-          <summary class="collapsible-summary">
+          <summary
+            class="collapsible-summary bg-card hover:bg-muted/50 flex cursor-pointer items-center justify-between gap-3 px-5 py-4 transition-colors select-none"
+          >
             <div class="card-title-group flex flex-col gap-0.5">
               <h2 class="card-title text-texto text-base font-semibold sm:text-lg">
                 Matriz de desempenho
@@ -429,7 +488,7 @@
             <span class="summary-chevron" aria-hidden="true">▾</span>
           </summary>
 
-          <div class="collapsible-content">
+          <div class="collapsible-content flex min-w-0 flex-col gap-4 p-5 sm:p-6">
             <div class="section-subtoolbar">
               <div
                 class="period-segmented-control"
@@ -467,7 +526,9 @@
 
         <!-- E5. Vendas Gerais do Recorte — Recolhível e paginada 10 no celular / 20 no desktop (Item 1.3) -->
         <details id="detailsSecaoVendasGerais" class="card collapsible-section" open>
-          <summary class="collapsible-summary">
+          <summary
+            class="collapsible-summary bg-card hover:bg-muted/50 flex cursor-pointer items-center justify-between gap-3 px-5 py-4 transition-colors select-none"
+          >
             <div class="card-title-group flex flex-col gap-0.5">
               <h2 class="card-title text-texto text-base font-semibold sm:text-lg">
                 Vendas do período
@@ -479,7 +540,7 @@
             <span class="summary-chevron" aria-hidden="true">▾</span>
           </summary>
 
-          <div class="collapsible-content">
+          <div class="collapsible-content flex min-w-0 flex-col gap-4 p-5 sm:p-6">
             <div class="section-subtoolbar">
               <div class="consultor-selector-box flex items-center gap-2">
                 <label for="filtroVendasGeraisConsultor">Filtrar consultor:</label>
@@ -532,12 +593,12 @@
          ========================================================== -->
       <section
         id="panelPainel"
-        class="tab-panel hidden"
+        class="tab-panel flex hidden flex-col gap-6"
         role="tabpanel"
         data-tabpanel="painel"
         aria-labelledby="tabPainel"
       >
-        <div class="panel-container">
+        <div class="panel-container flex flex-col gap-6">
           <div class="period-filter-wrapper">
             <div class="panel-header-left flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
               <div class="period-title">
@@ -592,28 +653,42 @@
           </div>
 
           <!-- KPIs Individuais -->
-          <div class="kpi-cards-grid grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div class="kpi-card highlight">
+          <div
+            class="kpi-card bg-card rounded-card border-borda shadow-card relative flex min-w-0 flex-col overflow-hidden border p-5"
+          >
+            <div
+              class="kpi-card highlight bg-card rounded-card border-borda shadow-card relative flex min-w-0 flex-col overflow-hidden border p-5"
+            >
               <div class="kpi-header">
-                <span class="kpi-title">Total de Vendas</span>
+                <span class="kpi-title text-texto-3 text-xs font-semibold tracking-wider uppercase"
+                  >Total de Vendas</span
+                >
                 <span class="kpi-icon" aria-hidden="true"></span>
               </div>
               <div id="kpiTotalVendas" class="kpi-value">0</div>
               <div id="kpiPeriodoTexto" class="kpi-detail">Neste mês</div>
             </div>
 
-            <div class="kpi-card">
+            <div
+              class="kpi-card bg-card rounded-card border-borda shadow-card relative flex min-w-0 flex-col overflow-hidden border p-5"
+            >
               <div class="kpi-header">
-                <span class="kpi-title">Modelo Mais Vendido</span>
+                <span class="kpi-title text-texto-3 text-xs font-semibold tracking-wider uppercase"
+                  >Modelo Mais Vendido</span
+                >
                 <span class="kpi-icon" aria-hidden="true"></span>
               </div>
               <div id="kpiModeloMaisVendido" class="kpi-value">-</div>
               <div id="kpiModeloDetalhe" class="kpi-detail">0 unidades</div>
             </div>
 
-            <div class="kpi-card">
+            <div
+              class="kpi-card bg-card rounded-card border-borda shadow-card relative flex min-w-0 flex-col overflow-hidden border p-5"
+            >
               <div class="kpi-header">
-                <span class="kpi-title">Ano Mais Vendido</span>
+                <span class="kpi-title text-texto-3 text-xs font-semibold tracking-wider uppercase"
+                  >Ano Mais Vendido</span
+                >
                 <span class="kpi-icon" aria-hidden="true"></span>
               </div>
               <div id="kpiAnoMaisVendido" class="kpi-value">-</div>
@@ -634,12 +709,16 @@
               </div>
             </div>
 
-            <div class="card-body">
+            <div class="card-body p-5 sm:p-6">
               <div
                 class="chart-controls-bar bg-muted/40 border-borda grid grid-cols-1 items-end gap-3 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-4"
               >
-                <div class="filter-item">
-                  <label for="selectPainelGraficoDimensao" class="filter-label">Ver por</label>
+                <div class="filter-item flex min-w-0 flex-col gap-1.5">
+                  <label
+                    for="selectPainelGraficoDimensao"
+                    class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
+                    >Ver por</label
+                  >
                   <select
                     id="selectPainelGraficoDimensao"
                     class="form-select filter-select"
@@ -653,8 +732,12 @@
                   >
                 </div>
 
-                <div class="filter-item">
-                  <label for="selectPainelGraficoTipo" class="filter-label">Tipo</label>
+                <div class="filter-item flex min-w-0 flex-col gap-1.5">
+                  <label
+                    for="selectPainelGraficoTipo"
+                    class="filter-label text-texto-2 block text-xs font-bold tracking-wider uppercase"
+                    >Tipo</label
+                  >
                   <select id="selectPainelGraficoTipo" class="form-select filter-select">
                     <option value="colunas" selected>Colunas</option>
                     <option value="pizza">Pizza</option>
@@ -662,7 +745,7 @@
                   </select>
                 </div>
 
-                <div class="filter-item filter-actions">
+                <div class="filter-item flex min-w-0 flex-col gap-1.5">
                   <button type="button" id="btnBaixarPNGPainel" class="btn-secondary">
                     Exportar PNG
                   </button>
@@ -813,7 +896,7 @@
          ========================================================== -->
       <section
         id="panelNovaVenda"
-        class="tab-panel hidden"
+        class="tab-panel flex hidden flex-col gap-6"
         role="tabpanel"
         data-tabpanel="nova-venda"
         aria-labelledby="tabNovaVenda"
@@ -846,7 +929,7 @@
             </div>
           </div>
 
-          <div class="card-body">
+          <div class="card-body p-5 sm:p-6">
             <form id="formCadastroVenda" class="form-venda space-y-6 p-4 sm:p-6" novalidate>
               <div class="form-venda-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div class="form-group">

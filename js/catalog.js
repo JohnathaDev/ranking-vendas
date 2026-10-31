@@ -123,7 +123,13 @@ export function getCorConsistente(dimensao, chave) {
     return '#64748b';
   }
   if (chaveStr === 'Total') {
-    return '#0f172a';
+    if (
+      typeof document !== 'undefined' &&
+      document.documentElement?.getAttribute('data-tema') === 'escuro'
+    ) {
+      return '#f3f4f6';
+    }
+    return '#111827';
   }
 
   if (dimensao === 'modelo' && CORES_MODELO[chaveStr]) {

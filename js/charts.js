@@ -16,7 +16,8 @@ import {
   pontosDispersao,
   obterDataHojeISO,
   hexParaRgba,
-  escurecerHex
+  escurecerHex,
+  aplicarOpacidadeCor
 } from './utils.js';
 
 const instanciasGraficos = new Map();
@@ -49,19 +50,32 @@ function lerCoresTemaCSS() {
   if (typeof window === 'undefined' || typeof getComputedStyle !== 'function') {
     return {
       bgCard: '#ffffff',
-      textMain: '#0f172a',
-      textSecondary: '#475569',
-      borderColor: '#e2e8f0',
+      textMain: '#111827',
+      textSecondary: '#4b5563',
+      borderColor: '#e5e7eb',
       fontFamily: 'system-ui, sans-serif'
     };
   }
   const styles = getComputedStyle(document.documentElement);
   return {
     bgCard: styles.getPropertyValue('--bg-card').trim() || '#ffffff',
-    textMain: styles.getPropertyValue('--text-main').trim() || '#0f172a',
-    textSecondary: styles.getPropertyValue('--text-secondary').trim() || '#475569',
-    borderColor: styles.getPropertyValue('--border-color').trim() || '#e2e8f0',
+    textMain: styles.getPropertyValue('--text-main').trim() || '#111827',
+    textSecondary: styles.getPropertyValue('--text-secondary').trim() || '#4b5563',
+    borderColor: styles.getPropertyValue('--border-color').trim() || '#e5e7eb',
     fontFamily: styles.getPropertyValue('--font-family').trim() || 'system-ui, sans-serif'
+  };
+}
+
+function criarConfigTooltipTema(coresTema, callbacksExtras = {}) {
+  return {
+    backgroundColor: coresTema.bgCard,
+    titleColor: coresTema.textMain,
+    bodyColor: coresTema.textMain,
+    footerColor: coresTema.textMain,
+    borderColor: coresTema.borderColor,
+    borderWidth: 1,
+    padding: 10,
+    callbacks: callbacksExtras
   };
 }
 
@@ -251,6 +265,7 @@ export function renderGraficoRankingBI(params) {
     typeof window !== 'undefined' && window.ChartDataLabels ? window.ChartDataLabels : null;
   const mobile = isMobileViewport();
   const ehCircular = tipo === 'pizza';
+  const corGradeHorizontal = aplicarOpacidadeCor(coresTema.borderColor, 0.6);
 
   let configChart = null;
   let ariaLabelResumo = '';
@@ -293,7 +308,7 @@ export function renderGraficoRankingBI(params) {
             data: serieFinal.valores,
             backgroundColor: coresFatias,
             hoverBackgroundColor: coresFatias.map((c) => escurecerHex(c, 0.18)),
-            borderColor: ehCircular ? '#ffffff' : coresFatias,
+            borderColor: ehCircular ? coresTema.bgCard : coresFatias,
             borderWidth: ehCircular ? 2 : 1,
             borderRadius: ehCircular ? 0 : 6,
             hoverOffset: ehCircular ? 6 : 0
@@ -334,18 +349,16 @@ export function renderGraficoRankingBI(params) {
             display: ehCircular,
             position: mobile ? 'bottom' : 'right',
             labels: {
-              color: coresTema.textMain,
+              color: coresTema.textSecondary,
               font: { family: coresTema.fontFamily, size: 12 }
             }
           },
-          tooltip: {
-            callbacks: {
-              label(ctx) {
-                const valor = Number(ctx.raw) || 0;
-                return ` ${ctx.label}: ${valor} venda${valor === 1 ? '' : 's'} (${formatarPerc(valor, totalGeral)})`;
-              }
+          tooltip: criarConfigTooltipTema(coresTema, {
+            label(ctx) {
+              const valor = Number(ctx.raw) || 0;
+              return ` ${ctx.label}: ${valor} venda${valor === 1 ? '' : 's'} (${formatarPerc(valor, totalGeral)})`;
             }
-          }
+          })
         },
         scales: ehCircular
           ? {}
@@ -356,7 +369,7 @@ export function renderGraficoRankingBI(params) {
                   color: coresTema.textSecondary,
                   precision: 0
                 },
-                grid: { color: coresTema.borderColor }
+                grid: { display: false }
               },
               y: {
                 beginAtZero: true,
@@ -364,7 +377,7 @@ export function renderGraficoRankingBI(params) {
                   color: coresTema.textSecondary,
                   precision: 0
                 },
-                grid: { color: coresTema.borderColor }
+                grid: { color: corGradeHorizontal }
               }
             }
       }
@@ -401,7 +414,7 @@ export function renderGraficoRankingBI(params) {
             data: ds.valores,
             backgroundColor: cor,
             hoverBackgroundColor: escurecerHex(cor, 0.18),
-            borderColor: '#ffffff',
+            borderColor: coresTema.bgCard,
             borderWidth: 1
           };
         })
@@ -420,30 +433,28 @@ export function renderGraficoRankingBI(params) {
             display: true,
             position: mobile ? 'bottom' : 'top',
             labels: {
-              color: coresTema.textMain,
+              color: coresTema.textSecondary,
               font: { family: coresTema.fontFamily, size: 12 }
             }
           },
-          tooltip: {
-            callbacks: {
-              label(ctx) {
-                const valor = Number(ctx.raw) || 0;
-                return ` ${ctx.dataset.label}: ${valor} (${formatarPerc(valor, totalGeral)} do total)`;
-              }
+          tooltip: criarConfigTooltipTema(coresTema, {
+            label(ctx) {
+              const valor = Number(ctx.raw) || 0;
+              return ` ${ctx.dataset.label}: ${valor} (${formatarPerc(valor, totalGeral)} do total)`;
             }
-          }
+          })
         },
         scales: {
           x: {
             stacked: true,
             ticks: { color: coresTema.textSecondary },
-            grid: { color: coresTema.borderColor }
+            grid: { display: false }
           },
           y: {
             stacked: true,
             beginAtZero: true,
             ticks: { color: coresTema.textSecondary, precision: 0 },
-            grid: { color: coresTema.borderColor }
+            grid: { color: corGradeHorizontal }
           }
         }
       }
@@ -464,16 +475,19 @@ export function renderGraficoRankingBI(params) {
       data: {
         labels: seriesLinha.labels,
         datasets: seriesLinha.datasets.map((ds) => {
-          const cor = ds.isTotal ? '#0f172a' : getCorConsistente(dimensao, ds.label);
+          const cor = ds.isTotal ? coresTema.textMain : getCorConsistente(dimensao, ds.label);
           return {
             label: ds.label,
             data: ds.valores,
             borderColor: cor,
             backgroundColor: cor,
-            borderWidth: ds.isTotal ? 3 : 2,
+            borderWidth: ds.isTotal ? 2.5 : 1.75,
             borderDash: ds.isTotal ? [] : [4, 2],
-            tension: 0.25,
-            pointRadius: ds.isTotal ? 4 : 3
+            cubicInterpolationMode: 'monotone',
+            pointRadius: ds.isTotal ? 4 : 3,
+            pointBackgroundColor: cor,
+            pointBorderColor: coresTema.bgCard,
+            pointBorderWidth: 1
           };
         })
       },
@@ -486,28 +500,26 @@ export function renderGraficoRankingBI(params) {
             display: true,
             position: mobile ? 'bottom' : 'top',
             labels: {
-              color: coresTema.textMain,
+              color: coresTema.textSecondary,
               font: { family: coresTema.fontFamily, size: 12 }
             }
           },
-          tooltip: {
-            callbacks: {
-              label(ctx) {
-                const valor = Number(ctx.raw) || 0;
-                return ` ${ctx.dataset.label}: ${valor} venda${valor === 1 ? '' : 's'} (${formatarPerc(valor, totalGeral)})`;
-              }
+          tooltip: criarConfigTooltipTema(coresTema, {
+            label(ctx) {
+              const valor = Number(ctx.raw) || 0;
+              return ` ${ctx.dataset.label}: ${valor} venda${valor === 1 ? '' : 's'} (${formatarPerc(valor, totalGeral)})`;
             }
-          }
+          })
         },
         scales: {
           x: {
             ticks: { color: coresTema.textSecondary },
-            grid: { color: coresTema.borderColor }
+            grid: { display: false }
           },
           y: {
             beginAtZero: true,
             ticks: { color: coresTema.textSecondary, precision: 0 },
-            grid: { color: coresTema.borderColor }
+            grid: { color: corGradeHorizontal }
           }
         }
       }
@@ -560,18 +572,18 @@ export function renderGraficoRankingBI(params) {
             title: {
               display: true,
               text: 'Horário da Venda (00h–24h)',
-              color: coresTema.textSecondary
+              color: coresTema.textMain
             },
             ticks: { color: coresTema.textSecondary, stepSize: 2, callback: formatarHoraTick },
-            grid: { color: coresTema.borderColor }
+            grid: { color: corGradeHorizontal }
           },
           y: {
             type: 'category',
             labels: chavesGrupos,
             offset: true,
-            title: { display: true, text: labelDimensao, color: coresTema.textSecondary },
+            title: { display: true, text: labelDimensao, color: coresTema.textMain },
             ticks: { color: coresTema.textSecondary },
-            grid: { color: coresTema.borderColor }
+            grid: { color: corGradeHorizontal }
           }
         }
       : null;
@@ -588,8 +600,8 @@ export function renderGraficoRankingBI(params) {
             label: String(chaveGrupo),
             data: dadosPontos,
             backgroundColor: cor,
-            borderColor: '#ffffff',
-            borderWidth: 1,
+            borderColor: coresTema.bgCard,
+            borderWidth: 1.5,
             pointRadius: 6,
             pointHoverRadius: 8
           };
@@ -604,24 +616,22 @@ export function renderGraficoRankingBI(params) {
             display: true,
             position: mobile ? 'bottom' : 'top',
             labels: {
-              color: coresTema.textMain,
+              color: coresTema.textSecondary,
               font: { family: coresTema.fontFamily, size: 12 }
             }
           },
-          tooltip: {
-            callbacks: {
-              label(ctx) {
-                const pt = ctx.raw || {};
-                const percUnidade = formatarPerc(1, totalGeral);
-                return [
-                  ` Data/Hora: ${pt.dataHora || '-'}`,
-                  ` Consultor: ${pt.consultor || '-'}`,
-                  ` Modelo: ${pt.modelo || '-'} (${pt.anoModelo || '-'})`,
-                  ` Placa: ${pt.placa || '-'} (1 venda · ${percUnidade})`
-                ];
-              }
+          tooltip: criarConfigTooltipTema(coresTema, {
+            label(ctx) {
+              const pt = ctx.raw || {};
+              const percUnidade = formatarPerc(1, totalGeral);
+              return [
+                ` Data/Hora: ${pt.dataHora || '-'}`,
+                ` Consultor: ${pt.consultor || '-'}`,
+                ` Modelo: ${pt.modelo || '-'} (${pt.anoModelo || '-'})`,
+                ` Placa: ${pt.placa || '-'} (1 venda · ${percUnidade})`
+              ];
             }
-          }
+          })
         },
         scales: escalasDispersao || {
           x: {
@@ -632,7 +642,7 @@ export function renderGraficoRankingBI(params) {
             title: {
               display: true,
               text: periodo === 'semana' ? 'Dia da Semana (Seg–Dom)' : 'Dia do Mês',
-              color: coresTema.textSecondary
+              color: coresTema.textMain
             },
             ticks: {
               color: coresTema.textSecondary,
@@ -644,7 +654,7 @@ export function renderGraficoRankingBI(params) {
                 return value;
               }
             },
-            grid: { color: coresTema.borderColor }
+            grid: { color: corGradeHorizontal }
           },
           y: {
             min: 0,
@@ -652,7 +662,7 @@ export function renderGraficoRankingBI(params) {
             title: {
               display: true,
               text: 'Horário da Venda (00h–24h)',
-              color: coresTema.textSecondary
+              color: coresTema.textMain
             },
             ticks: {
               color: coresTema.textSecondary,
@@ -661,7 +671,7 @@ export function renderGraficoRankingBI(params) {
                 return `${String(value).padStart(2, '0')}h`;
               }
             },
-            grid: { color: coresTema.borderColor }
+            grid: { color: corGradeHorizontal }
           }
         }
       }
@@ -738,6 +748,7 @@ export function renderGraficoConsultorPainel(params) {
   let cabecalhosTabela = [];
   let linhasTabela = [];
 
+  const corGradeHorizontal = aplicarOpacidadeCor(coresTema.borderColor, 0.6);
   const dimValida = dimensao === 'anoModelo' ? 'anoModelo' : 'modelo';
   const labelDim = dimValida === 'anoModelo' ? 'Ano Modelo' : 'Modelo';
 
@@ -763,9 +774,12 @@ export function renderGraficoConsultorPainel(params) {
             borderColor: corConsultor,
             backgroundColor: hexParaRgba(corConsultor, 0.15),
             fill: true,
-            borderWidth: 3,
-            tension: 0.25,
-            pointRadius: 4
+            borderWidth: 2.5,
+            cubicInterpolationMode: 'monotone',
+            pointRadius: 4,
+            pointBackgroundColor: corConsultor,
+            pointBorderColor: coresTema.bgCard,
+            pointBorderWidth: 1
           }
         ]
       },
@@ -778,28 +792,26 @@ export function renderGraficoConsultorPainel(params) {
             display: true,
             position: mobile ? 'bottom' : 'top',
             labels: {
-              color: coresTema.textMain,
+              color: coresTema.textSecondary,
               font: { family: coresTema.fontFamily, size: 12 }
             }
           },
-          tooltip: {
-            callbacks: {
-              label(ctx) {
-                const valor = Number(ctx.raw) || 0;
-                return ` ${valor} venda${valor === 1 ? '' : 's'} (${formatarPerc(valor, totalConsultor)})`;
-              }
+          tooltip: criarConfigTooltipTema(coresTema, {
+            label(ctx) {
+              const valor = Number(ctx.raw) || 0;
+              return ` ${valor} venda${valor === 1 ? '' : 's'} (${formatarPerc(valor, totalConsultor)})`;
             }
-          }
+          })
         },
         scales: {
           x: {
             ticks: { color: coresTema.textSecondary },
-            grid: { color: coresTema.borderColor }
+            grid: { display: false }
           },
           y: {
             beginAtZero: true,
             ticks: { color: coresTema.textSecondary, precision: 0 },
-            grid: { color: coresTema.borderColor }
+            grid: { color: corGradeHorizontal }
           }
         }
       }
@@ -838,7 +850,7 @@ export function renderGraficoConsultorPainel(params) {
             data: serieFinal.valores,
             backgroundColor: cores,
             hoverBackgroundColor: cores.map((c) => escurecerHex(c, 0.18)),
-            borderColor: ehCircular ? '#ffffff' : cores,
+            borderColor: ehCircular ? coresTema.bgCard : cores,
             borderWidth: ehCircular ? 2 : 1,
             borderRadius: ehCircular ? 0 : 6,
             hoverOffset: ehCircular ? 6 : 0
@@ -874,30 +886,28 @@ export function renderGraficoConsultorPainel(params) {
             display: ehCircular,
             position: mobile ? 'bottom' : 'right',
             labels: {
-              color: coresTema.textMain,
+              color: coresTema.textSecondary,
               font: { family: coresTema.fontFamily, size: 12 }
             }
           },
-          tooltip: {
-            callbacks: {
-              label(ctx) {
-                const valor = Number(ctx.raw) || 0;
-                return ` ${ctx.label}: ${valor} venda${valor === 1 ? '' : 's'} (${formatarPerc(valor, totalConsultor)})`;
-              }
+          tooltip: criarConfigTooltipTema(coresTema, {
+            label(ctx) {
+              const valor = Number(ctx.raw) || 0;
+              return ` ${ctx.label}: ${valor} venda${valor === 1 ? '' : 's'} (${formatarPerc(valor, totalConsultor)})`;
             }
-          }
+          })
         },
         scales: ehCircular
           ? {}
           : {
               x: {
                 ticks: { color: coresTema.textSecondary },
-                grid: { color: coresTema.borderColor }
+                grid: { display: false }
               },
               y: {
                 beginAtZero: true,
                 ticks: { color: coresTema.textSecondary, precision: 0 },
-                grid: { color: coresTema.borderColor }
+                grid: { color: corGradeHorizontal }
               }
             }
       }

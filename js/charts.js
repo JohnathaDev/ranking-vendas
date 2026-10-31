@@ -15,7 +15,8 @@ import {
   gerarSeriesLinhaPorDimensao,
   pontosDispersao,
   obterDataHojeISO,
-  hexParaRgba
+  hexParaRgba,
+  escurecerHex
 } from './utils.js';
 
 const instanciasGraficos = new Map();
@@ -27,6 +28,8 @@ function isChartDisponivel() {
   return typeof window !== 'undefined' && typeof window.Chart === 'function';
 }
 
+const ultimosTiposGraficos = new Map();
+
 function obterDuracaoAnimacao() {
   if (
     typeof window !== 'undefined' &&
@@ -35,7 +38,7 @@ function obterDuracaoAnimacao() {
   ) {
     return 0;
   }
-  return 350;
+  return 650;
 }
 
 function isMobileViewport() {
@@ -236,8 +239,18 @@ export function renderGraficoRankingBI(params) {
   const totalGeral = listaVendas.length;
   const { canvas, theadTabela, tbodyTabela } = elementos;
   const coresTema = lerCoresTemaCSS();
-  const duracaoAnimacao = obterDuracaoAnimacao();
+  const tipoAnteriorBI = ultimosTiposGraficos.get(idInstancia);
+  const ehNovoOuTrocaTipoBI = tipoAnteriorBI !== tipo;
+  ultimosTiposGraficos.set(idInstancia, tipo);
+  const duracaoAnimacao = ehNovoOuTrocaTipoBI
+    ? obterDuracaoAnimacao()
+    : obterDuracaoAnimacao() > 0
+      ? 250
+      : 0;
+  const pluginDatalabels =
+    typeof window !== 'undefined' && window.ChartDataLabels ? window.ChartDataLabels : null;
   const mobile = isMobileViewport();
+  const ehCircular = tipo === 'pizza';
 
   let configChart = null;
   let ariaLabelResumo = '';
@@ -249,7 +262,6 @@ export function renderGraficoRankingBI(params) {
 
   if (tipo === 'colunas' || tipo === 'pizza') {
     const base = serieCategorias(listaVendas, dimensao, consultores);
-    const ehCircular = tipo === 'pizza';
     const serieFinal = ehCircular ? agruparFatiasPizza(base.labels, base.valores, 6) : base;
 
     const coresFatias = serieFinal.labels.map((lbl) => getCorConsistente(dimensao, lbl));
@@ -280,17 +292,44 @@ export function renderGraficoRankingBI(params) {
             label: 'Vendas',
             data: serieFinal.valores,
             backgroundColor: coresFatias,
+            hoverBackgroundColor: coresFatias.map((c) => escurecerHex(c, 0.18)),
             borderColor: ehCircular ? '#ffffff' : coresFatias,
             borderWidth: ehCircular ? 2 : 1,
-            borderRadius: ehCircular ? 0 : 6
+            borderRadius: ehCircular ? 0 : 6,
+            hoverOffset: ehCircular ? 6 : 0
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: duracaoAnimacao },
+        animation: {
+          duration: duracaoAnimacao,
+          easing: 'easeOutQuart',
+          animateRotate: ehCircular && ehNovoOuTrocaTipoBI,
+          animateScale: ehCircular && ehNovoOuTrocaTipoBI
+        },
         plugins: {
+          datalabels: ehCircular
+            ? {
+                color: '#ffffff',
+                font: {
+                  weight: 'bold',
+                  size: mobile ? 11 : 13,
+                  family: coresTema.fontFamily
+                },
+                textShadowColor: 'rgba(0, 0, 0, 0.55)',
+                textShadowBlur: 4,
+                formatter(value, ctx) {
+                  const ds = ctx.chart.data.datasets[0];
+                  const total = (ds.data || []).reduce((acc, v) => acc + (Number(v) || 0), 0);
+                  if (!total) return null;
+                  const pct = ((Number(value) || 0) / total) * 100;
+                  if (pct < 4) return null;
+                  return `${Math.round(pct)}%`;
+                }
+              }
+            : { display: false },
           legend: {
             display: ehCircular,
             position: mobile ? 'bottom' : 'right',
@@ -361,6 +400,7 @@ export function renderGraficoRankingBI(params) {
             label: ds.label,
             data: ds.valores,
             backgroundColor: cor,
+            hoverBackgroundColor: escurecerHex(cor, 0.18),
             borderColor: '#ffffff',
             borderWidth: 1
           };
@@ -369,7 +409,12 @@ export function renderGraficoRankingBI(params) {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: duracaoAnimacao },
+        animation: {
+          duration: duracaoAnimacao,
+          easing: 'easeOutQuart',
+          animateRotate: ehCircular && ehNovoOuTrocaTipoBI,
+          animateScale: ehCircular && ehNovoOuTrocaTipoBI
+        },
         plugins: {
           legend: {
             display: true,
@@ -638,7 +683,11 @@ export function renderGraficoRankingBI(params) {
   alternarVisibilidadeElementos(elementos, 'grafico');
 
   if (canvas && configChart) {
-    configChart.plugins = [pluginFundoCanvas, ...(configChart.plugins || [])];
+    const pluginsAdicionais = [];
+    if (ehCircular && pluginDatalabels) {
+      pluginsAdicionais.push(pluginDatalabels);
+    }
+    configChart.plugins = [pluginFundoCanvas, ...pluginsAdicionais, ...(configChart.plugins || [])];
     const ctx = canvas.getContext('2d');
     const novaInstancia = new window.Chart(ctx, configChart);
     instanciasGraficos.set(idInstancia, novaInstancia);
@@ -671,8 +720,18 @@ export function renderGraficoConsultorPainel(params) {
   const totalConsultor = listaVendas.length;
   const { canvas, theadTabela, tbodyTabela } = elementos;
   const coresTema = lerCoresTemaCSS();
-  const duracaoAnimacao = obterDuracaoAnimacao();
+  const tipoAnteriorPainel = ultimosTiposGraficos.get(idInstancia);
+  const ehNovoOuTrocaTipoPainel = tipoAnteriorPainel !== tipo;
+  ultimosTiposGraficos.set(idInstancia, tipo);
+  const duracaoAnimacao = ehNovoOuTrocaTipoPainel
+    ? obterDuracaoAnimacao()
+    : obterDuracaoAnimacao() > 0
+      ? 250
+      : 0;
+  const pluginDatalabels =
+    typeof window !== 'undefined' && window.ChartDataLabels ? window.ChartDataLabels : null;
   const mobile = isMobileViewport();
+  const ehCircular = tipo === 'pizza';
 
   let configChart = null;
   let ariaLabelResumo = '';
@@ -778,9 +837,11 @@ export function renderGraficoConsultorPainel(params) {
             label: 'Vendas',
             data: serieFinal.valores,
             backgroundColor: cores,
+            hoverBackgroundColor: cores.map((c) => escurecerHex(c, 0.18)),
             borderColor: ehCircular ? '#ffffff' : cores,
             borderWidth: ehCircular ? 2 : 1,
-            borderRadius: ehCircular ? 0 : 6
+            borderRadius: ehCircular ? 0 : 6,
+            hoverOffset: ehCircular ? 6 : 0
           }
         ]
       },
@@ -789,6 +850,26 @@ export function renderGraficoConsultorPainel(params) {
         maintainAspectRatio: false,
         animation: { duration: duracaoAnimacao },
         plugins: {
+          datalabels: ehCircular
+            ? {
+                color: '#ffffff',
+                font: {
+                  weight: 'bold',
+                  size: mobile ? 11 : 13,
+                  family: coresTema.fontFamily
+                },
+                textShadowColor: 'rgba(0, 0, 0, 0.55)',
+                textShadowBlur: 4,
+                formatter(value, ctx) {
+                  const ds = ctx.chart.data.datasets[0];
+                  const total = (ds.data || []).reduce((acc, v) => acc + (Number(v) || 0), 0);
+                  if (!total) return null;
+                  const pct = ((Number(value) || 0) / total) * 100;
+                  if (pct < 4) return null;
+                  return `${Math.round(pct)}%`;
+                }
+              }
+            : { display: false },
           legend: {
             display: ehCircular,
             position: mobile ? 'bottom' : 'right',
@@ -838,7 +919,11 @@ export function renderGraficoConsultorPainel(params) {
   alternarVisibilidadeElementos(elementos, 'grafico');
 
   if (canvas && configChart) {
-    configChart.plugins = [pluginFundoCanvas, ...(configChart.plugins || [])];
+    const pluginsAdicionais = [];
+    if (ehCircular && pluginDatalabels) {
+      pluginsAdicionais.push(pluginDatalabels);
+    }
+    configChart.plugins = [pluginFundoCanvas, ...pluginsAdicionais, ...(configChart.plugins || [])];
     const ctx = canvas.getContext('2d');
     const novaInstancia = new window.Chart(ctx, configChart);
     instanciasGraficos.set(idInstancia, novaInstancia);

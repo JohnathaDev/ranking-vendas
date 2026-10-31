@@ -752,3 +752,29 @@ export function hexParaRgba(hex, alfa = 1) {
 
   return `rgba(${r}, ${g}, ${b}, ${numAlfa})`;
 }
+
+/**
+ * Escurece uma cor hexadecimal aplicando um fator de redução (0 a 1).
+ * Suporta hex com 3 ou 6 dígitos (com ou sem #).
+ * Exemplo: escurecerHex('#3b82f6', 0.2) reduz cada canal RGB em 20%.
+ * @param {string} hex
+ * @param {number} [fator=0.18]
+ * @returns {string} Hexadecimal de 6 dígitos formatado em minúsculas (ex: '#2f68c5')
+ */
+export function escurecerHex(hex, fator = 0.18) {
+  if (typeof hex !== 'string') return '#000000';
+  let limpo = hex.trim().replace(/^#/, '');
+  if (!limpo) return '#000000';
+  if (limpo.length === 3) {
+    limpo = limpo[0] + limpo[0] + limpo[1] + limpo[1] + limpo[2] + limpo[2];
+  }
+  if (limpo.length !== 6 || !/^[0-9a-fA-F]{6}$/.test(limpo)) {
+    return hex.startsWith('#') ? hex : `#${hex}`;
+  }
+  const f = Math.max(0, Math.min(1, Number(fator) || 0));
+  const r = Math.max(0, Math.min(255, Math.round(parseInt(limpo.substring(0, 2), 16) * (1 - f))));
+  const g = Math.max(0, Math.min(255, Math.round(parseInt(limpo.substring(2, 4), 16) * (1 - f))));
+  const b = Math.max(0, Math.min(255, Math.round(parseInt(limpo.substring(4, 6), 16) * (1 - f))));
+  const toHex = (n) => n.toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}

@@ -26,7 +26,8 @@ import {
   serieTemporal,
   gerarSeriesLinhaPorDimensao,
   pontosDispersao,
-  hexParaRgba
+  hexParaRgba,
+  escurecerHex
 } from '../js/utils.js';
 
 describe('Validação e formatação de placa', () => {
@@ -561,5 +562,30 @@ describe('Conversão de hex para RGBA (hexParaRgba)', () => {
     assert.equal(hexParaRgba('invalido', 0.15), 'rgba(37, 99, 235, 0.15)');
     assert.equal(hexParaRgba('#12345', 0.15), 'rgba(37, 99, 235, 0.15)');
     assert.equal(hexParaRgba('#2563eb', 'invalido'), 'rgba(37, 99, 235, 1)');
+  });
+});
+
+describe('Escurecimento de cor hexadecimal (escurecerHex)', () => {
+  it('escurece hex de 6 dígitos aplicando o fator percentual', () => {
+    // #ffffff com fator 0.2 -> 255 * 0.8 = 204 (#cccccc)
+    assert.equal(escurecerHex('#ffffff', 0.2), '#cccccc');
+    // #2563eb (37, 99, 235) com fator 0.2 -> (30, 79, 188) -> #1e4fbc
+    assert.equal(escurecerHex('#2563eb', 0.2), '#1e4fbc');
+  });
+
+  it('suporta hex de 3 dígitos expandindo para 6 dígitos', () => {
+    assert.equal(escurecerHex('#fff', 0.2), '#cccccc');
+    assert.equal(escurecerHex('fff', 0.2), '#cccccc');
+  });
+
+  it('lida com fator 0 (mantém a cor) e fator 1 (retorna preto)', () => {
+    assert.equal(escurecerHex('#3b82f6', 0), '#3b82f6');
+    assert.equal(escurecerHex('#3b82f6', 1), '#000000');
+  });
+
+  it('retorna fallback seguro para entradas inválidas, nulas ou vazias', () => {
+    assert.equal(escurecerHex(null, 0.2), '#000000');
+    assert.equal(escurecerHex('', 0.2), '#000000');
+    assert.equal(escurecerHex('invalido', 0.2), '#invalido');
   });
 });

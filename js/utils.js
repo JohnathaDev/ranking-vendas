@@ -778,3 +778,19 @@ export function escurecerHex(hex, fator = 0.18) {
   const toHex = (n) => n.toString(16).padStart(2, '0');
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
+
+/**
+ * Retorna o próximo tipo de gráfico na sequência circular de uma lista.
+ * Se o tipo atual não estiver na lista ou for nulo/vazio, retorna o primeiro item.
+ * @param {string} atual
+ * @param {string[]} lista
+ * @returns {string}
+ */
+export function proximoTipoGrafico(atual, lista = []) {
+  if (!Array.isArray(lista) || lista.length === 0) return '';
+  const idx = lista.indexOf(atual);
+  if (idx === -1 || idx === lista.length - 1) {
+    return lista[0];
+  }
+  return lista[idx + 1];
+}

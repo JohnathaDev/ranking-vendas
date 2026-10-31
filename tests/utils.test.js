@@ -27,7 +27,8 @@ import {
   gerarSeriesLinhaPorDimensao,
   pontosDispersao,
   hexParaRgba,
-  escurecerHex
+  escurecerHex,
+  proximoTipoGrafico
 } from '../js/utils.js';
 
 describe('Validação e formatação de placa', () => {
@@ -587,5 +588,31 @@ describe('Escurecimento de cor hexadecimal (escurecerHex)', () => {
     assert.equal(escurecerHex(null, 0.2), '#000000');
     assert.equal(escurecerHex('', 0.2), '#000000');
     assert.equal(escurecerHex('invalido', 0.2), '#invalido');
+  });
+});
+
+describe('Alternância de tipo de gráfico (proximoTipoGrafico)', () => {
+  const lista = ['colunas', 'pizza', 'empilhadas', 'linha', 'dispersao'];
+
+  it('retorna o próximo item na sequência da lista', () => {
+    assert.equal(proximoTipoGrafico('colunas', lista), 'pizza');
+    assert.equal(proximoTipoGrafico('pizza', lista), 'empilhadas');
+    assert.equal(proximoTipoGrafico('empilhadas', lista), 'linha');
+    assert.equal(proximoTipoGrafico('linha', lista), 'dispersao');
+  });
+
+  it('faz o ciclo circular voltando ao primeiro elemento a partir do último', () => {
+    assert.equal(proximoTipoGrafico('dispersao', lista), 'colunas');
+  });
+
+  it('retorna o primeiro item se o tipo atual for desconhecido, vazio ou nulo', () => {
+    assert.equal(proximoTipoGrafico('invalido', lista), 'colunas');
+    assert.equal(proximoTipoGrafico('', lista), 'colunas');
+    assert.equal(proximoTipoGrafico(null, lista), 'colunas');
+  });
+
+  it('retorna string vazia para lista vazia ou inválida', () => {
+    assert.equal(proximoTipoGrafico('colunas', []), '');
+    assert.equal(proximoTipoGrafico('colunas', null), '');
   });
 });

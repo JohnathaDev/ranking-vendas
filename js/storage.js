@@ -37,7 +37,8 @@ export const STORAGE_KEYS = {
   USUARIOS: 'ranking_motos_usuarios',
   CONSULTOR_ATIVO: 'ranking_motos_consultor_ativo_id',
   SESSAO: 'ranking_motos_sessao',
-  TENTATIVAS_LOGIN: 'ranking_motos_login_tentativas'
+  TENTATIVAS_LOGIN: 'ranking_motos_login_tentativas',
+  BI_ALTERNAR: 'ranking_motos_bi_alternar'
 };
 
 /**

@@ -17,6 +17,7 @@ import {
 } from './utils.js';
 import { atualizarBotoesSegmentados, configurarControleSegmentado, showToast } from './ui.js';
 import { renderGraficoRankingBI, exportarGraficoPNG } from './charts.js';
+import { criarGerenciadorAlternanciaBI } from './biAlternancia.js';
 
 const PERIODOS_VALIDOS = ['dia', 'semana', 'mes'];
 export const TIPOS_GRAFICO_BI = ['colunas', 'pizza', 'empilhadas', 'linha', 'dispersao'];
@@ -307,7 +308,7 @@ function setupRankingListeners() {
     });
   }
 
-  // Controles do BI (Item 2.3)
+  // Controles do BI (Item 2.3) e Alternância Automática (Item 5)
   const selectBITipo = document.getElementById('selectBITipoGrafico');
   if (selectBITipo) {
     selectBITipo.addEventListener('change', (e) => {
@@ -318,6 +319,27 @@ function setupRankingListeners() {
       renderSecaoBIRanking();
     });
   }
+
+  criarGerenciadorAlternanciaBI({
+    selectTipo: selectBITipo,
+    containerGrafico: document.getElementById('containerCanvasBI'),
+    detalhesSecao: document.getElementById('detalhesAnaliseVisual'),
+    painelRanking: document.getElementById('panelRanking'),
+    btnFixo: document.getElementById('btnBIModoFixo'),
+    btnAlternar: document.getElementById('btnBIModoAlternar'),
+    barraProgresso: document.getElementById('barraProgressoBIAlternar'),
+    tiposDisponiveis: TIPOS_GRAFICO_BI,
+    obterTipoAtual: () => rankingState.graficoBI,
+    aoMudarTipo: (proximoTipo) => {
+      rankingState.graficoBI = proximoTipo;
+      if (selectBITipo) {
+        selectBITipo.value = proximoTipo;
+      }
+      aplicarRegrasCompatibilidadeBI();
+      atualizarURLFiltrosRanking();
+      renderSecaoBIRanking();
+    }
+  });
 
   const selectBIDim = document.getElementById('selectBIDimensao');
   if (selectBIDim) {

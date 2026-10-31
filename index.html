@@ -369,12 +369,43 @@
                 </div>
               </div>
 
-              <div class="controls-actions flex items-start gap-3 sm:self-start">
+              <div class="controls-actions flex flex-wrap items-start gap-3 sm:self-start">
                 <div class="filter-item flex flex-col gap-1.5">
                   <span class="filter-label invisible select-none" aria-hidden="true">&nbsp;</span>
                   <button type="button" id="btnBaixarPNGBI" class="btn-secondary whitespace-nowrap">
                     Exportar PNG
                   </button>
+                </div>
+
+                <div class="filter-item flex flex-col gap-1.5">
+                  <span class="filter-label invisible select-none" aria-hidden="true">&nbsp;</span>
+                  <div
+                    class="period-segmented-control"
+                    role="group"
+                    aria-label="Modo de alternância do gráfico"
+                  >
+                    <button
+                      type="button"
+                      id="btnBIModoFixo"
+                      class="btn-period active"
+                      aria-pressed="true"
+                    >
+                      Fixo
+                    </button>
+                    <button
+                      type="button"
+                      id="btnBIModoAlternar"
+                      class="btn-period relative overflow-hidden"
+                      aria-pressed="false"
+                    >
+                      <span>Alternar</span>
+                      <span
+                        id="barraProgressoBIAlternar"
+                        class="bg-acento pointer-events-none absolute bottom-0 left-0 h-[2px] w-0 transition-none"
+                        aria-hidden="true"
+                      ></span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

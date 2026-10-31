@@ -445,7 +445,8 @@ body::before {
     @apply bg-acento/10;
   }
 
-  .data-table .table-sort-btn {
+  .data-table .table-sort-btn,
+  .th-sort-btn {
     @apply text-texto-2 hover:text-texto inline-flex items-center gap-1 text-xs font-semibold tracking-wider uppercase focus-visible:outline-none;
   }
 

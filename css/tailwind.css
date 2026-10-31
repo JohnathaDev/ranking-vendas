@@ -267,30 +267,30 @@ body::before {
   }
 
   /* Cartões de KPI compactos com altura natural */
+  .kpi-cards-grid {
+    @apply grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3;
+  }
+  .kpi-cards-grid.kpi-cards-4 {
+    @apply lg:grid-cols-4;
+  }
   .kpi-card {
     @apply bg-card rounded-card border-borda shadow-card relative flex min-w-0 flex-col overflow-hidden border p-5 transition-all duration-150;
   }
-
   .kpi-card.highlight {
     @apply border-acento/40 shadow-md;
   }
-
   .kpi-header {
     @apply mb-2 flex items-center justify-between gap-2;
   }
-
   .kpi-title {
     @apply text-texto-3 text-xs font-semibold tracking-wider uppercase;
   }
-
   .kpi-icon {
-    @apply bg-muted text-texto-2 flex h-7 w-7 items-center justify-center rounded-md text-sm;
+    @apply hidden;
   }
-
   .kpi-value {
     @apply text-texto mt-1 text-2xl leading-tight font-bold tracking-tight sm:text-[1.75rem];
   }
-
   .kpi-detail {
     @apply text-texto-3 mt-1.5 text-xs;
   }

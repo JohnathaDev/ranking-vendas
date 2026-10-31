@@ -70,8 +70,10 @@ export function atualizarBotaoTema(tema) {
 
 /**
  * Aplica o tema no documentElement, atualiza atributos do botão e salva se solicitado.
+ * Retorna uma Promise resolvida após a mutação do DOM ter sido efetivamente aplicada.
  * @param {'claro'|'escuro'} tema
  * @param {{ salvar?: boolean, transicao?: boolean }} [opcoes]
+ * @returns {Promise<'claro'|'escuro'>}
  */
 export function aplicarTema(tema, { salvar = false, transicao = true } = {}) {
   const temaFinal = tema === TEMAS.ESCURO ? TEMAS.ESCURO : TEMAS.CLARO;
@@ -102,10 +104,19 @@ export function aplicarTema(tema, { salvar = false, transicao = true } = {}) {
     typeof document !== 'undefined' &&
     typeof document.startViewTransition === 'function'
   ) {
-    document.startViewTransition(() => {
-      aplicarMutacao();
-    });
-    return;
+    try {
+      const transition = document.startViewTransition(() => {
+        aplicarMutacao();
+      });
+      if (transition && typeof transition.updateCallbackDone?.then === 'function') {
+        return transition.updateCallbackDone.then(() => temaFinal);
+      }
+      if (transition && typeof transition.finished?.then === 'function') {
+        return transition.finished.then(() => temaFinal);
+      }
+    } catch {
+      /* Segue para caminho síncrono */
+    }
   }
 
   // Fallback suave via classe tema-transicao
@@ -123,19 +134,24 @@ export function aplicarTema(tema, { salvar = false, transicao = true } = {}) {
   }
 
   aplicarMutacao();
+  return Promise.resolve(temaFinal);
 }
 
 /**
  * Alterna entre modo claro e escuro a partir de interação do usuário.
+ * Aguarda a mutação do DOM antes de invocar aoMudarTema, prevenindo condição de corrida na leitura de cores.
  * @param {{ aoMudarTema?: (novoTema: string) => void }} [opcoes]
+ * @returns {Promise<'claro'|'escuro'>}
  */
 export function alternarTema({ aoMudarTema } = {}) {
   const atual = obterTemaAtual();
   const novoTema = atual === TEMAS.ESCURO ? TEMAS.CLARO : TEMAS.ESCURO;
-  aplicarTema(novoTema, { salvar: true, transicao: true });
-  if (typeof aoMudarTema === 'function') {
-    aoMudarTema(novoTema);
-  }
+  return aplicarTema(novoTema, { salvar: true, transicao: true }).then((temaAplicado) => {
+    if (typeof aoMudarTema === 'function') {
+      aoMudarTema(temaAplicado);
+    }
+    return temaAplicado;
+  });
 }
 
 /**
@@ -175,10 +191,11 @@ export function initTema({ aoMudarTema } = {}) {
       const escolhaValida = escolhaSalva === TEMAS.CLARO || escolhaSalva === TEMAS.ESCURO;
       if (!escolhaValida) {
         const temaSistema = resolverTema(null, e.matches);
-        aplicarTema(temaSistema, { salvar: false, transicao: true });
-        if (typeof aoMudarTema === 'function') {
-          aoMudarTema(temaSistema);
-        }
+        aplicarTema(temaSistema, { salvar: false, transicao: true }).then((temaAplicado) => {
+          if (typeof aoMudarTema === 'function') {
+            aoMudarTema(temaAplicado);
+          }
+        });
       }
     };
     if (typeof mediaQuery.addEventListener === 'function') {
@@ -191,10 +208,11 @@ export function initTema({ aoMudarTema } = {}) {
   window.addEventListener('storage', (event) => {
     if (event.key === STORAGE_KEYS.TEMA) {
       const novoTema = resolverTema(event.newValue, obterPreferenciaSistemaEscuro());
-      aplicarTema(novoTema, { salvar: false, transicao: true });
-      if (typeof aoMudarTema === 'function') {
-        aoMudarTema(novoTema);
-      }
+      aplicarTema(novoTema, { salvar: false, transicao: true }).then((temaAplicado) => {
+        if (typeof aoMudarTema === 'function') {
+          aoMudarTema(temaAplicado);
+        }
+      });
     }
   });
 }

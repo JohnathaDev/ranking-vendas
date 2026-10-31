@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolverTema, TEMAS } from '../js/tema.js';
+import { resolverTema, aplicarTema, alternarTema, TEMAS } from '../js/tema.js';
 import { STORAGE_KEYS } from '../js/storage.js';
 
 describe('Resolução de tema (modo claro / modo escuro)', () => {
@@ -28,5 +28,52 @@ describe('Resolução de tema (modo claro / modo escuro)', () => {
 
   it('possui a chave de armazenamento TEMA configurada em STORAGE_KEYS', () => {
     assert.equal(STORAGE_KEYS.TEMA, 'ranking_motos_tema');
+  });
+});
+
+describe('Garantia de resolução assíncrona e prevenção de corrida (aplicarTema / alternarTema)', () => {
+  it('aplicarTema retorna uma Promise que resolve com o tema aplicado', async () => {
+    const res = await aplicarTema('escuro', { salvar: false, transicao: false });
+    assert.equal(res, TEMAS.ESCURO);
+  });
+
+  it('alternarTema aguarda a mutação antes de executar o callback aoMudarTema', async () => {
+    let callbackChamado = false;
+    let temaNoCallback = null;
+
+    // Simula document global básico se não existir em ambiente de teste node puro
+    const documentOriginal = globalThis.document;
+    globalThis.document = {
+      documentElement: {
+        getAttribute: () => 'claro',
+        setAttribute: () => {},
+        classList: { contains: () => false, add: () => {}, remove: () => {} }
+      },
+      getElementById: () => null,
+      startViewTransition: (cb) => {
+        return {
+          updateCallbackDone: new Promise((resolve) => {
+            setTimeout(() => {
+              cb();
+              resolve();
+            }, 10);
+          })
+        };
+      }
+    };
+
+    try {
+      await alternarTema({
+        aoMudarTema: (novo) => {
+          callbackChamado = true;
+          temaNoCallback = novo;
+        }
+      });
+
+      assert.equal(callbackChamado, true);
+      assert.equal(temaNoCallback, TEMAS.ESCURO);
+    } finally {
+      globalThis.document = documentOriginal;
+    }
   });
 });
